@@ -15,6 +15,7 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.api.world.storage.RespawnLocation;
 
 import java.time.Duration;
 import java.util.Map;
@@ -116,12 +117,12 @@ public class ResidentSpawnExecutor implements CommandExecutor {
     }
 
     private static Optional<Location<World>> findBedSpawn(Player player) {
-        Optional<Map<UUID, WorldProperties.RespawnLocation>> respawnLocations = player.get(Keys.RESPAWN_LOCATIONS);
+        Optional<Map<UUID, RespawnLocation>> respawnLocations = player.get(Keys.RESPAWN_LOCATIONS);
         if (!respawnLocations.isPresent()) {
             return Optional.empty();
         }
 
-        for (WorldProperties.RespawnLocation respawnLocation : respawnLocations.get().values()) {
+        for (RespawnLocation respawnLocation : respawnLocations.get().values()) {
             Optional<Location<World>> candidate = respawnLocation.asLocation();
             if (candidate.isPresent()) {
                 return candidate;
