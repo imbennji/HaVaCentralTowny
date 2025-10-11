@@ -35,8 +35,8 @@ public class TownyFlagExecutor implements CommandExecutor
 								.map(key -> key.toString())
 								.collect(Collectors.toMap(flag -> flag, flag -> flag))),
 						GenericArguments.optional(GenericArguments.bool(Text.of("bool"))))
-				.executor(new TownyFlagExecutor())
-				.build(), "flag");
+                                .executor(new TownyFlagExecutor())
+                                .build(), "flag", "toggle");
 	}
 
 	public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException
