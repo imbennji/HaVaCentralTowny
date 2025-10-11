@@ -17,6 +17,7 @@ Towny Sponge Remake reimagines the beloved town management gameplay of the origi
 * A comprehensive command suite covering residents, towns, plots, administrators, and world managers.
 * Integrated chat channels for private town communication and administrative spy oversight.
 * Highly configurable gameplay flags, price lists, and default behaviours so servers can tailor Towny to their community.
+* Cross-town nations with leadership ranks, national banks, allied/enemy relations, configurable spawns, and taxation controls (war mechanics intentionally excluded).
 
 ---
 
@@ -90,9 +91,16 @@ Plots are subdivisions of town land:
 * Can be marked for specific uses (e.g., shop, farm, embassy) depending on town policy.
 * Offer rent cycles ranging from hourly to daily, automatically charging residents and repossessing if payments lapse.
 
-### 4.4 Nations (Future Scope)
+### 4.4 Nations
 
-While the Sponge remake emphasises town-level play, nation support is on the roadmap. Keep an eye on release notes for updates on cross-town alliances, national taxes, and war mechanics.
+Nations unite multiple towns under shared leadership and economic policy:
+
+* **Leadership Structure**: Each nation appoints a king drawn from the capital town’s residents. Kings can promote assistants to help manage invitations, finances, and diplomacy. Leadership automatically reconciles if towns leave or mayors change.
+* **Membership Management**: Towns may receive invitations, request to join open nations, or be kicked. Capital towns can be reassigned, and nations disband automatically when membership drops below valid thresholds.
+* **Economy**: Nations maintain their own bank balance for upkeep, spawn costs, and inter-town projects. Players with proper ranks can deposit to or withdraw from the nation bank, provided an economy service is installed.
+* **Taxation**: Kings configure either flat-rate or percentage taxes collected from member towns. Limits mirror the Spigot edition so server owners can rely on familiar balances.
+* **Spawns**: Nations may set a dedicated spawn point with optional public access and configurable teleport fees. Members can teleport using `/nation spawn`, paying the configured cost unless exempted.
+* **Diplomacy**: Nation leaders manage lists of allies and enemies to coordinate protections and conflicts. War-specific mechanics remain out of scope for this remake.
 
 ---
 
@@ -159,6 +167,21 @@ Towny Sponge Remake mirrors the classic Towny command layout. Below is a high-le
 | `/plot perm <group> <toggle>` | Adjust build, destroy, switch, or item-use permissions for friends, allies, residents, or outsiders. |
 | `/plot flag <flag> <on/off>` | Override town-wide flags (PvP, mobs, explosions) on a per-plot basis. |
 | `/plot rent <price> <interval>` | List or cancel rental offerings. |
+
+### 6.4 Nation Commands (`/nation`)
+
+| Command | Purpose |
+| --- | --- |
+| `/nation create <name>` | Form a new nation with your town as the capital, charging the configured creation price. |
+| `/nation invite <town>` / `/nation kick <town>` | Manage town membership through invitations or removals. |
+| `/nation join <nation>` / `/nation leave` | Accept invitations or voluntarily depart from a nation. |
+| `/nation set capital <town>` | Reassign the capital town when leadership changes. |
+| `/nation set king <player>` / `/nation assistant <add/remove> <player>` | Promote or demote national leadership roles. |
+| `/nation deposit <amount>` / `/nation withdraw <amount>` | Transfer funds between your personal account and the nation bank. |
+| `/nation taxes <flat|percent> <amount>` | Configure nation-wide taxes charged to member towns. |
+| `/nation spawn` / `/nation set spawn` / `/nation set spawncost <amount>` | Use or adjust the nation spawn location and teleport fee. |
+| `/nation toggle <public|open|neutral>` | Change nation accessibility and neutrality preferences (war combat toggles remain disabled). |
+| `/nation ally <add|remove> <nation>` / `/nation enemy <add|remove> <nation>` | Manage allied and enemy relations with other nations. |
 
 ### 6.4 Administrative Commands (`/townyadmin`)
 
@@ -269,7 +292,7 @@ A: Use the provided data conversion scripts (when available) or recreate towns m
 
 Stay informed by reviewing each release changelog. Upcoming milestones include:
 
-* Extended nation mechanics including alliances, capitals, and global taxation.
+* Nation quality-of-life improvements such as map overlays, scoreboards, and additional administrative tooling.
 * Enhanced map visualisation with web-based claim viewers.
 * Optional war events with configurable siege rules and victory conditions.
 * API extensions exposing more resident and town data for third-party integrations.

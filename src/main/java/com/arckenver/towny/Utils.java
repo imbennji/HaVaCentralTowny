@@ -31,8 +31,11 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 import com.arckenver.towny.claim.ChunkClaimUtils;
+import com.arckenver.towny.object.Nation;
 import com.arckenver.towny.object.Towny;
 import com.arckenver.towny.object.Plot;
 
@@ -103,11 +106,11 @@ public class Utils
 
 
 
-	public static Text formatTownyDescription(Towny towny, int clicker) {
-		Builder builder = Text.builder("");
-		builder.append(
-				Text.of(TextColors.GOLD, "----------{ "),
-				Text.of(TextColors.YELLOW,
+        public static Text formatTownyDescription(Towny towny, int clicker) {
+                Builder builder = Text.builder("");
+                builder.append(
+                                Text.of(TextColors.GOLD, "----------{ "),
+                                Text.of(TextColors.YELLOW,
 						((ConfigHandler.getNode("others", "enableTownyRanks").getBoolean())
 								? ConfigHandler.getTownyRank(towny.getNumCitizens()).getNode("townyTitle").getString()
 								: LanguageHandler.FORMAT_TOWN)
@@ -119,8 +122,16 @@ public class Utils
 			builder.append(Text.of(TextColors.GOLD, "\nBoard: "));
 			builder.append(TextSerializers.FORMATTING_CODE.deserialize(board));
 		}
-		builder.append(Text.of(TextColors.GOLD, "\n", LanguageHandler.TOWN_ID, ": ",
-				TextColors.GREEN, towny.getRealName()));
+                builder.append(Text.of(TextColors.GOLD, "\n", LanguageHandler.TOWN_ID, ": ",
+                                TextColors.GREEN, towny.getRealName()));
+
+                if (towny.hasNation()) {
+                        Nation nation = DataHandler.getNation(towny.getNationUUID());
+                        if (nation != null) {
+                                builder.append(Text.of(TextColors.GOLD, "\n", LanguageHandler.FORMAT_NATION, ": ",
+                                                TextColors.AQUA, nation.getName()));
+                        }
+                }
 
 
 		if (!towny.isAdmin()) {
@@ -316,6 +327,153 @@ public class Utils
                 if (spawnCooldown > System.currentTimeMillis()) {
                         long remaining = spawnCooldown - System.currentTimeMillis();
                         builder.append(Text.of(TextColors.GOLD, "\nSpawn cooldown: ", TextColors.YELLOW, formatDuration(remaining)));
+                }
+
+                return builder.build();
+        }
+
+        public static Text formatNationDescription(Nation nation)
+        {
+                Builder builder = Text.builder("");
+                builder.append(
+                                Text.of(TextColors.GOLD, "----------{ "),
+                                Text.of(TextColors.YELLOW, LanguageHandler.FORMAT_NATION + " - " + nation.getName()),
+                                Text.of(TextColors.GOLD, " }----------"));
+
+                if (nation.getBoard() != null && !nation.getBoard().trim().isEmpty()) {
+                        builder.append(Text.of(TextColors.GOLD, "\nBoard: "));
+                        builder.append(TextSerializers.FORMATTING_CODE.deserialize(nation.getBoard()));
+                }
+
+                builder.append(Text.of(TextColors.GOLD, "\nID: ", TextColors.GREEN, nation.getRealName()));
+
+                if (nation.getCapital() != null) {
+                        Towny capital = DataHandler.getTowny(nation.getCapital());
+                        if (capital != null) {
+                                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_TOWN + " (" + LanguageHandler.FORMAT_MAYOR + "): "));
+                                builder.append(Text.of(TextColors.YELLOW, capital.getName()));
+                                UUID mayor = capital.getPresident();
+                                if (mayor != null) {
+                                        builder.append(Text.of(TextColors.GOLD, " - "));
+                                        builder.append(Text.of(TextColors.YELLOW, DataHandler.getPlayerName(mayor)));
+                                }
+                        }
+                }
+
+                UUID king = nation.getKing();
+                if (king != null) {
+                        builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_KING + ": "));
+                        builder.append(Text.of(TextColors.YELLOW, DataHandler.getPlayerName(king)));
+                }
+
+                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_ASSISTANTS + ": "));
+                if (nation.getAssistants().isEmpty()) {
+                        builder.append(Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE));
+                } else {
+                        boolean firstAssistant = true;
+                        for (UUID assistant : nation.getAssistants()) {
+                                if (!firstAssistant) {
+                                        builder.append(Text.of(TextColors.GOLD, ", "));
+                                }
+                                builder.append(Text.of(TextColors.YELLOW, DataHandler.getPlayerName(assistant)));
+                                firstAssistant = false;
+                        }
+                }
+
+                builder.append(Text.of(TextColors.GOLD, "\nTowns: "));
+                if (nation.getTowns().isEmpty()) {
+                        builder.append(Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE));
+                } else {
+                        boolean first = true;
+                        for (UUID townId : nation.getTowns()) {
+                                Towny town = DataHandler.getTowny(townId);
+                                if (town == null) {
+                                        continue;
+                                }
+                                if (!first) {
+                                        builder.append(Text.of(TextColors.GOLD, ", "));
+                                }
+                                builder.append(Text.of(TextColors.YELLOW, town.getName()));
+                                first = false;
+                        }
+                        if (first) {
+                                builder.append(Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE));
+                        }
+                }
+
+                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_OPEN + ": ", TextColors.YELLOW, nation.isOpen()));
+                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_PUBLIC + ": ", TextColors.YELLOW, nation.isPublic()));
+                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_NEUTRAL + ": ", TextColors.YELLOW, nation.isNeutral()));
+
+                BigDecimal balance = null;
+                if (TownyPlugin.getEcoService() != null) {
+                        Optional<Account> account = TownyPlugin.getEcoService().getOrCreateAccount("nation-" + nation.getUUID());
+                        if (account.isPresent()) {
+                                balance = account.get().getBalance(TownyPlugin.getEcoService().getDefaultCurrency());
+                        }
+                }
+                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_MONEY + ": "));
+                builder.append((balance == null) ? Text.of(TextColors.GRAY, LanguageHandler.FORMAT_UNKNOWN) : formatPrice(TextColors.YELLOW, balance));
+
+                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_TAXES + ": "));
+                if (nation.isTaxPercentage()) {
+                        builder.append(Text.of(TextColors.YELLOW, String.format("%.2f%%", nation.getTaxes())));
+                } else {
+                        builder.append(formatPrice(TextColors.YELLOW, BigDecimal.valueOf(nation.getTaxes())));
+                }
+
+                Location<World> spawn = nation.getSpawn();
+                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_SPAWN + ": "));
+                if (spawn == null) {
+                        builder.append(Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE));
+                } else {
+                        builder.append(Text.of(TextColors.YELLOW,
+                                        spawn.getExtent().getName() + " @ " + spawn.getBlockX() + ", " + spawn.getBlockY() + ", " + spawn.getBlockZ()));
+                }
+
+                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_SPAWN_COST + ": "));
+                builder.append(formatPrice(TextColors.YELLOW, BigDecimal.valueOf(nation.getSpawnCost())));
+
+                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_ALLIES + ": "));
+                if (nation.getAllies().isEmpty()) {
+                        builder.append(Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE));
+                } else {
+                        boolean first = true;
+                        for (UUID allyId : nation.getAllies()) {
+                                Nation ally = DataHandler.getNation(allyId);
+                                if (ally == null) {
+                                        continue;
+                                }
+                                if (!first) {
+                                        builder.append(Text.of(TextColors.GOLD, ", "));
+                                }
+                                builder.append(Text.of(TextColors.YELLOW, ally.getName()));
+                                first = false;
+                        }
+                        if (first) {
+                                builder.append(Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE));
+                        }
+                }
+
+                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_ENEMIES + ": "));
+                if (nation.getEnemies().isEmpty()) {
+                        builder.append(Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE));
+                } else {
+                        boolean first = true;
+                        for (UUID enemyId : nation.getEnemies()) {
+                                Nation enemy = DataHandler.getNation(enemyId);
+                                if (enemy == null) {
+                                        continue;
+                                }
+                                if (!first) {
+                                        builder.append(Text.of(TextColors.GOLD, ", "));
+                                }
+                                builder.append(Text.of(TextColors.YELLOW, enemy.getName()));
+                                first = false;
+                        }
+                        if (first) {
+                                builder.append(Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE));
+                        }
                 }
 
                 return builder.build();
