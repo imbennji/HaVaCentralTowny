@@ -18,6 +18,10 @@ import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -95,6 +99,37 @@ public final class ResidentExecutor implements CommandExecutor {
         lines.add(Text.of(TextColors.GRAY, "Taxes Owed: ",
                 TextColors.WHITE, taxes, TextColors.GRAY, " / day"));
 
+        BigDecimal balance = DataHandler.getResidentBalance(uuid);
+        if (balance != null) {
+            lines.add(Text.of(TextColors.GRAY, "Balance: ", TextColors.WHITE, balance));
+        }
+
+        long registered = DataHandler.getResidentRegisteredAt(uuid);
+        if (registered > 0) {
+            lines.add(Text.of(TextColors.GRAY, "Registered: ", TextColors.WHITE, formatInstant(registered)));
+        }
+
+        long lastOnline = DataHandler.getResidentLastOnline(uuid);
+        if (lastOnline > 0) {
+            lines.add(Text.of(TextColors.GRAY, "Last Online: ", TextColors.WHITE, formatInstant(lastOnline)));
+        }
+
+        long exempt = DataHandler.getResidentTaxExemptUntil(uuid);
+        if (exempt > System.currentTimeMillis()) {
+            lines.add(Text.of(TextColors.GRAY, "Tax Exempt Until: ", TextColors.WHITE, formatInstant(exempt)));
+        }
+
+        if (DataHandler.isResidentJailed(uuid)) {
+            long release = DataHandler.getResidentJailRelease(uuid);
+            String releaseText = (release > 0) ? formatInstant(release) : "Indefinite";
+            lines.add(Text.of(TextColors.RED, "Jailed", TextColors.GRAY, " – release at ", TextColors.WHITE, releaseText));
+        }
+
+        Set<String> modes = DataHandler.getResidentModes(uuid);
+        if (!modes.isEmpty()) {
+            lines.add(Text.of(TextColors.GRAY, "Modes: ", TextColors.WHITE, String.join(", ", modes)));
+        }
+
         lines.add(compactListLine(
                 Text.of(TextColors.GRAY, "Owned Plots: "),
                 or.ownedNames, or.ownedCount, TextColors.YELLOW, "/plot info"));
@@ -108,6 +143,12 @@ public final class ResidentExecutor implements CommandExecutor {
         }
 
         return Text.joinWith(Text.NEW_LINE, lines);
+    }
+
+    private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withZone(ZoneId.systemDefault());
+
+    private static String formatInstant(long epochMs) {
+        return DATE_TIME.format(Instant.ofEpochMilli(epochMs));
     }
 
     private int resolveTaxes(Towny town) {
