@@ -15,7 +15,7 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.api.world.storage.WorldProperties.RespawnLocation;
+import org.spongepowered.api.world.storage.RespawnLocation;
 
 import java.time.Duration;
 import java.util.Map;
