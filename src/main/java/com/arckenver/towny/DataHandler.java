@@ -671,12 +671,30 @@ public class DataHandler
 						Resident src = e.getValue();
 						if (src == null) src = new Resident(id);
 						// normalize to ensure UUID is set
-						Resident fixed = new Resident(id);
-						fixed.setTitle(src.getTitle());
-						fixed.setAutoMap(src.isAutoMap());
-						fixed.setLastAutoMapTs(src.getLastAutoMapTs());
-						fixed.getFriends().addAll(src.getFriends());
-						RESIDENTS.put(id, fixed);
+                                                Resident fixed = new Resident(id);
+                                                fixed.setTitle(src.getTitle());
+                                                fixed.setAbout(src.getAbout());
+                                                fixed.setAutoMap(src.isAutoMap());
+                                                fixed.setLastAutoMapTs(src.getLastAutoMapTs());
+                                                fixed.getFriends().addAll(src.getFriends());
+                                                fixed.setAutoClaim(src.isAutoClaim());
+                                                fixed.setAutoUnclaim(src.isAutoUnclaim());
+                                                fixed.setPreferBedSpawn(src.isPreferBedSpawn());
+                                                fixed.setPlotBorder(src.isPlotBorder());
+                                                fixed.setConstantPlotBorder(src.isConstantPlotBorder());
+                                                fixed.setTownBorder(src.isTownBorder());
+                                                fixed.setBorderTitles(src.isBorderTitles());
+                                                fixed.setPvp(src.isPvp());
+                                                fixed.setFire(src.isFire());
+                                                fixed.setExplosion(src.isExplosion());
+                                                fixed.setMobs(src.isMobs());
+                                                fixed.setSpy(src.isSpy());
+                                                fixed.setIgnorePlots(src.isIgnorePlots());
+                                                fixed.setPlotGroupMode(src.isPlotGroupMode());
+                                                fixed.setDistrictMode(src.isDistrictMode());
+                                                fixed.setAdminBypass(src.isAdminBypass());
+                                                fixed.setInfoTool(src.isInfoTool());
+                                                RESIDENTS.put(id, fixed);
 					} catch (IllegalArgumentException bad) {
 						TownyPlugin.getLogger().warn("Skipping malformed resident key: " + e.getKey());
 					}
