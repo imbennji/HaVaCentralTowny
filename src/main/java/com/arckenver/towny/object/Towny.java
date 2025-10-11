@@ -13,6 +13,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import com.arckenver.towny.ConfigHandler;
+import com.arckenver.towny.claim.ChunkClaimUtils;
 import com.arckenver.towny.channel.TownyMessageChannel;
 import com.flowpowered.math.vector.Vector2i;
 
@@ -334,29 +335,42 @@ public class Towny {
 		plots.remove(uuid);
 	}
 
-	public int getExtras() {
-		return extras;
-	}
+        public int getExtras() {
+                return extras;
+        }
 
-	public void setExtras(int extras) {
-		this.extras = extras;
-		if (this.extras < 0)
-			this.extras = 0;
-	}
+        public void setExtras(int extras) {
+                this.extras = normalizeChunkCount(extras);
+                if (this.extras < 0)
+                        this.extras = 0;
+        }
 
-	public void addExtras(int extras) {
-		this.extras += extras;
-	}
+        public void addExtras(int extras) {
+                this.extras += normalizeChunkCount(extras);
+        }
 
-	public void removeExtras(int extras) {
-		this.extras -= extras;
-		if (this.extras < 0)
-			this.extras = 0;
-	}
+        public void removeExtras(int extras) {
+                this.extras -= normalizeChunkCount(extras);
+                if (this.extras < 0)
+                        this.extras = 0;
+        }
 
-	public int maxBlockSize() {
-		return extras + citizens.size() * ConfigHandler.getNode("others", "blocksPerCitizen").getInt();
-	}
+        private int normalizeChunkCount(int value) {
+                if (value >= ChunkClaimUtils.CHUNK_AREA) {
+                        return (int) Math.ceil(value / (double) ChunkClaimUtils.CHUNK_AREA);
+                }
+                return value;
+        }
+
+        public int maxClaimArea() {
+                int perCitizenChunks = ConfigHandler.getNode("others", "chunksPerCitizen").getInt();
+                return (extras + citizens.size() * perCitizenChunks) * ChunkClaimUtils.CHUNK_AREA;
+        }
+
+        public int maxChunkAllowance() {
+                int perCitizenChunks = ConfigHandler.getNode("others", "chunksPerCitizen").getInt();
+                return extras + citizens.size() * perCitizenChunks;
+        }
 
 	public int getRentInterval() {
 		return rentInterval;

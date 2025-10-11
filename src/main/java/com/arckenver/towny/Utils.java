@@ -32,6 +32,7 @@ import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
+import com.arckenver.towny.claim.ChunkClaimUtils;
 import com.arckenver.towny.object.Towny;
 import com.arckenver.towny.object.Plot;
 
@@ -132,9 +133,9 @@ public class Utils
 				}
 			}
 
-			int claimedBlocks = towny.getRegion().size();
-			int claimedChunksIncremental = (int) Math.ceil((double) claimedBlocks / 256);
-			int maxChunksAllowedIncremental = (int) Math.ceil((double) towny.maxBlockSize() / 256);
+                        int claimedBlocks = towny.getRegion().size();
+                        int claimedChunksIncremental = ChunkClaimUtils.toChunkCount(claimedBlocks);
+                        int maxChunksAllowedIncremental = towny.maxChunkAllowance();
 
 			builder.append(
 					Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_SIZE + ": "),

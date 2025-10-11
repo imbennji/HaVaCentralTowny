@@ -17,6 +17,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
+import com.arckenver.towny.claim.ChunkClaimUtils;
 import com.arckenver.towny.cmdelement.PlayerNameElement;
 import com.arckenver.towny.object.Towny;
 import com.arckenver.towny.object.Point;
@@ -41,7 +42,8 @@ public class PlotCreateExecutor implements CommandExecutor
 		if (src instanceof Player)
 		{
 			Player player = (Player) src;
-			Towny towny = DataHandler.getTowny(player.getLocation());
+                        ChunkClaimUtils.selectCurrentChunk(player);
+                        Towny towny = DataHandler.getTowny(player.getLocation());
 			if (towny == null)
 			{
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDSTANDTOWN));
@@ -74,11 +76,11 @@ public class PlotCreateExecutor implements CommandExecutor
 					return CommandResult.success();
 				}
 			}
-			Point a = DataHandler.getFirstPoint(player.getUniqueId());
-			Point b = DataHandler.getSecondPoint(player.getUniqueId());
-			if (a == null || b == null)
-			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDAXESELECT));
+                        Point a = DataHandler.getFirstPoint(player.getUniqueId());
+                        Point b = DataHandler.getSecondPoint(player.getUniqueId());
+                        if (a == null || b == null)
+                        {
+                                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDCHUNKSELECT));
 				return CommandResult.success();
 			}
 			Rect rect = new Rect(a, b);

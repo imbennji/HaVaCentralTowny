@@ -3,7 +3,7 @@ package com.arckenver.towny.cmdexecutor.towny;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import com.arckenver.towny.listener.GoldenAxeListener;
+import com.arckenver.towny.claim.ChunkClaimUtils;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -48,27 +48,15 @@ public class TownyClaimExecutor implements CommandExecutor
 				.build(), "claim");
 	}
 
-	public static void CheckFirstChunk(Player player, Towny towny) {
-		// Assuming 1 chunk is 16x16x256 blocks
-		int blocksPerChunk = 16 * 16 * 256;
-		int claimedBlocks = towny.getRegion().size();
+        public static void checkFirstChunk(Player player, Towny towny) {
+                int claimedBlocks = towny.getRegion().size();
+                int claimedChunks = ChunkClaimUtils.toChunkCount(claimedBlocks);
+                int maxChunksAllowed = towny.maxChunkAllowance();
 
-		// Calculate the number of chunks claimed based on 256-block increments
-		int claimedChunksIncremental = (int) Math.ceil((double) claimedBlocks / 256);
-
-		// Calculate the maximum allowed chunks based on 256-block increments
-		int maxChunksAllowedIncremental = (int) Math.ceil((double) towny.maxBlockSize() / 256);
-
-		// Check if the player's towny claims at least one chunk
-		if (claimedChunksIncremental >= 1) {
-			// The player's towny claims at least one chunk
-
-			// Set the spawn with the default name "home"
-			handleSetSpawnCommand(player, towny, "home");
-		} else {
-			// No log message for the case where the towny doesn't claim the first chunk
-		}
-	}
+                if (claimedChunks >= 1 && maxChunksAllowed > 0) {
+                        handleSetSpawnCommand(player, towny, "home");
+                }
+        }
 
 	private static void handleSetSpawnCommand(Player player, Towny towny, String spawnName) {
 		if (spawnName == null || spawnName.isEmpty()) {
@@ -111,8 +99,8 @@ public class TownyClaimExecutor implements CommandExecutor
 	}
 
 	public boolean claimLand(Player player, Towny townyParam) {
-		// Automatically set the points based on the player's current chunk
-		GoldenAxeListener.setAutomaticPoints(player);
+                // Automatically set the points based on the player's current chunk
+                ChunkClaimUtils.selectCurrentChunk(player);
 
 		Towny towny = DataHandler.getTownyOfPlayer(player.getUniqueId());
 		if (towny == null) {
@@ -125,8 +113,8 @@ public class TownyClaimExecutor implements CommandExecutor
 		}
 		Point a = DataHandler.getFirstPoint(player.getUniqueId());
 		Point b = DataHandler.getSecondPoint(player.getUniqueId());
-		if (a == null || b == null) {
-			player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDAXESELECT));
+                if (a == null || b == null) {
+                        player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDCHUNKSELECT));
 			return false;
 		}
 		if (!ConfigHandler.getNode("worlds").getNode(a.getWorld().getName()).getNode("enabled").getBoolean()) {
@@ -145,16 +133,16 @@ public class TownyClaimExecutor implements CommandExecutor
 		Region claimed = towny.getRegion().copy();
 		claimed.addRect(rect);
 
-		if (claimed.size() > towny.maxBlockSize()) {
-			player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOENOUGHBLOCKS));
+            if (claimed.size() > towny.maxClaimArea()) {
+                        player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOENOUGHCHUNKS));
 			return false;
 		}
 
-		// Update claimed region and other necessary data
-		towny.setRegion(claimed);
-		DataHandler.addToWorldChunks(towny);
-		DataHandler.saveTowny(towny.getUUID());
-		CheckFirstChunk(player, towny);
+                // Update claimed region and other necessary data
+                towny.setRegion(claimed);
+                DataHandler.addToWorldChunks(towny);
+                DataHandler.saveTowny(towny.getUUID());
+                checkFirstChunk(player, towny);
 		player.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.SUCCESS_CLAIM));
 		return true;
 	}
@@ -167,8 +155,8 @@ public class TownyClaimExecutor implements CommandExecutor
 		{
 			Player player = (Player) src;
 
-			// Automatically set the points based on the player's current chunk
-			GoldenAxeListener.setAutomaticPoints(player);
+                        // Automatically set the points based on the player's current chunk
+                        ChunkClaimUtils.selectCurrentChunk(player);
 
 			Towny towny = DataHandler.getTownyOfPlayer(player.getUniqueId());
 			if (towny == null)
@@ -183,9 +171,9 @@ public class TownyClaimExecutor implements CommandExecutor
 			}
 			Point a = DataHandler.getFirstPoint(player.getUniqueId());
 			Point b = DataHandler.getSecondPoint(player.getUniqueId());
-			if (a == null || b == null)
-			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDAXESELECT));
+                        if (a == null || b == null)
+                        {
+                                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDCHUNKSELECT));
 				return CommandResult.success();
 			}
 			if (!ConfigHandler.getNode("worlds").getNode(a.getWorld().getName()).getNode("enabled").getBoolean())
@@ -207,9 +195,9 @@ public class TownyClaimExecutor implements CommandExecutor
 			Region claimed = towny.getRegion().copy();
 			claimed.addRect(rect);
 			
-			if (claimed.size() > towny.maxBlockSize())
-			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOENOUGHBLOCKS));
+                    if (claimed.size() > towny.maxClaimArea())
+                        {
+                                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOENOUGHCHUNKS));
 				return CommandResult.success();
 			}
 			
@@ -224,7 +212,12 @@ public class TownyClaimExecutor implements CommandExecutor
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOTOWN));
 				return CommandResult.success();
 			}
-			BigDecimal price = BigDecimal.valueOf((claimed.size() - towny.getRegion().size()) * ConfigHandler.getNode("prices", "blockClaimPrice").getDouble());
+                        int additionalBlocks = claimed.size() - towny.getRegion().size();
+                        int chunksToPurchase = (int) Math.ceil(additionalBlocks / (double) ChunkClaimUtils.CHUNK_AREA);
+                        if (chunksToPurchase <= 0) {
+                                chunksToPurchase = 1;
+                        }
+                        BigDecimal price = BigDecimal.valueOf(chunksToPurchase * ConfigHandler.getNode("prices", "chunkClaimPrice").getDouble());
 			TransactionResult result = optAccount.get().withdraw(TownyPlugin.getEcoService().getDefaultCurrency(), price, TownyPlugin.getCause());
 			if (result.getResult() == ResultType.ACCOUNT_NO_FUNDS)
 			{
@@ -243,7 +236,7 @@ public class TownyClaimExecutor implements CommandExecutor
 			towny.setRegion(claimed);
 			DataHandler.addToWorldChunks(towny);
 			DataHandler.saveTowny(towny.getUUID());
-			CheckFirstChunk(player, towny);
+                checkFirstChunk(player, towny);
 			src.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.SUCCESS_CLAIM));
 		}
 		else
@@ -254,8 +247,8 @@ public class TownyClaimExecutor implements CommandExecutor
 	}
 
 	public String claimLandMessages(Player player, Towny townyParam) {
-		// Automatically set the points based on the player's current chunk
-		GoldenAxeListener.setAutomaticPoints(player);
+                // Automatically set the points based on the player's current chunk
+                ChunkClaimUtils.selectCurrentChunk(player);
 
 		Towny towny = DataHandler.getTownyOfPlayer(player.getUniqueId());
 		if (towny == null) {
@@ -266,8 +259,8 @@ public class TownyClaimExecutor implements CommandExecutor
 		}
 		Point a = DataHandler.getFirstPoint(player.getUniqueId());
 		Point b = DataHandler.getSecondPoint(player.getUniqueId());
-		if (a == null || b == null) {
-			return LanguageHandler.ERROR_NEEDAXESELECT;
+                if (a == null || b == null) {
+                        return LanguageHandler.ERROR_NEEDCHUNKSELECT;
 		}
 		if (!ConfigHandler.getNode("worlds").getNode(a.getWorld().getName()).getNode("enabled").getBoolean()) {
 			return LanguageHandler.ERROR_PLUGINDISABLEDINWORLD;
@@ -282,15 +275,15 @@ public class TownyClaimExecutor implements CommandExecutor
 		Region claimed = towny.getRegion().copy();
 		claimed.addRect(rect);
 
-		if (claimed.size() > towny.maxBlockSize()) {
-			return LanguageHandler.ERROR_NOENOUGHBLOCKS;
+            if (claimed.size() > towny.maxClaimArea()) {
+                        return LanguageHandler.ERROR_NOENOUGHCHUNKS;
 		}
 
 		// Update claimed region and other necessary data
 		towny.setRegion(claimed);
 		DataHandler.addToWorldChunks(towny);
 		DataHandler.saveTowny(towny.getUUID());
-		CheckFirstChunk(player, towny);
+                checkFirstChunk(player, towny);
 		player.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.SUCCESS_CLAIM));
 		return null; // Return null if the claim is successful
 	}

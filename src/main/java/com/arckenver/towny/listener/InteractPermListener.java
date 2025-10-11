@@ -15,7 +15,6 @@ import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.filter.cause.First;
-import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -53,9 +52,9 @@ public class InteractPermListener
 		{
 			return;
 		}
-		Optional<ItemStack> optItem = player.getItemInHand(HandTypes.MAIN_HAND);
-		if (optItem.isPresent() && (ConfigHandler.isWhitelisted("use", optItem.get().getType().getId()) || optItem.get().getType().equals(ItemTypes.GOLDEN_AXE) && ConfigHandler.getNode("others", "enableGoldenAxe").getBoolean(true)))
-			return;
+                Optional<ItemStack> optItem = player.getItemInHand(HandTypes.MAIN_HAND);
+                if (optItem.isPresent() && ConfigHandler.isWhitelisted("use", optItem.get().getType().getId()))
+                        return;
 		event.getTargetBlock().getLocation().ifPresent(loc -> {
 			if (!DataHandler.getPerm("interact", player.getUniqueId(), loc))
 			{

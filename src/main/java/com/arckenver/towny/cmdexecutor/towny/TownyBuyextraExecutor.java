@@ -56,11 +56,11 @@ public class TownyBuyextraExecutor implements CommandExecutor
 				src.sendMessage(Text.of(TextColors.YELLOW, "/t buyextra <amount>"));
 				return CommandResult.success();
 			}
-			int n = ctx.<Integer>getOne("amount").get();
-			int maxToBuy = ConfigHandler.getNode("others", "maxExtra").getInt() - towny.getExtras();
-			if (n > maxToBuy)
-			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOMOREBLOCK.replaceAll("\\{NUM\\}", Integer.toString(maxToBuy))));
+                        int n = ctx.<Integer>getOne("amount").get();
+                        int maxToBuy = ConfigHandler.getNode("others", "maxExtraChunks").getInt() - towny.getExtras();
+                        if (n > maxToBuy)
+                        {
+                                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOMORECHUNKS.replaceAll("\\{NUM\\}", Integer.toString(maxToBuy))));
 				return CommandResult.success();
 			}
 
@@ -75,7 +75,7 @@ public class TownyBuyextraExecutor implements CommandExecutor
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOTOWN));
 				return CommandResult.success();
 			}
-			BigDecimal price = BigDecimal.valueOf(n * ConfigHandler.getNode("prices", "extraPrice").getDouble());
+                        BigDecimal price = BigDecimal.valueOf(n * ConfigHandler.getNode("prices", "extraChunkPrice").getDouble());
 			TransactionResult result = optAccount.get().withdraw(TownyPlugin.getEcoService().getDefaultCurrency(), price, TownyPlugin.getCause());
 			if (result.getResult() == ResultType.ACCOUNT_NO_FUNDS)
 			{
@@ -94,7 +94,7 @@ public class TownyBuyextraExecutor implements CommandExecutor
 
 			towny.addExtras(n);
 			DataHandler.saveTowny(towny.getUUID());
-			String[] splited2 = LanguageHandler.SUCCESS_ADDBLOCKS.replaceAll("\\{NUM\\}", Integer.toString(n)).split("\\{AMOUNT\\}");
+                        String[] splited2 = LanguageHandler.SUCCESS_ADDCHUNKS.replaceAll("\\{NUM\\}", Integer.toString(n)).split("\\{AMOUNT\\}");
 			src.sendMessage(Text.builder()
 					.append(Text.of(TextColors.AQUA, (splited2.length > 0) ? splited2[0] : ""))
 					.append(Utils.formatPrice(TextColors.AQUA, price))

@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import com.arckenver.towny.channel.AdminSpyMessageChannel;
 import com.arckenver.towny.channel.TownyMessageChannel;
+import com.arckenver.towny.claim.ChunkClaimUtils;
 import com.arckenver.towny.object.*;
 import com.arckenver.towny.serializer.TownyDeserializer;
 import com.arckenver.towny.serializer.TownySerializer;
@@ -537,20 +538,25 @@ public class DataHandler
 	// ------------------------------------------------------------
 	// Selection points
 	// ------------------------------------------------------------
-	public static Point getFirstPoint(UUID uuid)
-	{
-		if (ConfigHandler.getNode("others", "enableGoldenAxe").getBoolean(true))
-		{
-			return firstPoints.get(uuid);
-		}
-		Optional<Player> player = Sponge.getServer().getPlayer(uuid);
-		if (!player.isPresent())
-		{
-			return null;
-		}
-		Vector3i chunk = player.get().getLocation().getChunkPosition();
-		return new Point(player.get().getWorld(), chunk.getX() * 16, chunk.getZ() * 16);
-	}
+        public static Point getFirstPoint(UUID uuid)
+        {
+                Point stored = firstPoints.get(uuid);
+                if (stored != null)
+                {
+                        return stored;
+                }
+                Optional<Player> player = Sponge.getServer().getPlayer(uuid);
+                if (!player.isPresent())
+                {
+                        return null;
+                }
+                Vector3i chunk = player.get().getLocation().getChunkPosition();
+                return new Point(
+                                player.get().getWorld(),
+                                chunk.getX() * ChunkClaimUtils.CHUNK_SIZE,
+                                chunk.getZ() * ChunkClaimUtils.CHUNK_SIZE
+                );
+        }
 
 	public static void setFirstPoint(UUID uuid, Point point)
 	{
@@ -562,20 +568,27 @@ public class DataHandler
 		firstPoints.remove(uuid);
 	}
 
-	public static Point getSecondPoint(UUID uuid)
-	{
-		if (ConfigHandler.getNode("others", "enableGoldenAxe").getBoolean(true))
-		{
-			return secondPoints.get(uuid);
-		}
-		Optional<Player> player = Sponge.getServer().getPlayer(uuid);
-		if (!player.isPresent())
-		{
-			return null;
-		}
-		Vector3i chunk = player.get().getLocation().getChunkPosition();
-		return new Point(player.get().getWorld(), chunk.getX() * 16 + 15, chunk.getZ() * 16 + 15);
-	}
+        public static Point getSecondPoint(UUID uuid)
+        {
+                Point stored = secondPoints.get(uuid);
+                if (stored != null)
+                {
+                        return stored;
+                }
+                Optional<Player> player = Sponge.getServer().getPlayer(uuid);
+                if (!player.isPresent())
+                {
+                        return null;
+                }
+                Vector3i chunk = player.get().getLocation().getChunkPosition();
+                int baseX = chunk.getX() * ChunkClaimUtils.CHUNK_SIZE;
+                int baseZ = chunk.getZ() * ChunkClaimUtils.CHUNK_SIZE;
+                return new Point(
+                                player.get().getWorld(),
+                                baseX + ChunkClaimUtils.CHUNK_SIZE - 1,
+                                baseZ + ChunkClaimUtils.CHUNK_SIZE - 1
+                );
+        }
 
 	public static void setSecondPoint(UUID uuid, Point point)
 	{

@@ -33,7 +33,7 @@ public class LanguageHandler
 	public static String HELP_DESC_CMD_T_PERM = "set town perm";
 	public static String HELP_DESC_CMD_T_FLAG = "set town flag";
 	public static String HELP_DESC_CMD_T_SPAWN = "teleport to spawn with the given name";
-	public static String HELP_DESC_CMD_T_BUYEXTRA = "buy extra claimable blocks";
+        public static String HELP_DESC_CMD_T_BUYEXTRA = "buy extra claimable chunks";
 	public static String HELP_DESC_CMD_T_CITIZEN = "get player details";
 	public static String HELP_DESC_CMD_T_TAXES = "set town taxes";
 	public static String HELP_DESC_CMD_T_CHAT = "toggle town chat";
@@ -53,8 +53,8 @@ public class LanguageHandler
 	public static String HELP_DESC_CMD_TA_FLAG = "set town flag";
 	public static String HELP_DESC_CMD_TA_SPY = "spy on towns' private channels";
 	public static String HELP_DESC_CMD_TA_FORCEKEEPUP = "force town upkeep script to run";
-	public static String HELP_DESC_CMD_TA_EXTRA = "manage extra blocks";
-	public static String HELP_DESC_CMD_TA_EXTRAPLAYER = "manage extra blocks using player name";
+        public static String HELP_DESC_CMD_TA_EXTRA = "manage extra chunks";
+        public static String HELP_DESC_CMD_TA_EXTRAPLAYER = "manage extra chunks using player name";
 	public static String HELP_DESC_CMD_TA_EXTRASPAWN = "manage extra spawns";
 	public static String HELP_DESC_CMD_TA_EXTRASPAWNPLAYER = "manage extra spawns using player name";
 	public static String HELP_DESC_CMD_TA_UNCLAIM = "unclaims for admin town";
@@ -129,16 +129,16 @@ public class LanguageHandler
 	public static String ERROR_NEEDMONEYTOWN = "Your town needs {AMOUNT} to perform that transaction";
 	public static String ERROR_NOENOUGHMONEY = "You don't have that much money";
 	public static String ERROR_NOENOUGHMONEYTOWN = "Your town doesn't have that much money";
-	public static String ERROR_NOMOREBLOCK = "Your town can't buy more than {NUM} extra blocks";
+        public static String ERROR_NOMORECHUNKS = "Your town can't buy more than {NUM} extra chunks";
 	public static String ERROR_NEEDSTANDTOWN = "You must be standing in a town to perform that command";
 	public static String ERROR_PERM_PLOTBUY = "You do not have permission to buy a plot in this town";
 	public static String ERROR_PERM_PLOTRENT = "You do not have permission to rent a plot in this town";
 
-	public static String SUCCESS_ADDBLOCKS = "Successfully bought {NUM} extra blocks for {AMOUNT}";
+        public static String SUCCESS_ADDCHUNKS = "Successfully bought {NUM} extra chunks for {AMOUNT}";
 	public static String SUCCESS_UNCLAIM = "You successfully unclaimed this area";
 	public static String SUCCESS_WITHDRAW = "You successfully took {AMOUNT} from your town that has now {BALANCE}";
 
-	public static String INFO_UNCLAIMREFUND = "Your town was refunded {AMOUNT} for unclaiming these {NUM} blocks ({PRECENT}%)";
+        public static String INFO_UNCLAIMREFUND = "Your town was refunded {AMOUNT} for unclaiming these {NUM} chunk(s) ({PERCENT}% of the purchase price)";
 	public static String INFO_PLOTFORSALE = "{PLAYER} put plot {PLOT} up for sale at {AMOUNT}";
 	public static String INFO_PLOTFORRENT = "{PLOT} is now up for rent at {AMOUNT}";
 	public static String INFO_PLOT_TAX_PAID = "Paid daily plot tax {AMOUNT} for plot {PLOT} to {TOWN}.";
@@ -167,11 +167,11 @@ public class LanguageHandler
 	public static String RES_AUTOMAP_OFF = "Auto-map disabled.";
 
 
-	public static String ERROR_NEEDAXESELECT = "You must select a region with a golden axe first (right/left click)";
+        public static String ERROR_NEEDCHUNKSELECT = "You must select a chunk before using this command (stand in the target chunk and try again)";
 	public static String ERROR_NEEDADJACENT = "Your selection must be adjacent to your region";
 	public static String ERROR_NEEDINTERSECT = "Your selection must intersect your region";
 	public static String ERROR_AREACONTAINSPAWN = "Your selection contains a spawn of your town";
-	public static String ERROR_NOENOUGHBLOCKS = "Your town doesn't have enough blocks, you can buy extra ones with /town buyextra";
+        public static String ERROR_NOENOUGHCHUNKS = "Your town doesn't have enough chunks, you can buy extra ones with /town buyextra";
 	public static String SUCCESS_CLAIM = "You successfully claimed this area";
 	public static String ERROR_TOOCLOSE = "Too close to another town";
 	public static String SUCCESS_OUTPOST = "You successfully created an outpost here";
@@ -325,8 +325,8 @@ public class LanguageHandler
 	public static String COST_MSG_TOWNCREATE = "Town creation";
 	public static String COST_MSG_OUTPOSTCREATE = "Outpost creation";
 	public static String COST_MSG_UPKEEP = "Upkeep per citizen";
-	public static String COST_MSG_CLAIMPRICE = "Price per block claimed";
-	public static String COST_MSG_EXTRAPRICE = "Price per extra block";
+        public static String COST_MSG_CLAIMPRICE = "Price per chunk claimed";
+        public static String COST_MSG_EXTRAPRICE = "Price per extra chunk";
 	public static String INFO_PLOTFS = "{PLAYER} made plot {PLOT} not for sale";
 
 	private static File languageFile;
