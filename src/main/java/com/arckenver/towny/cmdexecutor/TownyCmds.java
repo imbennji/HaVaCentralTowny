@@ -12,6 +12,7 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
 
 import com.arckenver.towny.TownyPlugin;
+import com.arckenver.towny.cmdexecutor.nation.NationInfoExecutor;
 import com.arckenver.towny.cmdexecutor.towny.TownyInfoExecutor;
 import com.arckenver.towny.cmdexecutor.townyadmin.TownyadminExecutor;
 import com.arckenver.towny.cmdexecutor.townyworld.TownyworldExecutor;
@@ -25,15 +26,20 @@ public class TownyCmds {
 	public static void create(TownyPlugin plugin)
 	{
 
-		CommandSpec.Builder townyCmd = CommandSpec.builder()
-				.description(Text.of(""))
-				.permission("towny.command.town.execute")
-				.executor(new TownyInfoExecutor());
+                CommandSpec.Builder townyCmd = CommandSpec.builder()
+                                .description(Text.of(""))
+                                .permission("towny.command.town.execute")
+                                .executor(new TownyInfoExecutor());
 
-		CommandSpec.Builder townyadminCmd = CommandSpec.builder()
-				.description(Text.of(""))
-				.permission("towny.command.townyadmin.execute")
-				.executor(new TownyadminExecutor());
+                CommandSpec.Builder nationCmd = CommandSpec.builder()
+                                .description(Text.of(""))
+                                .permission("towny.command.nation.execute")
+                                .executor(new NationInfoExecutor());
+
+                CommandSpec.Builder townyadminCmd = CommandSpec.builder()
+                                .description(Text.of(""))
+                                .permission("towny.command.townyadmin.execute")
+                                .executor(new TownyadminExecutor());
 
 		CommandSpec.Builder plotCmd = CommandSpec.builder()
 				.description(Text.of(""))
@@ -58,16 +64,18 @@ public class TownyCmds {
 
 		createCmds(residentCmd, "com.arckenver.towny.cmdexecutor.resident");
 
-		createCmds(townyCmd, "com.arckenver.towny.cmdexecutor.towny");
-		createCmds(townyadminCmd, "com.arckenver.towny.cmdexecutor.townyadmin");
-		createCmds(plotCmd, "com.arckenver.towny.cmdexecutor.plot");
-		createCmds(townyworldCmd, "com.arckenver.towny.cmdexecutor.townyworld");
+                createCmds(townyCmd, "com.arckenver.towny.cmdexecutor.towny");
+                createCmds(nationCmd, "com.arckenver.towny.cmdexecutor.nation");
+                createCmds(townyadminCmd, "com.arckenver.towny.cmdexecutor.townyadmin");
+                createCmds(plotCmd, "com.arckenver.towny.cmdexecutor.plot");
+                createCmds(townyworldCmd, "com.arckenver.towny.cmdexecutor.townyworld");
 
-		Sponge.getCommandManager().register(plugin, townyadminCmd.build(), "townyadmin", "ta", "townyadmin");
-		Sponge.getCommandManager().register(plugin, townyCmd.build(), "town", "t", "towny");
-		Sponge.getCommandManager().register(plugin, plotCmd.build(), "plot", "p");
-		Sponge.getCommandManager().register(plugin, townyworldCmd.build(), "townyworld", "tw");
-	}
+                Sponge.getCommandManager().register(plugin, townyadminCmd.build(), "townyadmin", "ta", "townyadmin");
+                Sponge.getCommandManager().register(plugin, townyCmd.build(), "town", "t", "towny");
+                Sponge.getCommandManager().register(plugin, nationCmd.build(), "nation", "n");
+                Sponge.getCommandManager().register(plugin, plotCmd.build(), "plot", "p");
+                Sponge.getCommandManager().register(plugin, townyworldCmd.build(), "townyworld", "tw");
+        }
 
 	private static void createCmds(CommandSpec.Builder cmd, String path)
 	{

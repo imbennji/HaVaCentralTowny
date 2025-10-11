@@ -39,7 +39,17 @@ public class LanguageHandler
 	public static String HELP_DESC_CMD_T_CHAT = "toggle town chat";
 	public static String HELP_DESC_CMD_T_VISIT = "teleport to spawn of a public town";
 	public static String HELP_DESC_CMD_T_COST = "display town prices";
-	public static String HELP_DESC_CMD_T_HOME = "if you have a spawn named 'home', tp to it";
+        public static String HELP_DESC_CMD_T_HOME = "if you have a spawn named 'home', tp to it";
+
+        public static String HELP_DESC_CMD_N_INFO = "get nation details";
+        public static String HELP_DESC_CMD_N_LIST = "get the list of all nations";
+        public static String HELP_DESC_CMD_N_CREATE = "create a new nation";
+        public static String HELP_DESC_CMD_N_INVITE = "invite a town to your nation";
+        public static String HELP_DESC_CMD_N_JOIN = "make your town join a nation";
+        public static String HELP_DESC_CMD_N_LEAVE = "make your town leave its nation";
+        public static String HELP_DESC_CMD_N_SETBOARD = "set the nation board";
+        public static String HELP_DESC_CMD_N_SETTAG = "set the nation tag";
+        public static String HELP_DESC_CMD_N_TOGGLEOPEN = "toggle whether the nation is open";
 
 	public static String HELP_DESC_CMD_TA_RELOAD = "reloads config file";
 	public static String HELP_DESC_CMD_TA_CREATE = "create admin town";
@@ -91,9 +101,26 @@ public class LanguageHandler
 	public static String ERROR_NEEDPLAYERNAME = "You must specify player name";
 	public static String ERROR_NEEDWORLDNAME = "You must specify world name";
 
-	public static String ERROR_NOTOWN = "You must be in a town to perform that command, type /town ? for more help";
-	public static String ERROR_NOTOWNYET = "There is no town created yet";
-	public static String ERROR_PLAYERNOTPARTOFTOWN = "That player is not part of the town";
+        public static String ERROR_NOTOWN = "You must be in a town to perform that command, type /town ? for more help";
+        public static String ERROR_NOTOWNYET = "There is no town created yet";
+        public static String ERROR_NONATIONYET = "There is no nation created yet";
+        public static String ERROR_NONATION = "You must be part of a nation to perform that command";
+        public static String ERROR_NATION_NOT_FOUND = "Nation not found";
+        public static String ERROR_TOWN_HAS_NATION = "Your town already belongs to a nation";
+        public static String ERROR_TOWN_NO_NATION = "Your town does not belong to a nation";
+        public static String ERROR_NATION_NAME_TAKEN = "That nation name is already in use";
+        public static String ERROR_NATION_TAG_TAKEN = "That nation tag is already in use";
+        public static String ERROR_NATION_NAME_LENGTH = "Nation name must be between {MIN} and {MAX} characters";
+        public static String ERROR_NATION_TAG_LENGTH = "Nation tag must be between {MIN} and {MAX} characters";
+        public static String ERROR_PERM_NATIONLEADER = "You must be the nation leader to perform that command";
+        public static String ERROR_PERM_NATIONSTAFF = "You must be the nation leader or an assistant to perform that command";
+        public static String ERROR_NATION_CLOSED = "This nation is not open";
+        public static String ERROR_NATION_INVITE_REQUIRED = "Your town needs an invitation to join this nation";
+        public static String ERROR_NEEDNATIONNAME = "You must specify nation name";
+        public static String ERROR_NEEDTOWN = "You must specify a town";
+        public static String ERROR_NATION_CAPITAL_REQUIRED = "A nation capital must remain in the nation";
+        public static String ERROR_NATION_ALREADY_INVITED = "That town already has a pending nation invitation";
+        public static String ERROR_PLAYERNOTPARTOFTOWN = "That player is not part of the town";
 	public static String ERROR_PLUGINDISABLEDINWORLD = "Town plugin is disabled for this world";
 	public static String ERROR_PLUGINALREADYENABLED = "Town plugin is already enabled for this world";
 	public static String ERROR_PLUGINALREADYDISABLE = "Town plugin is already disabled for this world";
@@ -109,8 +136,17 @@ public class LanguageHandler
 
 	public static String INFO_UPKEEPANNOUNCE = "A new day is here! Towns now have to pay their upkeep.";
 	public static String INFO_RENTTIME = "It's time to pay rent in your town, paying the landlord!";
-	public static String INFO_TOWNFAILUPKEEP = "Town {TOWN} could not pay its upkeep and fell into ruins";
-	public static String INFO_TOWNFALL = "Town {TOWN} fell into ruins!";
+        public static String INFO_TOWNFAILUPKEEP = "Town {TOWN} could not pay its upkeep and fell into ruins";
+        public static String INFO_TOWNFALL = "Town {TOWN} fell into ruins!";
+        public static String INFO_NATION_CREATED = "Nation {NATION} has been founded";
+        public static String INFO_NATION_DISBANDED = "Nation {NATION} has disbanded";
+        public static String INFO_NATION_INVITED = "{TOWN} has been invited to join the nation";
+        public static String INFO_NATION_JOINED = "{TOWN} has joined the nation";
+        public static String INFO_NATION_LEFT = "{TOWN} has left the nation";
+        public static String INFO_NATION_BOARD = "Nation board updated";
+        public static String INFO_NATION_TAG = "Nation tag updated";
+        public static String INFO_NATION_OPEN = "Nation open status updated";
+        public static String INFO_NATION_CAPITAL = "Nation capital updated";
 
 	public static String ERROR_BADARG_GTS = "Invalid operation, use \"give\", \"take\" or \"set\"";
 	public static String ERROR_BADARG_AR = "Invalid argument, you must use \"add\" or \"remove\"";
@@ -278,7 +314,8 @@ public class LanguageHandler
 	public static String TOAST_WILDNAME = "Wilderness";
 	public static String TOAST_PVP = "PvP";
 	public static String TOAST_NOPVP = "No PvP";
-	public static String FORMAT_TOWN = "Town";
+        public static String FORMAT_TOWN = "Town";
+        public static String FORMAT_NATION = "Nation";
 	public static String FORMAT_PLOT = "Plot";
 	public static String FORMAT_PLOT_ID = "Plot ID";
 	public static String FORMAT_SIZE = "Size";
@@ -313,7 +350,8 @@ public class LanguageHandler
 	public static String FORMAT_BALANCE = "Balance";
 
 	public static String CLICKME = "click here";
-	public static String HEADER_TOWNLIST = "Town List";
+        public static String HEADER_TOWNLIST = "Town List";
+        public static String HEADER_NATIONLIST = "Nation List";
 	public static String HEADER_WORLDLIST = "World List";
 	public static String TYPE_BUILD = "BUILD";
 	public static String TYPE_INTERACT = "INTERACT";
