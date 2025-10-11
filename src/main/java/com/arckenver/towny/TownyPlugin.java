@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +23,7 @@ import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.event.service.ChangeServiceProviderEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.service.ProviderRegistration;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.api.service.economy.account.Account;
 import org.spongepowered.api.service.economy.account.UniqueAccount;
@@ -43,6 +45,7 @@ public class TownyPlugin {
 	private File defaultConfigDir;
 
         private EconomyService economyService = null;
+        private boolean economyWarningLogged = false;
         private static final AtomicBoolean ECONOMY_FAILURE_LOGGED = new AtomicBoolean(false);
 
 	@Listener
@@ -70,9 +73,7 @@ public class TownyPlugin {
 		ConfigHandler.load();
 		DataHandler.load();
 
-		Sponge.getServiceManager()
-				.getRegistration(EconomyService.class)
-				.ifPresent(prov -> economyService = prov.getProvider());
+                refreshEconomyService();
 
 		// ❌ DO NOT call TownyCmds.create(this) again here.
 
@@ -124,14 +125,38 @@ public class TownyPlugin {
 
 	@Listener
 	public void onChangeServiceProvider(ChangeServiceProviderEvent event) {
-		if (event.getService().equals(EconomyService.class)) {
-			economyService = (EconomyService) event.getNewProviderRegistration().getProvider();
-		}
-	}
+                if (event.getService().equals(EconomyService.class)) {
+                        refreshEconomyService();
+                }
+        }
 
-	public static TownyPlugin getInstance() { return plugin; }
+        public static TownyPlugin getInstance() { return plugin; }
         public static Logger getLogger() { return getInstance().logger; }
         public static EconomyService getEcoService() { return getInstance().economyService; }
+
+        private void refreshEconomyService() {
+                Optional<ProviderRegistration<EconomyService>> registration =
+                                Sponge.getServiceManager().getRegistration(EconomyService.class);
+
+                if (registration.isPresent()) {
+                        EconomyService detectedService = registration.get().getProvider();
+                        if (!Objects.equals(economyService, detectedService)) {
+                                economyService = detectedService;
+                                economyWarningLogged = false;
+                                logger.info("Hooked into economy provider: {}", registration.get().getPlugin().getId());
+                        }
+                } else {
+                        if (economyService != null) {
+                                economyService = null;
+                                logger.warn(
+                                                "Economy provider was unregistered; economy features are disabled until a provider returns.");
+                        } else if (!economyWarningLogged) {
+                                economyWarningLogged = true;
+                                logger.warn(
+                                                "No economy provider detected. Install a Sponge economy plugin to enable monetary features.");
+                        }
+                }
+        }
 
         private static void logEconomyFailure(String identifier, RuntimeException exception) {
                 if (ECONOMY_FAILURE_LOGGED.compareAndSet(false, true)) {
