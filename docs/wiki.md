@@ -1,6 +1,7 @@
 # Towny Sponge Remake Wiki
-
-Welcome to the official knowledge base for the Towny Sponge Remake – a modern port of the classic Towny experience tailored for Sponge API 7 servers. This wiki explains every gameplay system, administrative workflow, and integration point so server owners and residents can get the most out of the plugin.
+1
+## Overview
+This repository is a Sponge API 7 port of the classic Towny plugin that recreates town, resident, and plot gameplay without nation mechanics. The plugin bootstraps through `TownyPlugin`, wiring configuration, language packs, persistence, command trees, listeners, scheduled upkeep tasks, and the public `TownyService` so that Sponge servers get feature parity with the Spigot experience covered so far.【F:src/main/java/com/arckenver/towny/TownyPlugin.java†L29-L132】【F:src/main/java/com/arckenver/towny/service/TownyService.java†L1-L39】
 
 ---
 
