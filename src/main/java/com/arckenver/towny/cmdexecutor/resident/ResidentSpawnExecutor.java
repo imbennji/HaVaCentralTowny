@@ -9,14 +9,12 @@ import org.spongepowered.api.command.*;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.*;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.command.*;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.*;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.storage.WorldProperties;
 
 import java.time.Duration;
 import java.util.Map;
@@ -51,12 +49,7 @@ public class ResidentSpawnExecutor implements CommandExecutor {
         }
 
         boolean preferBed = DataHandler.getResidentPreferBedSpawn(id);
-        Optional<Location<World>> bedLocation = Optional.empty();
-        if (preferBed) {
-            try {
-                bedLocation = p.getBedLocation();
-            } catch (Exception ignored) {}
-        }
+        Optional<Location<World>> bedLocation = preferBed ? findBedSpawn(p) : Optional.empty();
 
         Location<World> dest;
         boolean usingBed = bedLocation.isPresent();
@@ -86,7 +79,7 @@ public class ResidentSpawnExecutor implements CommandExecutor {
             Location<World> finalDest = dest;
             boolean finalUsingBed = usingBed;
             Towny finalTown = t;
-            org.spongepowered.api.Sponge.getScheduler().createTaskBuilder()
+            Sponge.getScheduler().createTaskBuilder()
                     .delay(warmupSeconds, TimeUnit.SECONDS)
                     .execute(() -> performTeleport(id, finalDest, finalUsingBed, finalTown, cooldownSeconds))
                     .submit(TownyPlugin.getInstance());
@@ -97,7 +90,7 @@ public class ResidentSpawnExecutor implements CommandExecutor {
     }
 
     private void performTeleport(UUID id, Location<World> dest, boolean usingBed, Towny town, long cooldownSeconds) {
-        Optional<Player> optPlayer = org.spongepowered.api.Sponge.getServer().getPlayer(id);
+        Optional<Player> optPlayer = Sponge.getServer().getPlayer(id);
         if (!optPlayer.isPresent()) {
             return;
         }
@@ -120,5 +113,21 @@ public class ResidentSpawnExecutor implements CommandExecutor {
             return minutes + "m " + seconds + "s";
         }
         return seconds + "s";
+    }
+
+    private static Optional<Location<World>> findBedSpawn(Player player) {
+        Optional<Map<UUID, WorldProperties.RespawnLocation>> respawnLocations = player.get(Keys.RESPAWN_LOCATIONS);
+        if (!respawnLocations.isPresent()) {
+            return Optional.empty();
+        }
+
+        for (WorldProperties.RespawnLocation respawnLocation : respawnLocations.get().values()) {
+            Optional<Location<World>> candidate = respawnLocation.asLocation();
+            if (candidate.isPresent()) {
+                return candidate;
+            }
+        }
+
+        return Optional.empty();
     }
 }
