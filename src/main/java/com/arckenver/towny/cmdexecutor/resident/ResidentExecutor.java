@@ -1,0 +1,206 @@
+package com.arckenver.towny.cmdexecutor.resident;
+
+import com.arckenver.towny.ConfigHandler;
+import com.arckenver.towny.DataHandler;
+import com.arckenver.towny.LanguageHandler;
+import com.arckenver.towny.object.Towny;
+import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.spec.CommandExecutor;
+import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.action.TextActions;
+import org.spongepowered.api.text.format.TextColor;
+import org.spongepowered.api.text.format.TextColors;
+
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.stream.Collectors;
+
+/**
+ * /resident [player]
+ * Shows Towny-like resident info: Town, title, taxes, owned/rented plots.
+ */
+public final class ResidentExecutor implements CommandExecutor {
+
+    public static void create(CommandSpec.Builder root) {
+        root.child(spec(), "resident", "res");
+    }
+
+    public static CommandSpec spec() {
+        return CommandSpec.builder()
+                .description(Text.of("Show resident info"))
+                .permission("towny.command.resident.execute")
+                .arguments(GenericArguments.optional(GenericArguments.string(Text.of("player"))))
+                .executor(new ResidentExecutor())
+                .build();
+    }
+
+    @Override
+    public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+        UUID targetId;
+        String targetName;
+
+        Optional<String> optName = args.getOne("player");
+
+        if (!optName.isPresent()) {
+            if (!(src instanceof Player)) {
+                throw new CommandException(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+            }
+            Player p = (Player) src;
+            targetId = p.getUniqueId();
+            targetName = p.getName();
+        } else {
+            String name = optName.get();
+            UUID id = DataHandler.getPlayerUUID(name);
+            if (id == null) {
+                throw new CommandException(Text.of(TextColors.RED, LanguageHandler.ERROR_BADPLAYERNAME));
+            }
+            targetId = id;
+            String n = DataHandler.getPlayerName(id);
+            targetName = (n != null) ? n : name;
+        }
+
+        src.sendMessage(buildResidentInfo(targetId, targetName));
+        return CommandResult.success();
+    }
+
+    private Text buildResidentInfo(UUID uuid, String name) {
+        Towny town = DataHandler.getTownyOfPlayer(uuid);
+
+        String title = DataHandler.getCitizenTitle(uuid); // Hermit/Citizen/CoMayor/MayorTitle
+        int taxes = resolveTaxes(town);
+
+        OwnedRented or = findOwnedAndRentedPlots(uuid, town);
+
+        List<Text> lines = new ArrayList<>();
+        lines.add(Text.of(TextColors.GOLD, "Resident: ",
+                TextColors.YELLOW, name,
+                TextColors.DARK_GRAY, "  (", title, ")"));
+
+        if (town != null) {
+            Text.Builder townLine = Text.builder()
+                    .append(Text.of(TextColors.GRAY, "Town: ", TextColors.WHITE, town.getName()))
+                    .onClick(TextActions.runCommand("/town info " + town.getName()))
+                    .onHover(TextActions.showText(Text.of(TextColors.YELLOW, "Click for town info")));
+            lines.add(townLine.build());
+        } else {
+            lines.add(Text.of(TextColors.GRAY, "Town: ", TextColors.DARK_GRAY, "None"));
+        }
+
+        lines.add(Text.of(TextColors.GRAY, "Taxes Owed: ",
+                TextColors.WHITE, taxes, TextColors.GRAY, " / day"));
+
+        lines.add(compactListLine(
+                Text.of(TextColors.GRAY, "Owned Plots: "),
+                or.ownedNames, or.ownedCount, TextColors.YELLOW, "/plot info"));
+
+        if (or.rentedCount > 0) {
+            lines.add(compactListLine(
+                    Text.of(TextColors.GRAY, "Rented Plots: "),
+                    or.rentedNames, or.rentedCount, TextColors.AQUA, "/plot info"));
+        } else {
+            lines.add(Text.of(TextColors.GRAY, "Rented Plots: ", TextColors.DARK_GRAY, "None"));
+        }
+
+        return Text.joinWith(Text.NEW_LINE, lines);
+    }
+
+    private int resolveTaxes(Towny town) {
+        if (town == null) return ConfigHandler.getNode("towny", "defaultTaxes").getInt(0);
+        try {
+            Method m = town.getClass().getMethod("getTaxes");
+            Object v = m.invoke(town);
+            if (v instanceof Number) return ((Number) v).intValue();
+        } catch (Throwable ignored) {}
+        return ConfigHandler.getNode("towny", "defaultTaxes").getInt(0);
+    }
+
+    private static final class OwnedRented {
+        int ownedCount = 0;
+        int rentedCount = 0;
+        List<String> ownedNames = Collections.emptyList();
+        List<String> rentedNames = Collections.emptyList();
+    }
+
+    private OwnedRented findOwnedAndRentedPlots(UUID uuid, Towny town) {
+        OwnedRented out = new OwnedRented();
+        if (town == null) return out;
+
+        Collection<?> plots = Collections.emptyList();
+        try {
+            Method getPlots = town.getClass().getMethod("getPlots");
+            Object val = getPlots.invoke(town);
+            if (val instanceof Collection) plots = (Collection<?>) val;
+        } catch (Throwable ignored) {}
+
+        List<String> owned = new ArrayList<>();
+        List<String> rented = new ArrayList<>();
+
+        for (Object p : plots) {
+            boolean isOwner = invokeBool(p, "isOwner", uuid);
+            boolean isRenter = invokeBool(p, "isRenter", uuid); // optional
+            String pname = invokeString(p, "getName");
+            if (pname == null || pname.trim().isEmpty()) pname = LanguageHandler.DEFAULT_PLOTNAME;
+
+            if (isOwner) owned.add(pname);
+            else if (isRenter) rented.add(pname);
+        }
+
+        out.ownedCount = owned.size();
+        out.rentedCount = rented.size();
+        out.ownedNames = compactNames(owned, 6);
+        out.rentedNames = compactNames(rented, 6);
+        return out;
+    }
+
+    private static boolean invokeBool(Object obj, String method, UUID uuid) {
+        try {
+            Method m = obj.getClass().getMethod(method, UUID.class);
+            Object v = m.invoke(obj, uuid);
+            return (v instanceof Boolean) && (Boolean) v;
+        } catch (Throwable ignored) { return false; }
+    }
+
+    private static String invokeString(Object obj, String method) {
+        try {
+            Method m = obj.getClass().getMethod(method);
+            Object v = m.invoke(obj);
+            return (v != null) ? String.valueOf(v) : null;
+        } catch (Throwable ignored) { return null; }
+    }
+
+    private static List<String> compactNames(List<String> names, int max) {
+        if (names.size() <= max) return names;
+        List<String> head = new ArrayList<>(names.subList(0, max));
+        head.add("+" + (names.size() - max) + " more");
+        return head;
+    }
+
+    // >>> FIXED: accept TextColor (interface), not TextColors (constants class)
+    private Text compactListLine(Text label, List<String> names, int total, TextColor color, String clickCmdHint) {
+        if (total == 0) {
+            return Text.of(label, TextColors.DARK_GRAY, "None");
+        }
+
+        Text.Builder b = Text.builder().append(label);
+
+        String joined = names.stream().collect(Collectors.joining(", "));
+        Text namesText = Text.builder(joined).color(color).build();
+
+        b.append(
+                namesText
+                        .toBuilder()
+                        .onHover(TextActions.showText(Text.of(TextColors.YELLOW, "Click to run ", clickCmdHint)))
+                        .onClick(TextActions.runCommand(clickCmdHint))
+                        .build()
+        );
+
+        b.append(Text.of(TextColors.GRAY, "  [total: ", total, "]"));
+        return b.build();
+    }
+}
