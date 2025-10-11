@@ -1,9 +1,14 @@
 package com.arckenver.towny;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -34,9 +39,12 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 
 public class Utils
 {
-	public static final int CLICKER_NONE = 0;
-	public static final int CLICKER_DEFAULT = 1;
-	public static final int CLICKER_ADMIN = 2;
+        public static final int CLICKER_NONE = 0;
+        public static final int CLICKER_DEFAULT = 1;
+        public static final int CLICKER_ADMIN = 2;
+
+        private static final DateTimeFormatter RESIDENT_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+                        .withZone(ZoneId.systemDefault());
 
 	// players
 
@@ -171,19 +179,53 @@ public class Utils
 			return Text.of(TextColors.RED, LanguageHandler.FORMAT_UNKNOWN);
 		}
 
-		Builder builder = Text.builder("");
-		builder.append(
-				Text.of(TextColors.GOLD, "----------{ "),
-				Text.of(TextColors.YELLOW,
-						DataHandler.getCitizenTitle(uuid) + " - " + name),
-				Text.of(TextColors.GOLD, " }----------")
-				);
+                Builder builder = Text.builder("");
+                builder.append(
+                                Text.of(TextColors.GOLD, "----------{ "),
+                                Text.of(TextColors.YELLOW,
+                                                DataHandler.getCitizenTitle(uuid) + " - " + name),
+                                Text.of(TextColors.GOLD, " }----------")
+                                );
 
-		BigDecimal balance = null;
-		EconomyService service = TownyPlugin.getEcoService();
-		if (service != null)
-		{
-			Optional<UniqueAccount> optAccount = TownyPlugin.getEcoService().getOrCreateAccount(uuid);
+                String surname = DataHandler.getResidentSurname(uuid);
+                String prefix = DataHandler.getResidentChatPrefix(uuid);
+                String suffix = DataHandler.getResidentChatSuffix(uuid);
+                if ((surname != null && !surname.isEmpty()) || (prefix != null && !prefix.isEmpty()) || (suffix != null && !suffix.isEmpty())) {
+                        builder.append(Text.of(TextColors.GOLD, "\nName style: "));
+                        String style = "";
+                        if (prefix != null && !prefix.isEmpty()) {
+                                style += prefix + " ";
+                        }
+                        style += name;
+                        if (surname != null && !surname.isEmpty()) {
+                                style += " " + surname;
+                        }
+                        if (suffix != null && !suffix.isEmpty()) {
+                                style += " " + suffix;
+                        }
+                        builder.append(Text.of(TextColors.YELLOW, style.trim()));
+                }
+
+                String locale = DataHandler.getResidentLocale(uuid);
+                if (locale != null && !locale.isEmpty()) {
+                        builder.append(Text.of(TextColors.GOLD, "\nLocale: ", TextColors.YELLOW, locale));
+                }
+
+                long registered = DataHandler.getResidentRegisteredAt(uuid);
+                if (registered > 0) {
+                        builder.append(Text.of(TextColors.GOLD, "\nRegistered: ", TextColors.YELLOW, RESIDENT_TIME.format(Instant.ofEpochMilli(registered))));
+                }
+
+                long lastOnline = DataHandler.getResidentLastOnline(uuid);
+                if (lastOnline > 0) {
+                        builder.append(Text.of(TextColors.GOLD, "\nLast online: ", TextColors.YELLOW, RESIDENT_TIME.format(Instant.ofEpochMilli(lastOnline))));
+                }
+
+                BigDecimal balance = null;
+                EconomyService service = TownyPlugin.getEcoService();
+                if (service != null)
+                {
+                        Optional<UniqueAccount> optAccount = TownyPlugin.getEcoService().getOrCreateAccount(uuid);
 			if (optAccount.isPresent())
 			{
 				balance = optAccount.get().getBalance(TownyPlugin.getEcoService().getDefaultCurrency());
@@ -233,19 +275,61 @@ public class Utils
 				builder.append(Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE));
 			}
 
-			String title = DataHandler.getResidentTitle(uuid);
-			if (title != null && !title.trim().isEmpty()) {
-				builder.append(Text.of(TextColors.GOLD, "\nTitle: ", TextColors.YELLOW, title));
-			}
+                        String title = DataHandler.getResidentTitle(uuid);
+                        if (title != null && !title.trim().isEmpty()) {
+                                builder.append(Text.of(TextColors.GOLD, "\nTitle: ", TextColors.YELLOW, title));
+                        }
 
-		}
-		else
-		{
-			builder.append(Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE));
-		}
+                        java.util.List<String> ranks = new java.util.ArrayList<>(DataHandler.getResidentTownRanks(uuid));
+                        if (!ranks.isEmpty()) {
+                                builder.append(Text.of(TextColors.GOLD, "\nRanks: ", TextColors.YELLOW, String.join(", ", ranks)));
+                        }
 
-		return builder.build();
-	}
+                }
+                else
+                {
+                        builder.append(Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE));
+                }
+
+                if (DataHandler.isResidentJailed(uuid)) {
+                        long release = DataHandler.getResidentJailRelease(uuid);
+                        builder.append(Text.of(TextColors.GOLD, "\nStatus: ", TextColors.RED, "Jailed"));
+                        if (release > 0) {
+                                builder.append(Text.of(TextColors.GOLD, " (until ", TextColors.YELLOW, RESIDENT_TIME.format(Instant.ofEpochMilli(release)), TextColors.GOLD, ")"));
+                        }
+                } else if (DataHandler.isResidentBankrupt(uuid)) {
+                        builder.append(Text.of(TextColors.GOLD, "\nStatus: ", TextColors.RED, "Bankrupt"));
+                }
+
+                long exempt = DataHandler.getResidentTaxExemptUntil(uuid);
+                if (exempt > System.currentTimeMillis()) {
+                        builder.append(Text.of(TextColors.GOLD, "\nTax exempt until: ", TextColors.YELLOW, RESIDENT_TIME.format(Instant.ofEpochMilli(exempt))));
+                }
+
+                Set<String> modes = DataHandler.getResidentModes(uuid);
+                if (!modes.isEmpty()) {
+                        builder.append(Text.of(TextColors.GOLD, "\nModes: ", TextColors.YELLOW, String.join(", ", modes)));
+                }
+
+                long spawnCooldown = DataHandler.getResidentSpawnCooldown(uuid);
+                if (spawnCooldown > System.currentTimeMillis()) {
+                        long remaining = spawnCooldown - System.currentTimeMillis();
+                        builder.append(Text.of(TextColors.GOLD, "\nSpawn cooldown: ", TextColors.YELLOW, formatDuration(remaining)));
+                }
+
+                return builder.build();
+        }
+
+        private static String formatDuration(long millis) {
+                if (millis <= 0) return "ready";
+                long seconds = millis / 1000;
+                long minutes = seconds / 60;
+                long remaining = seconds % 60;
+                if (minutes > 0) {
+                        return minutes + "m " + remaining + "s";
+                }
+                return remaining + "s";
+        }
 
 	public static Text formatPlotDescription(Plot plot, Towny towny, int clicker)
 	{

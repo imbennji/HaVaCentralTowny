@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -664,41 +665,21 @@ public class DataHandler
 					new TypeToken<Map<String, Resident>>(){}.getType()
 			);
 			RESIDENTS.clear();
-			if (tmp != null) {
-				for (Map.Entry<String, Resident> e : tmp.entrySet()) {
-					try {
-						UUID id = UUID.fromString(e.getKey());
-						Resident src = e.getValue();
-						if (src == null) src = new Resident(id);
-						// normalize to ensure UUID is set
-                                                Resident fixed = new Resident(id);
-                                                fixed.setTitle(src.getTitle());
-                                                fixed.setAbout(src.getAbout());
-                                                fixed.setAutoMap(src.isAutoMap());
-                                                fixed.setLastAutoMapTs(src.getLastAutoMapTs());
-                                                fixed.getFriends().addAll(src.getFriends());
-                                                fixed.setAutoClaim(src.isAutoClaim());
-                                                fixed.setAutoUnclaim(src.isAutoUnclaim());
-                                                fixed.setPreferBedSpawn(src.isPreferBedSpawn());
-                                                fixed.setPlotBorder(src.isPlotBorder());
-                                                fixed.setConstantPlotBorder(src.isConstantPlotBorder());
-                                                fixed.setTownBorder(src.isTownBorder());
-                                                fixed.setBorderTitles(src.isBorderTitles());
-                                                fixed.setPvp(src.isPvp());
-                                                fixed.setFire(src.isFire());
-                                                fixed.setExplosion(src.isExplosion());
-                                                fixed.setMobs(src.isMobs());
-                                                fixed.setSpy(src.isSpy());
-                                                fixed.setIgnorePlots(src.isIgnorePlots());
-                                                fixed.setPlotGroupMode(src.isPlotGroupMode());
-                                                fixed.setDistrictMode(src.isDistrictMode());
-                                                fixed.setAdminBypass(src.isAdminBypass());
-                                                fixed.setInfoTool(src.isInfoTool());
-                                                RESIDENTS.put(id, fixed);
-					} catch (IllegalArgumentException bad) {
-						TownyPlugin.getLogger().warn("Skipping malformed resident key: " + e.getKey());
-					}
-				}
+                        if (tmp != null) {
+                                for (Map.Entry<String, Resident> e : tmp.entrySet()) {
+                                        try {
+                                                UUID id = UUID.fromString(e.getKey());
+                                                Resident src = e.getValue();
+                                                if (src == null) {
+                                                        src = new Resident(id);
+                                                } else {
+                                                        src.normalizeAfterLoad(id);
+                                                }
+                                                RESIDENTS.put(id, src);
+                                        } catch (IllegalArgumentException bad) {
+                                                TownyPlugin.getLogger().warn("Skipping malformed resident key: " + e.getKey());
+                                        }
+                                }
 			}
 		} catch (IOException ex) {
 			TownyPlugin.getLogger().error("Failed loading residents.json", ex);
@@ -717,19 +698,402 @@ public class DataHandler
 		}
 	}
 
-	private static Resident ensureResident(UUID id) {
-		return RESIDENTS.computeIfAbsent(id, Resident::new);
-	}
+        private static Resident ensureResident(UUID id) {
+                Resident r = RESIDENTS.computeIfAbsent(id, Resident::new);
+                r.normalizeAfterLoad(id);
+                return r;
+        }
 
-	public static Optional<Resident> getResident(UUID id) {
-		return Optional.ofNullable(RESIDENTS.get(id));
-	}
+        public static Optional<Resident> getResident(UUID id) {
+                return Optional.ofNullable(RESIDENTS.get(id));
+        }
 
-	// Title
-	public static String getResidentTitle(UUID id) {
-		Resident r = ensureResident(id);
-		return r.getTitle();
-	}
+        public static Collection<Resident> getResidents() {
+                return Collections.unmodifiableCollection(RESIDENTS.values());
+        }
+
+        // ------------------------------------------------------------
+        // Resident identity + lifecycle helpers
+        // ------------------------------------------------------------
+        public static void markResidentLogin(UUID id, String currentName) {
+                Resident r = ensureResident(id);
+                long now = System.currentTimeMillis();
+                if (r.getRegisteredAt() <= 0L) {
+                        r.setRegisteredAt(now);
+                }
+                r.setLastOnlineAt(now);
+                r.setLastKnownName(currentName);
+                saveResidents();
+        }
+
+        public static void markResidentLogout(UUID id) {
+                Resident r = ensureResident(id);
+                r.setLastLogoutAt(System.currentTimeMillis());
+                saveResidents();
+        }
+
+        public static long getResidentRegisteredAt(UUID id) { return ensureResident(id).getRegisteredAt(); }
+        public static long getResidentLastOnline(UUID id) { return ensureResident(id).getLastOnlineAt(); }
+        public static long getResidentLastLogout(UUID id) { return ensureResident(id).getLastLogoutAt(); }
+
+        public static String getResidentLastKnownName(UUID id) { return ensureResident(id).getLastKnownName(); }
+
+        public static String getResidentSurname(UUID id) { return ensureResident(id).getSurname(); }
+        public static void setResidentSurname(UUID id, String surname) {
+                Resident r = ensureResident(id);
+                r.setSurname(surname);
+                saveResidents();
+        }
+
+        public static String getResidentChatPrefix(UUID id) { return ensureResident(id).getChatPrefix(); }
+        public static void setResidentChatPrefix(UUID id, String prefix) {
+                Resident r = ensureResident(id);
+                r.setChatPrefix(prefix);
+                saveResidents();
+        }
+
+        public static String getResidentChatSuffix(UUID id) { return ensureResident(id).getChatSuffix(); }
+        public static void setResidentChatSuffix(UUID id, String suffix) {
+                Resident r = ensureResident(id);
+                r.setChatSuffix(suffix);
+                saveResidents();
+        }
+
+        public static String getResidentLocale(UUID id) { return ensureResident(id).getLocale(); }
+        public static void setResidentLocale(UUID id, String locale) {
+                Resident r = ensureResident(id);
+                r.setLocale(locale);
+                saveResidents();
+        }
+
+        public static void setResidentTaxExemptUntil(UUID id, long epochMs) {
+                Resident r = ensureResident(id);
+                r.setTaxExemptUntil(epochMs);
+                saveResidents();
+        }
+
+        public static long getResidentTaxExemptUntil(UUID id) { return ensureResident(id).getTaxExemptUntil(); }
+
+        public static Queue<String> getResidentNameHistory(UUID id) {
+                return new ArrayDeque<>(ensureResident(id).getNameHistory());
+        }
+
+        // ------------------------------------------------------------
+        // Town membership metadata (no nations)
+        // ------------------------------------------------------------
+        public static Optional<UUID> getResidentTownId(UUID id) {
+                return Optional.ofNullable(ensureResident(id).getTownId());
+        }
+
+        public static void setResidentTownId(UUID id, UUID townId) {
+                Resident r = ensureResident(id);
+                r.setTownId(townId);
+                if (townId == null) {
+                        r.clearTownRanks(null);
+                }
+                saveResidents();
+        }
+
+        public static Set<String> getResidentTownRanks(UUID id) {
+                return new LinkedHashSet<>(ensureResident(id).getTownRanks());
+        }
+
+        public static boolean addResidentTownRank(UUID id, String rank, UUID actor) {
+                Resident r = ensureResident(id);
+                boolean added = r.addTownRank(rank, actor);
+                if (added) saveResidents();
+                return added;
+        }
+
+        public static boolean removeResidentTownRank(UUID id, String rank, UUID actor) {
+                Resident r = ensureResident(id);
+                boolean removed = r.removeTownRank(rank, actor);
+                if (removed) saveResidents();
+                return removed;
+        }
+
+        public static List<Resident.TownRankHistoryEntry> getResidentTownRankHistory(UUID id) {
+                return new ArrayList<>(ensureResident(id).getTownRankHistory());
+        }
+
+        public static boolean isResidentMayor(UUID id) {
+                return ensureResident(id).isMayor();
+        }
+
+        public static boolean isResidentAssistant(UUID id) {
+                return ensureResident(id).isAssistant();
+        }
+
+        // ------------------------------------------------------------
+        // Economy helpers
+        // ------------------------------------------------------------
+        public static BigDecimal getResidentBalance(UUID id) {
+                return ensureResident(id).getBalance();
+        }
+
+        public static void setResidentBalance(UUID id, BigDecimal balance) {
+                Resident r = ensureResident(id);
+                r.setBalance(balance);
+                saveResidents();
+        }
+
+        public static void recordResidentDeposit(UUID id, BigDecimal amount, String type, String cause) {
+                if (amount == null) return;
+                Resident r = ensureResident(id);
+                r.recordTransaction(amount.abs(), type, cause);
+                r.setBankrupt(false);
+                saveResidents();
+        }
+
+        public static boolean recordResidentWithdrawal(UUID id, BigDecimal amount, String type, String cause) {
+                if (amount == null) return false;
+                Resident r = ensureResident(id);
+                BigDecimal neg = amount.abs().negate();
+                if (r.getBalance().add(neg).compareTo(BigDecimal.ZERO) < 0) {
+                        return false;
+                }
+                r.recordTransaction(neg, type, cause);
+                saveResidents();
+                return true;
+        }
+
+        public static List<Resident.EconomyLedgerEntry> getResidentLedger(UUID id) {
+                return new ArrayList<>(ensureResident(id).getLedger());
+        }
+
+        public static void setResidentBankrupt(UUID id, boolean bankrupt) {
+                Resident r = ensureResident(id);
+                r.setBankrupt(bankrupt);
+                if (bankrupt) {
+                        r.setBankruptcyDeclaredAt(System.currentTimeMillis());
+                }
+                saveResidents();
+        }
+
+        public static boolean isResidentBankrupt(UUID id) { return ensureResident(id).isBankrupt(); }
+
+        public static long getResidentBankruptcyDeclaredAt(UUID id) {
+                return ensureResident(id).getBankruptcyDeclaredAt();
+        }
+
+        public static void markResidentTaxPaid(UUID id) {
+                Resident r = ensureResident(id);
+                r.setLastTaxPaidAt(System.currentTimeMillis());
+                saveResidents();
+        }
+
+        public static long getResidentLastTaxPaidAt(UUID id) { return ensureResident(id).getLastTaxPaidAt(); }
+
+        // ------------------------------------------------------------
+        // Jail mechanics
+        // ------------------------------------------------------------
+        public static boolean isResidentJailed(UUID id) { return ensureResident(id).isJailed(); }
+
+        public static void setResidentJailed(UUID id, boolean jailed, UUID jailTown, UUID jailPlot, long releaseAt) {
+                Resident r = ensureResident(id);
+                r.setJailed(jailed);
+                r.setJailTownId(jailTown);
+                r.setJailPlotId(jailPlot);
+                r.setJailReleaseAt(releaseAt);
+                if (!jailed) {
+                        r.setJailEscapes(0);
+                }
+                saveResidents();
+        }
+
+        public static void incrementResidentJailEscapes(UUID id) {
+                Resident r = ensureResident(id);
+                r.setJailEscapes(r.getJailEscapes() + 1);
+                saveResidents();
+        }
+
+        public static int getResidentJailEscapes(UUID id) { return ensureResident(id).getJailEscapes(); }
+
+        public static long getResidentJailRelease(UUID id) { return ensureResident(id).getJailReleaseAt(); }
+
+        public static Optional<UUID> getResidentJailTown(UUID id) {
+                return Optional.ofNullable(ensureResident(id).getJailTownId());
+        }
+
+        public static List<Resident.JailRequest> getResidentJailRequests(UUID id) {
+                Resident r = ensureResident(id);
+                r.pruneExpiredJailRequests(System.currentTimeMillis());
+                return new ArrayList<>(r.getJailRequests());
+        }
+
+        public static void addResidentJailRequest(UUID id, Resident.JailRequest request) {
+                Resident r = ensureResident(id);
+                r.addJailRequest(request);
+                saveResidents();
+        }
+
+        public static void clearResidentJailRequests(UUID id) {
+                Resident r = ensureResident(id);
+                r.getJailRequests().clear();
+                saveResidents();
+        }
+
+        // ------------------------------------------------------------
+        // Spawn management
+        // ------------------------------------------------------------
+        public static String getResidentPreferredSpawn(UUID id) { return ensureResident(id).getPreferredSpawn(); }
+
+        public static void setResidentPreferredSpawn(UUID id, String spawn) {
+                Resident r = ensureResident(id);
+                r.setPreferredSpawn(spawn);
+                saveResidents();
+        }
+
+        public static long getResidentSpawnCooldown(UUID id) { return ensureResident(id).getSpawnCooldownEndsAt(); }
+
+        public static void setResidentSpawnCooldown(UUID id, long epochMs) {
+                Resident r = ensureResident(id);
+                r.setSpawnCooldownEndsAt(epochMs);
+                saveResidents();
+        }
+
+        public static long getResidentLastSpawn(UUID id) { return ensureResident(id).getLastSpawnAt(); }
+
+        public static void markResidentSpawn(UUID id, UUID townId, long cooldownMillis) {
+                Resident r = ensureResident(id);
+                long now = System.currentTimeMillis();
+                r.setLastSpawnAt(now);
+                r.setLastSpawnTownId(townId);
+                if (cooldownMillis > 0) {
+                        r.setSpawnCooldownEndsAt(now + cooldownMillis);
+                } else {
+                        r.setSpawnCooldownEndsAt(0L);
+                }
+                saveResidents();
+        }
+
+        public static boolean isResidentSpawnAtHomeOnLogin(UUID id) { return ensureResident(id).isSpawnAtHomeOnLogin(); }
+
+        public static void setResidentSpawnAtHomeOnLogin(UUID id, boolean enabled) {
+                Resident r = ensureResident(id);
+                r.setSpawnAtHomeOnLogin(enabled);
+                saveResidents();
+        }
+
+        public static void setResidentBedSpawnWarmup(UUID id, long epochMs) {
+                Resident r = ensureResident(id);
+                r.setBedSpawnWarmupEndsAt(epochMs);
+                saveResidents();
+        }
+
+        public static long getResidentBedSpawnWarmup(UUID id) { return ensureResident(id).getBedSpawnWarmupEndsAt(); }
+
+        // ------------------------------------------------------------
+        // Mode + notification management
+        // ------------------------------------------------------------
+        public static Set<String> getResidentModes(UUID id) {
+                return new LinkedHashSet<>(ensureResident(id).getModes());
+        }
+
+        public static boolean toggleResidentMode(UUID id, String mode) {
+                Resident r = ensureResident(id);
+                boolean enabled = r.toggleMode(mode);
+                saveResidents();
+                return enabled;
+        }
+
+        public static boolean setResidentMode(UUID id, String mode, boolean enabled) {
+                Resident r = ensureResident(id);
+                boolean changed = r.setMode(mode, enabled);
+                if (changed) saveResidents();
+                return changed;
+        }
+
+        public static boolean isResidentNotificationMuted(UUID id, String notification) {
+                return ensureResident(id).isNotificationMuted(notification);
+        }
+
+        public static void setResidentNotificationMuted(UUID id, String notification, boolean muted) {
+                Resident r = ensureResident(id);
+                r.setNotificationMuted(notification, muted);
+                saveResidents();
+        }
+
+        // ------------------------------------------------------------
+        // Misc flags and invites
+        // ------------------------------------------------------------
+        public static boolean isResidentIgnoringTowny(UUID id) { return ensureResident(id).isIgnoreTowny(); }
+
+        public static void setResidentIgnoringTowny(UUID id, boolean ignore) {
+                Resident r = ensureResident(id);
+                r.setIgnoreTowny(ignore);
+                saveResidents();
+        }
+
+        public static boolean isResidentDebugMode(UUID id) { return ensureResident(id).isDebugMode(); }
+
+        public static void setResidentDebugMode(UUID id, boolean enabled) {
+                Resident r = ensureResident(id);
+                r.setDebugMode(enabled);
+                saveResidents();
+        }
+
+        public static String getResidentProtectionStatus(UUID id) { return ensureResident(id).getProtectionStatus(); }
+
+        public static void setResidentProtectionStatus(UUID id, String status) {
+                Resident r = ensureResident(id);
+                r.setProtectionStatus(status);
+                saveResidents();
+        }
+
+        public static Set<String> getResidentPendingTownInvites(UUID id) {
+                return new LinkedHashSet<>(ensureResident(id).getPendingTownInvites());
+        }
+
+        public static void addResidentTownInvite(UUID id, String townName) {
+                Resident r = ensureResident(id);
+                r.addTownInvite(townName);
+                saveResidents();
+        }
+
+        public static void removeResidentTownInvite(UUID id, String townName) {
+                Resident r = ensureResident(id);
+                r.removeTownInvite(townName);
+                saveResidents();
+        }
+
+        public static void clearResidentTownInvites(UUID id) {
+                Resident r = ensureResident(id);
+                r.clearTownInvites();
+                saveResidents();
+        }
+
+        public static void addResidentPlotInvite(UUID id, UUID plotId) {
+                Resident r = ensureResident(id);
+                r.addPlotInvite(plotId);
+                saveResidents();
+        }
+
+        public static void removeResidentPlotInvite(UUID id, UUID plotId) {
+                Resident r = ensureResident(id);
+                r.removePlotInvite(plotId);
+                saveResidents();
+        }
+
+        public static Set<UUID> getResidentPendingPlotInvites(UUID id) {
+                return new LinkedHashSet<>(ensureResident(id).getPendingPlotInvites());
+        }
+
+        public static void incrementResidentWarStat(UUID id, String key) {
+                Resident r = ensureResident(id);
+                r.incrementWarStat(key);
+                saveResidents();
+        }
+
+        public static Map<String, Integer> getResidentWarStats(UUID id) {
+                return new LinkedHashMap<>(ensureResident(id).getWarStats());
+        }
+
+        // Title
+        public static String getResidentTitle(UUID id) {
+                Resident r = ensureResident(id);
+                return r.getTitle();
+        }
 
 	public static void setResidentTitle(UUID id, String title) {
 		Resident r = ensureResident(id);
