@@ -60,7 +60,7 @@ public class TaxesCollectRunnable implements Runnable
 		{
 			if (towny.isAdmin()) continue;
 
-			Optional<Account> optAccount = TownyPlugin.getEcoService().getOrCreateAccount("towny-" + towny.getUUID().toString());
+                    Optional<Account> optAccount = TownyPlugin.getOrCreateAccount("towny-" + towny.getUUID().toString());
 			if (!optAccount.isPresent())
 			{
 				TownyPlugin.getLogger().error("Towny " + towny.getName() + " doesn't have an account on the economy plugin of this server");
@@ -82,7 +82,7 @@ public class TaxesCollectRunnable implements Runnable
 				if (user.isPresent() && user.get().hasPermission("towny.admin.towny.exempt")) continue;
 				if (towny.isStaff(uuid)) continue;
 
-				Optional<UniqueAccount> optCitizenAccount = TownyPlugin.getEcoService().getOrCreateAccount(uuid);
+                            Optional<UniqueAccount> optCitizenAccount = TownyPlugin.getOrCreateUniqueAccount(uuid);
 				if (!optCitizenAccount.isPresent()) {
 					TownyPlugin.getLogger().error("Player " + uuid + " has no economy account for taxes.");
 					continue;
@@ -127,7 +127,7 @@ public class TaxesCollectRunnable implements Runnable
 					final UUID owner = plot.getOwner();
 					if (owner == null) continue;
 
-					Optional<UniqueAccount> optOwnerAcc = TownyPlugin.getEcoService().getOrCreateAccount(owner);
+                                    Optional<UniqueAccount> optOwnerAcc = TownyPlugin.getOrCreateUniqueAccount(owner);
 					if (!optOwnerAcc.isPresent()) {
 						TownyPlugin.getLogger().error("No account for owner " + owner + " while collecting plot tax.");
 						continue;

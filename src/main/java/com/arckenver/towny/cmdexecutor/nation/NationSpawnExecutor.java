@@ -87,7 +87,7 @@ public class NationSpawnExecutor implements CommandExecutor {
                 return CommandResult.success();
             }
 
-            Optional<UniqueAccount> optAccount = TownyPlugin.getEcoService().getOrCreateAccount(player.getUniqueId());
+            Optional<UniqueAccount> optAccount = TownyPlugin.getOrCreateUniqueAccount(player.getUniqueId());
             if (!optAccount.isPresent()) {
                 src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOACCOUNT));
                 return CommandResult.success();
@@ -104,7 +104,7 @@ public class NationSpawnExecutor implements CommandExecutor {
                 return CommandResult.success();
             }
 
-            Optional<Account> optNationAccount = TownyPlugin.getEcoService().getOrCreateAccount("nation-" + targetNation.getUUID());
+            Optional<Account> optNationAccount = TownyPlugin.getOrCreateAccount("nation-" + targetNation.getUUID());
             optNationAccount.ifPresent(account ->
                     account.deposit(TownyPlugin.getEcoService().getDefaultCurrency(), cost, TownyPlugin.getCause()));
         }

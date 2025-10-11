@@ -70,13 +70,13 @@ public class PlotReturnExecutor implements CommandExecutor {
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOECO));
 				return CommandResult.success();
 			}
-			Optional<Account> optAccount = TownyPlugin.getEcoService().getOrCreateAccount("plot-" + plot.getUUID().toString());
+                    Optional<Account> optAccount = TownyPlugin.getOrCreateAccount("plot-" + plot.getUUID().toString());
 			if (!optAccount.isPresent())
 			{
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOPLOT));
 				return CommandResult.success();
 			}
-			Optional<UniqueAccount> receiver = TownyPlugin.getEcoService().getOrCreateAccount(player.getUniqueId());
+                    Optional<UniqueAccount> receiver = TownyPlugin.getOrCreateUniqueAccount(player.getUniqueId());
 			if (!receiver.isPresent()) {
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOACCOUNT));
 				return CommandResult.success();

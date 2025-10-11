@@ -64,13 +64,13 @@ public class TownyWithdrawExecutor implements CommandExecutor
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOECO));
 				return CommandResult.success();
 			}
-			Optional<UniqueAccount> optAccount = TownyPlugin.getEcoService().getOrCreateAccount(player.getUniqueId());
+                    Optional<UniqueAccount> optAccount = TownyPlugin.getOrCreateUniqueAccount(player.getUniqueId());
 			if (!optAccount.isPresent())
 			{
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOACCOUNT));
 				return CommandResult.success();
 			}
-			Optional<Account> optTownyAccount = TownyPlugin.getEcoService().getOrCreateAccount("towny-" + towny.getUUID().toString());
+                    Optional<Account> optTownyAccount = TownyPlugin.getOrCreateAccount("towny-" + towny.getUUID().toString());
 			if (!optTownyAccount.isPresent())
 			{
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOTOWN));

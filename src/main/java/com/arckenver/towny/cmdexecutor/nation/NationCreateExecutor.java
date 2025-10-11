@@ -89,7 +89,7 @@ public class NationCreateExecutor implements CommandExecutor {
             return CommandResult.success();
         }
 
-        Optional<UniqueAccount> optAccount = TownyPlugin.getEcoService().getOrCreateAccount(player.getUniqueId());
+        Optional<UniqueAccount> optAccount = TownyPlugin.getOrCreateUniqueAccount(player.getUniqueId());
         if (!optAccount.isPresent()) {
             src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOACCOUNT));
             return CommandResult.success();

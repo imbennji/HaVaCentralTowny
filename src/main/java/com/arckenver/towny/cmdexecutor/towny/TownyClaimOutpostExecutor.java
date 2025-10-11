@@ -77,7 +77,7 @@ public class TownyClaimOutpostExecutor implements CommandExecutor
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOECO));
 				return CommandResult.success();
 			}
-			Optional<Account> optAccount = TownyPlugin.getEcoService().getOrCreateAccount("towny-" + towny.getUUID());
+                    Optional<Account> optAccount = TownyPlugin.getOrCreateAccount("towny-" + towny.getUUID());
 			if (!optAccount.isPresent())
 			{
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOTOWN));
