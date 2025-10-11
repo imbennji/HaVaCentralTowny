@@ -1,343 +1,297 @@
 # Towny Sponge Remake Wiki
-
-> **Towny Sponge Remake** delivers the classic Towny settlement experience on Sponge API 7 servers. This wiki explains how to install, configure, administer, and enjoy every gameplay system without diving into the codebase.
-
----
-
-## Contents
-
-- [Overview](#overview)
-- [Quick Start Checklist](#quick-start-checklist)
-- [Gameplay Systems](#gameplay-systems)
-  - [Residents](#residents)
-  - [Towns](#towns)
-  - [Plots](#plots)
-  - [Nations (Planned)](#nations-planned)
-- [Economy & Finance](#economy--finance)
-  - [Claim Costs & Upkeep](#claim-costs--upkeep)
-  - [Taxes](#taxes)
-  - [Rentals & Leasing](#rentals--leasing)
-  - [Bank Operations](#bank-operations)
-- [Command Reference](#command-reference)
-  - [Resident Commands](#resident-commands)
-  - [Town Commands](#town-commands)
-  - [Plot Commands](#plot-commands)
-  - [Administrative Commands](#administrative-commands)
-  - [World Commands](#world-commands)
-  - [Map & Visualisation](#map--visualisation)
-- [Permissions & Ranks](#permissions--ranks)
-- [Communication Tools](#communication-tools)
-- [Automation & Scheduling](#automation--scheduling)
-- [Configuration Guide](#configuration-guide)
-- [Data Management](#data-management)
-- [Troubleshooting](#troubleshooting)
-- [Frequently Asked Questions](#frequently-asked-questions)
-- [Support Channels](#support-channels)
-- [Roadmap & Release Notes](#roadmap--release-notes)
-- [Glossary](#glossary)
-
----
-
+1
 ## Overview
 
-| Field | Details |
-| --- | --- |
-| **Platform** | Sponge API 7 (SpongeForge or SpongeVanilla) |
-| **Game Version** | Minecraft 1.12.2 (matching Sponge API 7 baseline) |
-| **Primary Focus** | Town creation, land protection, community economies |
-| **Recommended Economy Provider** | EconomyLite, Total Economy, or any Sponge-compatible service |
-| **Data Format** | JSON data files under `data/towny/` |
-| **Configuration Location** | `config/towny/` |
-| **Command Prefix** | `/towny` root with multiple subtrees |
-| **Permission Manager Support** | Works with LuckPerms, PermissionsEx, and similar managers |
+---
 
-Towny Sponge Remake mirrors the beloved Towny gameplay loop: residents create towns, purchase plots, levy taxes, and cooperate in vibrant communities. It embraces Sponge conventions such as services, modular command structures, and highly configurable gameplay flags.
+## 1. Introduction
+
+**What is Towny Sponge Remake?**
+
+Towny Sponge Remake reimagines the beloved town management gameplay of the original Towny plugin for the Sponge ecosystem. It gives server communities a deep, economy-driven settlement simulator featuring resident-controlled towns, protected plots, taxes, rent, and a full complement of chat and administration tools. The project strives for parity with the legacy Spigot edition while embracing Sponge conventions such as services, configurability, and modular command trees.
+
+**Key capabilities**
+
+* Resident-created towns with rank hierarchies, boards, and optional tags.
+* Land claims that protect builds, regulate permissions, and offer granular ownership through sub-plots.
+* Robust economy hooks for upkeep, bank accounts, player taxation, and automated rent cycles.
+* A comprehensive command suite covering residents, towns, plots, administrators, and world managers.
+* Integrated chat channels for private town communication and administrative spy oversight.
+* Highly configurable gameplay flags, price lists, and default behaviours so servers can tailor Towny to their community.
 
 ---
 
-## Quick Start Checklist
+## 2. Requirements & Installation
 
-1. **Install Dependencies**
-   - Place the Towny Sponge Remake JAR in `mods/`.
-   - Install a Sponge economy plugin so taxes, rent, and bank transfers function.
-2. **Initial Launch**
-   - Start the server once to generate configuration, language, and data folders.
-   - Stop the server after generation to review the new files.
-3. **Configure Essentials**
-   - Adjust prices, taxes, and claim limits in `config/towny/TownsConfig.conf`.
-   - Set preferred language packs inside `config/towny/lang/`.
-   - Decide on default gameplay flags (PvP, explosions, fire spread) before reopening.
-4. **Assign Permissions**
-   - Use your permission manager to grant residents, assistants, and staff the appropriate nodes.
-   - Confirm players inherit the ability to join towns and interact with claims.
-5. **Educate Staff & Residents**
-   - Share this wiki, especially the command reference and troubleshooting sections.
-   - Encourage new mayors to rehearse claim workflows on a test world if available.
-6. **Schedule Backups**
-   - Automate copies of `data/towny/` and relevant configs before opening to the public.
+### 2.1 Prerequisites
 
----
+* **Sponge API**: Designed for Sponge API 7.x. Running the latest SpongeForge/SpongeVanilla build for this API line is recommended.
+* **Java Runtime**: Java 8 is the minimum supported runtime. Ensure both server and any accompanying tooling match this version.
+* **Economy Provider (Optional but recommended)**: For taxes, upkeep, rent, and bank transfers, install a Sponge-compatible economy service (e.g., EconomyLite or Total Economy).
 
-## Gameplay Systems
+### 2.2 Installation Steps
 
-### Residents
+1. Download the latest Towny Sponge Remake JAR from the project’s releases page.
+2. Place the JAR in your server’s `mods/` directory.
+3. Start the server once to allow Towny to generate its configuration, language files, and data folders.
+4. Stop the server and review the generated files inside `config/towny/` to customise prices, flags, and language packs.
+5. Restart the server to begin using Towny with your tailored settings.
 
-Residents are individual player records containing:
+### 2.3 Updating
 
-* Display preferences, including titles, surnames, and personal bio text.
-* Town membership, rank history, allies, and jailed status.
-* Financial state for rent, taxes, and bank contributions.
-* Toggleable gameplay modes such as map overlays, spy participation, or admin bypass (if granted).
-
-Residents can:
-
-* Join or leave towns at will (subject to invitations and taxes).
-* Purchase or rent plots for personal builds.
-* Set personal spawns within town borders.
-* Manage friend lists to share build permissions on private plots.
-
-### Towns
-
-Towns are resident-run municipalities featuring:
-
-* **Governance**: A mayor-led structure with assistant ranks, custom roles, and optional town boards.
-* **Land Management**: Claim town blocks, expand borders, designate outposts, and define home blocks for spawns.
-* **Economy**: Maintain a shared bank account paying upkeep, taxes, and municipal expenses.
-* **Security**: Set permissions and flags for residents, allies, and outsiders covering build/break, switches, explosions, fire, and mob spawning.
-* **Communication**: Coordinate via private chat channels and announcements visible to members.
-
-### Plots
-
-Plots subdivide town land for fine-grained ownership:
-
-* Owned or rented by residents, each with independent permissions.
-* Supports co-owners, friend permissions, and per-plot flag overrides.
-* Special designations such as shop, embassy, farm, or arena help organise municipal layout.
-* Rent cycles can be hourly or daily, automatically renewing until cancelled.
-
-### Nations (Planned)
-
-Nation-level play, including alliances, inter-town taxation, and war mechanics, is planned for future releases. Follow release notes to adopt these systems as they become available.
+1. Backup the following before upgrading: `config/towny/`, `data/towny/`, and the server world.
+2. Replace the existing plugin JAR with the new release.
+3. Start the server. Towny automatically updates configuration nodes, keeping custom values whenever possible.
+4. Review the console for any migration notices. Revisit your configuration if new options were added.
 
 ---
 
-## Economy & Finance
+## 3. Initial Setup Checklist
 
-Towny Sponge Remake integrates tightly with the registered Sponge economy service.
-
-### Claim Costs & Upkeep
-
-* Base claim prices determine how much it costs to expand town borders.
-* Upkeep charges scale with the number of claimed blocks, optional outpost multipliers, and special plot types.
-* Town banks must retain sufficient funds before the daily upkeep cycle; lacking funds can freeze expansion or trigger downsizing.
-
-### Taxes
-
-* **Resident Taxes**: Daily charges per resident. Mayors can use flat or percentage-based models and exempt certain ranks.
-* **Plot Taxes**: Optional daily fees on owned plots to encourage active development.
-* **Town Tax Holidays**: Temporarily pause taxation by disabling the relevant toggle in the configuration when hosting events.
-
-### Rentals & Leasing
-
-* Towns can advertise plots for rent with prices and interval length.
-* Tenants are warned before eviction if funds are insufficient.
-* Optional deposits or upfront fees protect municipal investment in high-demand districts.
-
-### Bank Operations
-
-* Residents with permission can deposit personal currency into the town bank for public works.
-* Withdrawals are limited to trusted ranks to prevent misuse.
-* Bank statements appear in chat feedback, letting mayors audit income versus expenses.
+| Step | Description |
+| --- | --- |
+| 1. Economy Service | Register a Sponge economy plugin so Towny can transact taxes, rent, and bank deposits. Without one, monetary features gracefully disable. |
+| 2. Configure Prices | Adjust claim costs, tax defaults, bonus block prices, and rent amounts in `config/towny/TownsConfig.conf`. |
+| 3. Language Customisation | Edit `config/towny/lang/en_US.lang` (or your locale) to personalise in-game messages and help output. |
+| 4. Permission Nodes | Assign town-related permissions through your permission manager (LuckPerms, etc.) to expose commands and features to specific ranks. |
+| 5. World Flags | Use `/townyworld` commands to toggle wilderness build permissions, PvP, fire spread, and other world-level behaviours. |
+| 6. Data Backup Strategy | Schedule regular copies of the `data/towny/` directory to preserve towns, residents, and plot states. |
 
 ---
 
-## Command Reference
+## 4. Core Concepts
 
-Towny mirrors the classic Towny command hierarchy. Use in-game help (`/towny ?`) for context; the tables below summarise the main entries.
+### 4.1 Residents
 
-### Resident Commands
+Residents represent individual players tracked by the plugin. Each resident profile records:
 
-| Command | Summary |
+* Display preferences (titles, surnames, personal board text).
+* Town membership, rank history, friends list, and jail status.
+* Financial data such as bank balance contributions, tax arrears, and rent obligations.
+* Toggleable gameplay modes (e.g., PvP, admin bypass, spy participation).
+
+Residents can join towns, purchase plots, pay rent, set personal spawn points within their town, and manage friends with whom they share permissions.
+
+### 4.2 Towns
+
+Towns are the heart of the plugin. Founders select a name, board, and optional tag, then manage the following:
+
+* **Government**: Mayor leadership with configurable assistant ranks (e.g., councillors, ministers).
+* **Territory**: Claims expand using town blocks purchased with in-game currency. Outposts allow remote settlements, while home blocks govern spawn and daily upkeep.
+* **Economy**: Town banks hold shared funds for taxes, upkeep, and public services. Mayors can deposit or withdraw with appropriate permissions.
+* **Permissions & Flags**: Town flags control PvP, fire spread, mobs, explosions, and build/break permissions for residents, allies, or outsiders.
+* **Communication**: Town chat channels keep conversations private, while optional spy monitoring ensures administrators can audit traffic when required.
+
+### 4.3 Plots
+
+Plots are subdivisions of town land:
+
+* May be sold or rented to residents, granting localised control inside the town.
+* Support co-owners, plot-level permissions, and bespoke flags overriding town defaults.
+* Can be marked for specific uses (e.g., shop, farm, embassy) depending on town policy.
+* Offer rent cycles ranging from hourly to daily, automatically charging residents and repossessing if payments lapse.
+
+### 4.4 Nations (Future Scope)
+
+While the Sponge remake emphasises town-level play, nation support is on the roadmap. Keep an eye on release notes for updates on cross-town alliances, national taxes, and war mechanics.
+
+---
+
+## 5. Economy & Taxation
+
+### 5.1 Claiming Costs
+
+Towns spend currency to acquire new blocks. Configure base prices, additional outpost costs, and multipliers for expanding beyond default limits. Town banks must retain enough funds to cover both purchase costs and daily upkeep.
+
+### 5.2 Upkeep
+
+* **Town Upkeep**: Charged daily per claimed block plus optional extras for outposts or embassies. If a town cannot pay, residents may be evicted, and claims can regress.
+* **Plot Upkeep**: Optional per-plot upkeep ensures private owners contribute to town expenses.
+
+### 5.3 Taxes
+
+* **Resident Taxes**: Daily charges applied to each resident. Mayors can exempt certain ranks or set percentage-based taxes.
+* **Plot Taxes**: Additional daily fees on owned plots, encouraging active land use.
+
+### 5.4 Rent System
+
+* Towns can list plots for rent with configurable intervals (e.g., hourly, daily).
+* Rent automatically charges the tenant’s balance; failures trigger warnings, then eviction.
+* Optional deposit or upfront payment protects the town against early departures.
+
+### 5.5 Bank Operations
+
+Commands allow residents with permission to deposit personal funds into the town bank or withdraw for municipal projects. The plugin interacts with the registered economy service to ensure consistent balances.
+
+---
+
+## 6. Command Reference
+
+Towny Sponge Remake mirrors the classic Towny command layout. Below is a high-level overview; consult in-game help (`/towny ?`) for context-sensitive details.
+
+### 6.1 Resident Commands (`/resident`)
+
+| Command | Purpose |
 | --- | --- |
-| `/resident` | View personal profile, including town membership, balance, and toggles. |
-| `/resident friend <add/remove/list>` | Maintain friend lists that inherit plot permissions. |
-| `/resident spawn` | Teleport to town or rented plot spawn if allowed. |
-| `/resident mode <toggle>` | Enable map view, claim selection, spy, or similar modes. |
-| `/resident set about <text>` | Update the biography message shown to others. |
+| `/resident` | Displays resident overview, including town membership, balance, and status toggles. |
+| `/resident friend <add/remove/list>` | Manage personal friend lists, impacting cooperative plot permissions. |
+| `/resident spawn` | Teleport to your town spawn or rented plot spawn if allowed. |
+| `/resident mode <set/clear>` | Toggle modes such as map viewing, claim selection, or spy participation (where permitted). |
+| `/resident set about <message>` | Update your resident biography shown to others. |
 
-### Town Commands
+### 6.2 Town Commands (`/town`)
 
-| Command | Summary |
+| Command | Purpose |
 | --- | --- |
-| `/town new <name>` | Found a town at your current position when criteria are met. |
-| `/town claim` | Claim the current chunk; modifiers support multiple claims or outposts. |
-| `/town unclaim` | Release land to reduce upkeep or rearrange borders. |
-| `/town deposit <amount>` | Move currency from personal balance into the town bank. |
-| `/town withdraw <amount>` | Withdraw funds for mayor-approved projects. |
-| `/town set <parameter>` | Configure board text, spawn, taxes, flags, or permission matrices. |
-| `/town invite <player>` | Invite a resident to join your town. |
-| `/town kick <player>` | Remove members who violate policies. |
-| `/town rank <add/remove> <player> <rank>` | Promote or demote residents within the town. |
+| `/town new <name>` | Create a new town at your current location if you meet the founding requirements. |
+| `/town claim` | Claim the chunk you stand in; additional arguments handle multiple chunks, outposts, or selection claims. |
+| `/town unclaim` | Release owned land to reduce upkeep or reallocate resources. |
+| `/town deposit <amount>` / `/town withdraw <amount>` | Transfer funds between your personal account and the town bank. |
+| `/town set <parameter>` | Configure town board, spawn, tax rates, flags, and permission matrices. |
+| `/town invite <player>` / `/town kick <player>` | Manage resident membership. |
+| `/town rank <add/remove> <player> <rank>` | Promote or demote residents to custom roles with associated permissions. |
 
-### Plot Commands
+### 6.3 Plot Commands (`/plot`)
 
-| Command | Summary |
+| Command | Purpose |
 | --- | --- |
-| `/plot claim` | Purchase the plot you stand in, subject to town rules. |
-| `/plot unclaim` | Return ownership to the town. |
-| `/plot set <type>` | Label the plot (shop, embassy, arena, etc.). |
-| `/plot perm <group> <toggle>` | Adjust build, destroy, switch, and item-use permissions for friends, allies, residents, or outsiders. |
-| `/plot flag <flag> <on/off>` | Override PvP, mobs, explosions, and other behaviours locally. |
-| `/plot rent <price> <interval>` | List plots for rent or cancel an existing lease. |
+| `/plot claim` / `/plot unclaim` | Purchase or release the plot you stand in, respecting town policies. |
+| `/plot set <type>` | Define plot category (e.g., shop, embassy) for organisational purposes. |
+| `/plot perm <group> <toggle>` | Adjust build, destroy, switch, or item-use permissions for friends, allies, residents, or outsiders. |
+| `/plot flag <flag> <on/off>` | Override town-wide flags (PvP, mobs, explosions) on a per-plot basis. |
+| `/plot rent <price> <interval>` | List or cancel rental offerings. |
 
-### Administrative Commands
+### 6.4 Administrative Commands (`/townyadmin`)
 
-| Command | Summary |
+| Command | Purpose |
 | --- | --- |
-| `/townyadmin` | Access the administrative help tree. |
-| `/townyadmin town <name> <action>` | Force-create, delete, or modify towns. |
-| `/townyadmin resident <name> <action>` | Adjust resident data, including forced joins or resets. |
-| `/townyadmin toggle <flag>` | Flip global flags instantly. |
+| `/townyadmin` | Opens the administrative help tree. |
+| `/townyadmin town <name> <action>` | Force-create, delete, or modify towns directly. |
+| `/townyadmin resident <name> <action>` | Adjust resident data, including forced joins, leaves, or toggle resets. |
+| `/townyadmin toggle <flag>` | Override world-level or global flags instantly. |
 | `/townyadmin economy <subcommand>` | Inject or remove currency from town and resident accounts. |
-| `/townyadmin collectrent` | Run the rent scheduler manually to resolve timing concerns. |
+| `/townyadmin collectrent` | Manually trigger rent collection to resolve scheduling issues. |
 
-### World Commands
+### 6.5 World Commands (`/townyworld`)
 
-| Command | Summary |
+| Command | Purpose |
 | --- | --- |
-| `/townyworld` | Display world-level settings for PvP, explosions, wilderness permissions, and more. |
-| `/townyworld toggle <flag>` | Switch fire spread, mob spawning, or similar global behaviours. |
-| `/townyworld perm <group> <toggle>` | Control wilderness build/interact permissions. |
+| `/townyworld` | Display current world settings such as PvP, explosions, and wilderness permissions. |
+| `/townyworld toggle <flag>` | Enable or disable world-level flags like fire spread or mob spawning. |
+| `/townyworld perm <group> <toggle>` | Control who may build or interact in the wilderness. |
 
-### Map & Visualisation
+### 6.6 Map & Visualization
 
-* `/towny map` renders an ASCII overview of surrounding claims and wilderness.
-* `/towny here` summarises ownership, plot type, permissions, and taxation for the chunk you occupy.
-* `/plot marker` toggles particle borders highlighting plot edges for easier surveying.
-
----
-
-## Permissions & Ranks
-
-Towny depends on your permission manager. Recommended practices:
-
-* **Root Nodes**: Gate each command tree with nodes such as `towny.command.town`, `towny.command.plot`, and `towny.command.resident`.
-* **Subcommand Nodes**: Grant precise control (e.g., `towny.command.town.claim`, `towny.command.resident.spawn`).
-* **Administrative Nodes**: Restrict high-impact actions under `towny.command.townyadmin.*`.
-* **Bypass & Spy Controls**: Provide separate nodes for plot protection bypass, admin spy chat, and debug readouts.
-* **Rank Profiles**: Create ranks—Mayor, Assistant, Councillor, Citizen, Visitor—and map nodes accordingly.
-
-Document rank expectations for your staff team so everyone understands the powers attached to each role.
+* `/towny map` displays an ASCII minimap showing nearby town claims and wilderness.
+* `/towny here` summarises the current chunk: owner, plot type, permissions, and taxation.
+* `/plot marker` toggles particle outlines marking plot boundaries for easier land management.
 
 ---
 
-## Communication Tools
+## 7. Permissions & Ranks
 
-* **Town Chat (`/tc`)**: Private channel for residents and assistants, ideal for planning builds or politics.
-* **Nation Chat (future)**: Reserved for upcoming nation support; currently unused but planned.
-* **Admin Spy**: Staff with spy privileges mirror town chat for moderation while respecting privacy policies.
-* **Interactive Notifications**: Invitations, rent offers, and teleport requests use Sponge’s rich messages for quick acceptance or denial.
+Towny integrates with Sponge permission managers. The plugin ships a granular node layout enabling precise control:
 
----
+* **Global Nodes**: Gate access to each command root (`towny.command.town`, `towny.command.plot`, etc.).
+* **Subcommand Nodes**: Provide fine-grained access, e.g., `towny.command.town.claim`, `towny.command.resident.spawn`.
+* **Administrative Nodes**: Reserved for staff (`towny.command.townyadmin.*`) covering forced actions and global toggles.
+* **Bypass & Spy**: Nodes controlling plot protection bypass, admin spy visibility, and debug outputs.
 
-## Automation & Scheduling
-
-* **Daily Upkeep Cycle**: Processes town upkeep, resident taxes, and plot taxes at a consistent server time. Towns lacking funds risk losing residents or unclaiming land.
-* **Hourly Rent Cycle**: Handles rent invoices, warnings, and evictions for overdue tenants.
-* **Auto-Save Tasks**: Persist resident, town, and plot data at regular intervals to guard against crashes.
-* **Economy Syncing**: Monitors the registered economy provider and reconnects if the service reloads mid-session.
+Use your permissions plugin to create ranks such as Mayor, Assistant, Citizen, or Visitor. Assign appropriate nodes so only trusted ranks can manage finances, change flags, or edit plots.
 
 ---
 
-## Configuration Guide
+## 8. Communication Channels
 
-* **General Settings (`TownyConfig.conf`)**: Toggle PvP defaults, explosion behaviour, wilderness permissions, and feature availability.
-* **Towns Settings (`TownsConfig.conf`)**: Adjust claim prices, upkeep formulas, tax defaults, bonus block costs, and war preparations (if enabled).
-* **Language Files (`lang/*.lang`)**: Translate or customise every message shown to players.
-* **Data Limits**: Configure maximum residents per town, claim limits per player, and restrictions on outposts.
-* **Notification Preferences**: Decide whether alerts appear in chat, action bar, or title overlays for events like entering towns or breaking protection rules.
-
-After editing configuration files, restart the server or use the plugin’s reload command (if available) to apply changes.
+* **Town Chat**: `/tc` or `/town chat` switches residents into a private channel. Messages broadcast only to residents and assistants.
+* **Admin Spy**: Staff with spy privileges can mirror town chat to monitor for rule infractions. Spy status can be toggled per-resident for transparency.
+* **Invite Notifications**: Residents receive clickable invitations for town joins, plot rentals, and teleports through Sponge’s interactive message system.
 
 ---
 
-## Data Management
+## 9. Scheduling & Automation
 
-* All persistent information lives in `data/towny/`.
-* Town records detail borders, flags, residents, taxes, and bank balances.
-* Resident data tracks personal settings, ranks, and financial history.
-* Plot files document ownership, rental status, and local overrides.
-* Implement an automated backup routine that includes world data alongside Towny’s directories to safeguard community progress.
+Towny Sponge Remake automates several recurring tasks:
 
----
-
-## Troubleshooting
-
-| Issue | Resolution |
-| --- | --- |
-| Players cannot build in wilderness | Confirm `/townyworld perm` grants outsiders build rights and verify your permission manager allows block interaction. |
-| Taxes or rent are not charging | Ensure an economy plugin is active, verify account balances, and manually trigger `/townyadmin collectrent` if schedules stalled. |
-| Towns lose residents unexpectedly | Review tax levels, offer grace periods, or subsidise members through the town bank. |
-| Messages appear in the wrong language | Set the desired locale in configuration and reload the plugin after translating language files. |
-| Migration from classic Towny | Back up both servers, convert data with the provided tools (when released), or recreate towns manually while noting feature differences. |
-
-Document persistent issues in the project’s tracker with logs and configuration snippets for faster assistance.
+* **Daily Upkeep Cycle**: Collects town upkeep, resident taxes, and plot taxes. Towns lacking funds risk losing residents or reverting claims.
+* **Hourly Rent Cycle**: Processes plot rent payments, issuing reminders before evicting defaulting tenants.
+* **Data Saves**: Regularly persists towns, residents, and plot data to JSON files under `data/towny/` to guard against crashes.
+* **Economy Sync**: Watches for changes in the registered economy provider and re-establishes links automatically if the service reloads.
 
 ---
 
-## Frequently Asked Questions
+## 10. Configuration Highlights
 
-**How large can a town grow?**  
-Claim limits depend on configuration—adjust maximum town blocks and bonus purchases to fit your server’s economy.
-
-**Can towns share land?**  
-Towns cannot overlap claims, but allied towns may coordinate borders using plot designations and shared districts controlled via permissions.
-
-**Does Towny support war events?**  
-War mechanics are a roadmap feature. Until released, servers can simulate conflicts with manual rules or complementary combat plugins.
-
-**How do I restore a deleted town?**  
-Restore from your latest backup of `data/towny/`. Keeping daily snapshots prevents permanent loss.
-
-**Can I disable rent entirely?**  
-Yes. Turn off rent toggles in configuration or avoid listing plots for rent.
+* **General Settings**: Toggle features like friendly fire, wilderness build permissions, grief prevention defaults, or server-wide PvP rules.
+* **Prices & Taxes**: Adjust base claim cost, additional block multipliers, rent amounts, daily taxes, and fees for extras like teleportation.
+* **Ranks & Titles**: Define custom rank titles, prefixes, and the permissions they unlock.
+* **Notifications**: Configure whether residents receive titles, action bar messages, or chat alerts for events such as entering towns or violating flags.
+* **Integration Hooks**: Enable or disable compatibility tweaks for map plugins, scoreboard trackers, or external mods.
 
 ---
 
-## Support Channels
+## 11. Data Storage & Backups
 
-* **Issue Tracker**: Report bugs and feature requests with reproduction steps, logs, and configuration details.
-* **Pull Requests**: Contributions are welcome—follow repository guidelines and include testing notes where applicable.
-* **Community Spaces**: Join the project’s Discord or forums (if advertised) to share best practices and showcase towns.
+* All persistent data lives in `data/towny/` inside the server directory.
+* Town files (`towns/<uuid>.json`) describe land, flags, residents, and financial state.
+* Resident data (`residents.json`) stores player records, including ranks and balances.
+* Regular backups are vital—schedule automated zips or off-site syncs to protect community progress.
 
 ---
 
-## Roadmap & Release Notes
+## 12. Troubleshooting & FAQs
 
-Stay informed by reviewing release changelogs. Upcoming priorities include:
+**Q: Why can’t players build in the wilderness?**
+A: Check `/townyworld perm` to ensure the wilderness build flag is enabled. Additionally, confirm your permission plugin grants the necessary build rights.
 
-* Nation systems with alliances, capitals, and inter-town diplomacy.
-* Enhanced map visualisation, including potential web-based claim viewers.
+**Q: Taxes or rent are not collecting. What should I do?**
+A: Verify an economy provider is installed and functioning. Staff can run `/townyadmin collectrent` to force the scheduler, then inspect the console for warnings about insufficient funds or misconfigured prices.
+
+**Q: Residents are being kicked for bankruptcy. How do we prevent this?**
+A: Lower resident taxes, adjust rent intervals, or encourage towns to subsidise members via the town bank. Consider enabling grace periods for new residents by temporarily exempting them from taxes.
+
+**Q: Can I change the language to something other than English?**
+A: Yes. Duplicate the language file in `config/towny/lang/`, translate entries, and set the desired locale in the main configuration. Reload the plugin or restart the server for changes to apply.
+
+**Q: How do I migrate from the Spigot version?**
+A: Use the provided data conversion scripts (when available) or recreate towns manually. Back up both servers before attempting migration. Some features may differ due to Sponge platform behaviour.
+
+---
+
+## 13. Support & Contribution
+
+* **Issue Tracking**: Report bugs and feature requests on the project’s issue tracker with reproduction steps, logs, and configuration snippets.
+* **Pull Requests**: Contributions are welcome—follow the coding standards outlined in the repository README and submit PRs with comprehensive testing notes.
+* **Community Channels**: Join the official Discord or forums (if provided) to discuss best practices, share town showcases, and coordinate with other server owners.
+
+---
+
+## 14. Release Notes & Roadmap
+
+Stay informed by reviewing each release changelog. Upcoming milestones include:
+
+* Extended nation mechanics including alliances, capitals, and global taxation.
+* Enhanced map visualisation with web-based claim viewers.
 * Optional war events with configurable siege rules and victory conditions.
-* Expanded API hooks for third-party plugins to track residents and towns.
+* API extensions exposing more resident and town data for third-party integrations.
 
 ---
 
-## Glossary
+## 15. Glossary
 
 | Term | Definition |
 | --- | --- |
-| **Resident** | A tracked player profile with personal settings and finances. |
-| **Town** | Player-run municipality controlling claimed land, rules, and economy. |
-| **Plot** | Subdivision of town land, either owned or rented by residents. |
-| **Outpost** | Remote claim disconnected from a town’s main territory, often costing extra upkeep. |
-| **Upkeep** | Recurring cost paid by towns to retain claims. |
-| **Rent** | Periodic payment allowing residents to use a plot without ownership. |
-| **Flag** | Toggle that enables or disables behaviours like PvP, explosions, or mob spawning. |
-| **Permission Matrix** | Combined rules defining which groups may interact with blocks or entities. |
-| **Economy Provider** | Sponge plugin delivering virtual currency transactions consumed by Towny. |
-| **Spy Mode** | Administrator tool mirroring town chat for moderation. |
+| **Resident** | A tracked player profile with personal settings, town membership, and financial status. |
+| **Town** | Player-governed settlement controlling claimed land, flags, and economy. |
+| **Plot** | Subdivision of town land that can be owned, rented, or managed separately. |
+| **Outpost** | Remote claim disconnected from the town’s main territory, often with increased upkeep. |
+| **Upkeep** | Recurring cost paid by towns to retain claimed blocks and services. |
+| **Rent** | Periodic payment allowing residents to occupy a plot without permanent ownership. |
+| **Flag** | Toggle controlling behaviours like PvP, fire spread, or mob spawning. |
+| **Permission Matrix** | Combined rules that determine whether residents, allies, or outsiders may interact with blocks or entities. |
+| **Economy Service** | Sponge plugin providing virtual currency transactions utilised by Towny. |
+| **Spy Mode** | Administrator tool mirroring town chat to ensure rule compliance. |
 
 ---
 
-For the latest updates and best practices, monitor the repository’s announcements and share feedback with the community. Towny Sponge Remake thrives on collaborative storytelling—build thriving settlements and shape your server’s narrative together.
+By following this guide, Sponge server owners can deploy the Towny Sponge Remake with confidence, fostering vibrant towns, thriving economies, and collaborative community storytelling. For the latest updates, always consult the project repository and release announcements.
