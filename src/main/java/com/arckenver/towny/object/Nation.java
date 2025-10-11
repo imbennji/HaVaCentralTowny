@@ -21,14 +21,19 @@ public class Nation {
     private String tag;
     private String board;
     private UUID capitalTown;
+    private UUID king;
     private boolean open;
     private boolean neutral;
+    private boolean publicNation;
     private double taxes;
+    private boolean taxPercentage;
+    private double spawnCost;
     private Location<World> spawn;
 
     private final Set<UUID> towns = new LinkedHashSet<>();
     private final Set<UUID> allies = new LinkedHashSet<>();
     private final Set<UUID> enemies = new LinkedHashSet<>();
+    private final Set<UUID> assistants = new LinkedHashSet<>();
 
     public Nation(UUID uuid, String name) {
         this.uuid = uuid;
@@ -37,7 +42,10 @@ public class Nation {
         this.tag = null;
         this.open = false;
         this.neutral = false;
+        this.publicNation = false;
         this.taxes = 0D;
+        this.taxPercentage = false;
+        this.spawnCost = 0D;
     }
 
     public UUID getUUID() {
@@ -91,6 +99,18 @@ public class Nation {
         }
     }
 
+    public UUID getKing() {
+        return king;
+    }
+
+    public void setKing(UUID king) {
+        this.king = king;
+    }
+
+    public boolean isKing(UUID playerUUID) {
+        return king != null && king.equals(playerUUID);
+    }
+
     public boolean isCapital(UUID townUUID) {
         return capitalTown != null && capitalTown.equals(townUUID);
     }
@@ -111,6 +131,14 @@ public class Nation {
         this.neutral = neutral;
     }
 
+    public boolean isPublic() {
+        return publicNation;
+    }
+
+    public void setPublic(boolean publicNation) {
+        this.publicNation = publicNation;
+    }
+
     public double getTaxes() {
         return taxes;
     }
@@ -119,12 +147,28 @@ public class Nation {
         this.taxes = taxes;
     }
 
+    public boolean isTaxPercentage() {
+        return taxPercentage;
+    }
+
+    public void setTaxPercentage(boolean taxPercentage) {
+        this.taxPercentage = taxPercentage;
+    }
+
     public Location<World> getSpawn() {
         return spawn;
     }
 
     public void setSpawn(Location<World> spawn) {
         this.spawn = spawn;
+    }
+
+    public double getSpawnCost() {
+        return spawnCost;
+    }
+
+    public void setSpawnCost(double spawnCost) {
+        this.spawnCost = spawnCost;
     }
 
     public Set<UUID> getTowns() {
@@ -168,5 +212,21 @@ public class Nation {
 
     public void removeEnemy(UUID nationUUID) {
         enemies.remove(nationUUID);
+    }
+
+    public Set<UUID> getAssistants() {
+        return Collections.unmodifiableSet(assistants);
+    }
+
+    public void addAssistant(UUID playerUUID) {
+        assistants.add(playerUUID);
+    }
+
+    public void removeAssistant(UUID playerUUID) {
+        assistants.remove(playerUUID);
+    }
+
+    public boolean isAssistant(UUID playerUUID) {
+        return assistants.contains(playerUUID);
     }
 }
