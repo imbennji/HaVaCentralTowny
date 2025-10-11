@@ -69,13 +69,13 @@ public class NationDepositExecutor implements CommandExecutor {
             return CommandResult.success();
         }
 
-        Optional<UniqueAccount> optPlayerAccount = TownyPlugin.getEcoService().getOrCreateAccount(player.getUniqueId());
+        Optional<UniqueAccount> optPlayerAccount = TownyPlugin.getOrCreateUniqueAccount(player.getUniqueId());
         if (!optPlayerAccount.isPresent()) {
             src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOACCOUNT));
             return CommandResult.success();
         }
 
-        Optional<Account> optNationAccount = TownyPlugin.getEcoService().getOrCreateAccount("nation-" + nation.getUUID());
+        Optional<Account> optNationAccount = TownyPlugin.getOrCreateAccount("nation-" + nation.getUUID());
         if (!optNationAccount.isPresent()) {
             src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_BANK));
             return CommandResult.success();

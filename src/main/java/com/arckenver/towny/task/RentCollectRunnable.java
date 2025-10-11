@@ -65,7 +65,7 @@ public class RentCollectRunnable implements Runnable {
 					});
 				}
 
-				Optional<Account> townyAccount = TownyPlugin.getEcoService().getOrCreateAccount("towny-" + towny.getUUID());
+                            Optional<Account> townyAccount = TownyPlugin.getOrCreateAccount("towny-" + towny.getUUID());
 				if (!townyAccount.isPresent()) {
 					MessageChannel.TO_CONSOLE.send(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOTOWN));
 					continue;
@@ -81,7 +81,7 @@ public class RentCollectRunnable implements Runnable {
 					BigDecimal rentPrice = plot.getRentalPrice();
 
 					BigDecimal plotBalance = BigDecimal.ZERO;
-					Optional<Account> plotAccount = TownyPlugin.getEcoService().getOrCreateAccount("plot-" + plot.getUUID());
+                                    Optional<Account> plotAccount = TownyPlugin.getOrCreateAccount("plot-" + plot.getUUID());
 					if (plotAccount.isPresent()) {
 						plotBalance = plotAccount.get().getBalance(TownyPlugin.getEcoService().getDefaultCurrency());
 					} else {
@@ -89,7 +89,7 @@ public class RentCollectRunnable implements Runnable {
 						continue;
 					}
 
-					Optional<UniqueAccount> ownerAccount = TownyPlugin.getEcoService().getOrCreateAccount(plot.getOwner());
+                                    Optional<UniqueAccount> ownerAccount = TownyPlugin.getOrCreateUniqueAccount(plot.getOwner());
 					BigDecimal ownerBalance = BigDecimal.ZERO;
 					if (ownerAccount.isPresent()) {
 						ownerBalance = ownerAccount.get().getBalance(TownyPlugin.getEcoService().getDefaultCurrency());

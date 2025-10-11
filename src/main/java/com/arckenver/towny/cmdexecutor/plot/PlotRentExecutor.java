@@ -61,13 +61,13 @@ public class PlotRentExecutor implements CommandExecutor {
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOECO));
 				return CommandResult.success();
 			}
-			Optional<UniqueAccount> optAccount = TownyPlugin.getEcoService().getOrCreateAccount(player.getUniqueId());
+                    Optional<UniqueAccount> optAccount = TownyPlugin.getOrCreateUniqueAccount(player.getUniqueId());
 			if (!optAccount.isPresent()) {
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOACCOUNT));
 				return CommandResult.success();
 			}
 			Account receiver;
-			Optional<Account> optReceiver = TownyPlugin.getEcoService().getOrCreateAccount("towny-" + towny.getUUID());
+                    Optional<Account> optReceiver = TownyPlugin.getOrCreateAccount("towny-" + towny.getUUID());
 			if (!optReceiver.isPresent())
 			{
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOTOWN));

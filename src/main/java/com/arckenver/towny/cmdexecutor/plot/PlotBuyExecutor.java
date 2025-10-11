@@ -72,7 +72,7 @@ public class PlotBuyExecutor implements CommandExecutor
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOECO));
 				return CommandResult.success();
 			}
-			Optional<UniqueAccount> optAccount = TownyPlugin.getEcoService().getOrCreateAccount(player.getUniqueId());
+                    Optional<UniqueAccount> optAccount = TownyPlugin.getOrCreateUniqueAccount(player.getUniqueId());
 			if (!optAccount.isPresent())
 			{
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOACCOUNT));
@@ -81,7 +81,7 @@ public class PlotBuyExecutor implements CommandExecutor
 			Account receiver;
 			if (oldOwner == null)
 			{
-				Optional<Account> optReceiver = TownyPlugin.getEcoService().getOrCreateAccount("towny-" + towny.getUUID());
+                            Optional<Account> optReceiver = TownyPlugin.getOrCreateAccount("towny-" + towny.getUUID());
 				if (!optReceiver.isPresent())
 				{
 					src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOTOWN));
@@ -91,7 +91,7 @@ public class PlotBuyExecutor implements CommandExecutor
 			}
 			else
 			{
-				Optional<UniqueAccount> optReceiver = TownyPlugin.getEcoService().getOrCreateAccount(oldOwner);
+                            Optional<UniqueAccount> optReceiver = TownyPlugin.getOrCreateUniqueAccount(oldOwner);
 				if (!optReceiver.isPresent())
 				{
 					src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOOWNER));

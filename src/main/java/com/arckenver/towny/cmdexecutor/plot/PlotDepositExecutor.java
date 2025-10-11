@@ -76,12 +76,12 @@ public class PlotDepositExecutor implements CommandExecutor {
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOECO));
 				return CommandResult.success();
 			}
-			Optional<UniqueAccount> ownerAccount = TownyPlugin.getEcoService().getOrCreateAccount(player.getUniqueId());
+                    Optional<UniqueAccount> ownerAccount = TownyPlugin.getOrCreateUniqueAccount(player.getUniqueId());
 			if (!ownerAccount.isPresent()) {
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOACCOUNT));
 				return CommandResult.success();
 			}
-			Optional<Account> plotAccount = TownyPlugin.getEcoService().getOrCreateAccount("plot-" + currentPlot.getUUID());
+                    Optional<Account> plotAccount = TownyPlugin.getOrCreateAccount("plot-" + currentPlot.getUUID());
 			if (!plotAccount.isPresent()) {
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOPLOT));
 				return CommandResult.success();

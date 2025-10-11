@@ -5,7 +5,10 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.arckenver.towny.listener.*;
 import com.arckenver.towny.task.RentCollectRunnable;
@@ -20,6 +23,8 @@ import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.event.service.ChangeServiceProviderEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.economy.EconomyService;
+import org.spongepowered.api.service.economy.account.Account;
+import org.spongepowered.api.service.economy.account.UniqueAccount;
 
 import com.arckenver.towny.cmdexecutor.TownyCmds;
 import com.arckenver.towny.service.TownyService;
@@ -37,7 +42,8 @@ public class TownyPlugin {
 	@Inject @ConfigDir(sharedRoot = true)
 	private File defaultConfigDir;
 
-	private EconomyService economyService = null;
+        private EconomyService economyService = null;
+        private static final AtomicBoolean ECONOMY_FAILURE_LOGGED = new AtomicBoolean(false);
 
 	@Listener
 	public void onInit(GameInitializationEvent event) {
@@ -124,8 +130,45 @@ public class TownyPlugin {
 	}
 
 	public static TownyPlugin getInstance() { return plugin; }
-	public static Logger getLogger() { return getInstance().logger; }
-	public static EconomyService getEcoService() { return getInstance().economyService; }
-	public static Cause getCause() { return Sponge.getCauseStackManager().getCurrentCause(); }
-	public File getDefaultConfigDir() { return defaultConfigDir; }
+        public static Logger getLogger() { return getInstance().logger; }
+        public static EconomyService getEcoService() { return getInstance().economyService; }
+
+        private static void logEconomyFailure(String identifier, RuntimeException exception) {
+                if (ECONOMY_FAILURE_LOGGED.compareAndSet(false, true)) {
+                        getLogger().error(
+                                        "Failed to access the economy account '{}'. Further errors will be logged at debug level.",
+                                        identifier, exception);
+                } else {
+                        getLogger().debug("Failed to access the economy account '{}'.", identifier, exception);
+                }
+        }
+
+        public static Optional<UniqueAccount> getOrCreateUniqueAccount(UUID uniqueId) {
+                EconomyService service = getEcoService();
+                if (service == null) {
+                        return Optional.empty();
+                }
+                try {
+                        return service.getOrCreateAccount(uniqueId);
+                } catch (RuntimeException exception) {
+                        logEconomyFailure(uniqueId.toString(), exception);
+                        return Optional.empty();
+                }
+        }
+
+        public static Optional<Account> getOrCreateAccount(String identifier) {
+                EconomyService service = getEcoService();
+                if (service == null) {
+                        return Optional.empty();
+                }
+                try {
+                        return service.getOrCreateAccount(identifier);
+                } catch (RuntimeException exception) {
+                        logEconomyFailure(identifier, exception);
+                        return Optional.empty();
+                }
+        }
+
+        public static Cause getCause() { return Sponge.getCauseStackManager().getCurrentCause(); }
+        public File getDefaultConfigDir() { return defaultConfigDir; }
 }

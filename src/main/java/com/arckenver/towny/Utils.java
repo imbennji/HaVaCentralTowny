@@ -237,7 +237,7 @@ public class Utils
                 EconomyService service = TownyPlugin.getEcoService();
                 if (service != null)
                 {
-                        Optional<UniqueAccount> optAccount = TownyPlugin.getEcoService().getOrCreateAccount(uuid);
+                        Optional<UniqueAccount> optAccount = TownyPlugin.getOrCreateUniqueAccount(uuid);
 			if (optAccount.isPresent())
 			{
 				balance = optAccount.get().getBalance(TownyPlugin.getEcoService().getDefaultCurrency());
@@ -434,7 +434,7 @@ public class Utils
 		);
 		if(plot.isForRent() && clicker == CLICKER_DEFAULT) { //either staff, owner or coowner
 			if(TownyPlugin.getEcoService() != null) {
-				Optional<Account> plotAccount = TownyPlugin.getEcoService().getOrCreateAccount("plot-" + plot.getUUID());
+                            Optional<Account> plotAccount = TownyPlugin.getOrCreateAccount("plot-" + plot.getUUID());
 				plotAccount.ifPresent(account -> builder.append(
 						Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_BALANCE + ": "),
 						formatPrice(TextColors.YELLOW, account.getBalance(TownyPlugin.getEcoService().getDefaultCurrency()))
