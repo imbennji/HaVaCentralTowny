@@ -13,15 +13,16 @@ import org.spongepowered.api.text.format.TextColors;
 public class PlayerConnectionListener
 {
 	@Listener
-	public void onPlayerJoin(ClientConnectionEvent.Join event)
-	{
-		event.getTargetEntity();
-		Player player = event.getTargetEntity();
-		Towny towny = DataHandler.getTownyOfPlayer(player.getUniqueId());
-		if (towny != null)
-			towny.getMessageChannel().addMember(player);
-		player.setMessageChannel(MessageChannel.TO_ALL);
-		if (player.hasPermission("towny.admin.spychat"))
+        public void onPlayerJoin(ClientConnectionEvent.Join event)
+        {
+                event.getTargetEntity();
+                Player player = event.getTargetEntity();
+                DataHandler.markResidentLogin(player.getUniqueId(), player.getName());
+                Towny towny = DataHandler.getTownyOfPlayer(player.getUniqueId());
+                if (towny != null)
+                        towny.getMessageChannel().addMember(player);
+                player.setMessageChannel(MessageChannel.TO_ALL);
+                if (player.hasPermission("towny.admin.spychat"))
 			DataHandler.getSpyChannel().addMember(player);
 		Towny my = DataHandler.getTownyOfPlayer(player.getUniqueId());
 		if (my != null && !my.getBoard().isEmpty()) {
@@ -30,15 +31,16 @@ public class PlayerConnectionListener
 	}
 
 	@Listener
-	public void onPlayerLeave(ClientConnectionEvent.Disconnect event)
-	{
-		event.getTargetEntity();
-		Player player = event.getTargetEntity();
-		DataHandler.removeFirstPoint(player.getUniqueId());
-		DataHandler.removeSecondPoint(player.getUniqueId());
-		Towny towny = DataHandler.getTownyOfPlayer(player.getUniqueId());
-		if (towny != null)
-			towny.getMessageChannel().removeMember(player);
+        public void onPlayerLeave(ClientConnectionEvent.Disconnect event)
+        {
+                event.getTargetEntity();
+                Player player = event.getTargetEntity();
+                DataHandler.markResidentLogout(player.getUniqueId());
+                DataHandler.removeFirstPoint(player.getUniqueId());
+                DataHandler.removeSecondPoint(player.getUniqueId());
+                Towny towny = DataHandler.getTownyOfPlayer(player.getUniqueId());
+                if (towny != null)
+                        towny.getMessageChannel().removeMember(player);
 		DataHandler.getSpyChannel().removeMember(player);
 	}
 }
