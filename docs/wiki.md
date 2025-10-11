@@ -1,97 +1,297 @@
 # Towny Sponge Remake Wiki
 
-## Overview
-This repository is a Sponge API 7 port of the classic Towny plugin that recreates town, resident, and plot gameplay without nation mechanics. The plugin bootstraps through `TownyPlugin`, wiring configuration, language packs, persistence, command trees, listeners, scheduled upkeep tasks, and the public `TownyService` so that Sponge servers get feature parity with the Spigot experience covered so far.【F:src/main/java/com/arckenver/towny/TownyPlugin.java†L29-L132】【F:src/main/java/com/arckenver/towny/service/TownyService.java†L1-L39】
+Welcome to the official knowledge base for the Towny Sponge Remake – a modern port of the classic Towny experience tailored for Sponge API 7 servers. This wiki explains every gameplay system, administrative workflow, and integration point so server owners and residents can get the most out of the plugin.
 
-## Repository layout
-| Path | Purpose |
+---
+
+## 1. Introduction
+
+**What is Towny Sponge Remake?**
+
+Towny Sponge Remake reimagines the beloved town management gameplay of the original Towny plugin for the Sponge ecosystem. It gives server communities a deep, economy-driven settlement simulator featuring resident-controlled towns, protected plots, taxes, rent, and a full complement of chat and administration tools. The project strives for parity with the legacy Spigot edition while embracing Sponge conventions such as services, configurability, and modular command trees.
+
+**Key capabilities**
+
+* Resident-created towns with rank hierarchies, boards, and optional tags.
+* Land claims that protect builds, regulate permissions, and offer granular ownership through sub-plots.
+* Robust economy hooks for upkeep, bank accounts, player taxation, and automated rent cycles.
+* A comprehensive command suite covering residents, towns, plots, administrators, and world managers.
+* Integrated chat channels for private town communication and administrative spy oversight.
+* Highly configurable gameplay flags, price lists, and default behaviours so servers can tailor Towny to their community.
+
+---
+
+## 2. Requirements & Installation
+
+### 2.1 Prerequisites
+
+* **Sponge API**: Designed for Sponge API 7.x. Running the latest SpongeForge/SpongeVanilla build for this API line is recommended.
+* **Java Runtime**: Java 8 is the minimum supported runtime. Ensure both server and any accompanying tooling match this version.
+* **Economy Provider (Optional but recommended)**: For taxes, upkeep, rent, and bank transfers, install a Sponge-compatible economy service (e.g., EconomyLite or Total Economy).
+
+### 2.2 Installation Steps
+
+1. Download the latest Towny Sponge Remake JAR from the project’s releases page.
+2. Place the JAR in your server’s `mods/` directory.
+3. Start the server once to allow Towny to generate its configuration, language files, and data folders.
+4. Stop the server and review the generated files inside `config/towny/` to customise prices, flags, and language packs.
+5. Restart the server to begin using Towny with your tailored settings.
+
+### 2.3 Updating
+
+1. Backup the following before upgrading: `config/towny/`, `data/towny/`, and the server world.
+2. Replace the existing plugin JAR with the new release.
+3. Start the server. Towny automatically updates configuration nodes, keeping custom values whenever possible.
+4. Review the console for any migration notices. Revisit your configuration if new options were added.
+
+---
+
+## 3. Initial Setup Checklist
+
+| Step | Description |
 | --- | --- |
-| `src/main/java/com/arckenver/towny` | Core bootstrap classes, configuration, localization, persistence helpers, chat channels, utilities, and the public service API. |
-| `src/main/java/com/arckenver/towny/object` | Domain models for towns, plots, residents, geometric helpers, and request tracking. |
-| `src/main/java/com/arckenver/towny/channel` | Message channels for town chat and admin spy traffic. |
-| `src/main/java/com/arckenver/towny/cmdexecutor` | Command registration and per-subcommand executors for `/town`, `/resident`, `/plot`, `/townyadmin`, and `/townyworld`. |
-| `src/main/java/com/arckenver/towny/cmdelement` | Custom command argument parsers for Sponge’s command framework. |
-| `src/main/java/com/arckenver/towny/event` | Custom events published by the plugin. |
-| `src/main/java/com/arckenver/towny/listener` | Gameplay enforcement listeners (movement, permissions, combat, chat, etc.). |
-| `src/main/java/com/arckenver/towny/serializer` | Gson serializers for persisting `Towny` regions and plots. |
-| `src/main/java/com/arckenver/towny/task` | Scheduled tax and rent collection jobs. |
-| `docs` | High-level documentation, including this wiki and a resident parity checklist. |
+| 1. Economy Service | Register a Sponge economy plugin so Towny can transact taxes, rent, and bank deposits. Without one, monetary features gracefully disable. |
+| 2. Configure Prices | Adjust claim costs, tax defaults, bonus block prices, and rent amounts in `config/towny/TownsConfig.conf`. |
+| 3. Language Customisation | Edit `config/towny/lang/en_US.lang` (or your locale) to personalise in-game messages and help output. |
+| 4. Permission Nodes | Assign town-related permissions through your permission manager (LuckPerms, etc.) to expose commands and features to specific ranks. |
+| 5. World Flags | Use `/townyworld` commands to toggle wilderness build permissions, PvP, fire spread, and other world-level behaviours. |
+| 6. Data Backup Strategy | Schedule regular copies of the `data/towny/` directory to preserve towns, residents, and plot states. |
 
-## Core runtime
-### Plugin bootstrap and lifecycle
-`TownyPlugin` initializes configuration, language, and data handlers during Sponge’s initialization phase; registers the `TownyService`; installs the command tree; hijacks legacy aliases; and registers listeners plus scheduled tasks when the server starts. Shutdown persists data back to disk. It also keeps the economy service reference current when providers change.【F:src/main/java/com/arckenver/towny/TownyPlugin.java†L29-L132】
+---
 
-`AliasHijacker` mirrors Towny’s short aliases (`/t`, `/ta`, `/tw`, `/p`, `/tc`) by intercepting command dispatch and tab completion, forwarding to whichever root command is available (e.g., `/t` → `/town`).【F:src/main/java/com/arckenver/towny/AliasHijacker.java†L1-L83】
+## 4. Core Concepts
 
-### Configuration and localization
-`ConfigHandler` loads and validates `TownsConfig.conf`, enforcing sane defaults for economy prices, gameplay toggles, rank titles, whitelist lists, and permission/flag matrices for towns, plots, and worlds. It exposes `getNode(...)` helpers so other systems can query settings at runtime.【F:src/main/java/com/arckenver/towny/ConfigHandler.java†L19-L138】【F:src/main/java/com/arckenver/towny/ConfigHandler.java†L139-L208】
+### 4.1 Residents
 
-`LanguageHandler` defines all player-facing strings (help lines, status messages, errors) and can reload overrides from disk, mirroring the original Towny language pack for parity.【F:src/main/java/com/arckenver/towny/LanguageHandler.java†L11-L200】
+Residents represent individual players tracked by the plugin. Each resident profile records:
 
-### Persistence and data access
-`DataHandler` manages serialized town JSON files under `towns/`, the global `residents.json`, in-memory caches, spatial indexes, and helper lookups. It exposes convenience methods for flag/permission evaluation, claim validation, admin spy channels, invite queues, point selections for the golden axe tool, and resident/town lookups. Save operations write back to disk, and helper calls access Sponge services when needed (e.g., profile lookup, scheduler).【F:src/main/java/com/arckenver/towny/DataHandler.java†L37-L139】【F:src/main/java/com/arckenver/towny/DataHandler.java†L200-L312】
+* Display preferences (titles, surnames, personal board text).
+* Town membership, rank history, friends list, and jail status.
+* Financial data such as bank balance contributions, tax arrears, and rent obligations.
+* Toggleable gameplay modes (e.g., PvP, admin bypass, spy participation).
 
-`TownySerializer` and `TownyDeserializer` plug into Gson so complex region/plot structures persist cleanly between restarts.【F:src/main/java/com/arckenver/towny/serializer/TownySerializer.java†L1-L158】【F:src/main/java/com/arckenver/towny/serializer/TownyDeserializer.java†L1-L173】
+Residents can join towns, purchase plots, pay rent, set personal spawn points within their town, and manage friends with whom they share permissions.
 
-### Domain model snapshot
-* `Towny` – Represents a town’s identity, board, tag, spawns, permissions, flags, plots, extras, tax settings, rent interval, and communication channel, with helpers for mayor/ministers, rank lookups, spawn validation, region math, bank capacity, and citizen collections.【F:src/main/java/com/arckenver/towny/object/Towny.java†L1-L116】【F:src/main/java/com/arckenver/towny/object/Towny.java†L117-L236】
-* `Plot` – Tracks per-plot ownership, co-owners, permissions, flags, sale/rent metadata, balances, history, and teleport spawn, mirroring Towny’s plot feature set.【F:src/main/java/com/arckenver/towny/object/Plot.java†L1-L200】
-* `Resident` – Sponge-specific resident profile containing identity metadata, rank history, economy ledger, jail/rent/spawn/mode toggles, admin bypass flags, invite tracking, and helper methods to normalize defaults, manage ranks, and update online timestamps.【F:src/main/java/com/arckenver/towny/object/Resident.java†L1-L120】【F:src/main/java/com/arckenver/towny/object/Resident.java†L121-L240】
-* `Region`, `Rect`, `Point`, and `Towny` geometry helpers handle rectangular selections, adjacency checks, volume computations, and intersection tests for claim validation.【F:src/main/java/com/arckenver/towny/object/Region.java†L1-L200】【F:src/main/java/com/arckenver/towny/object/Rect.java†L1-L143】
-* `Request` models invite/join requests with expiry, letting `DataHandler` manage outstanding prompts.【F:src/main/java/com/arckenver/towny/object/Request.java†L1-L86】
+### 4.2 Towns
 
-### Economy integration and scheduled jobs
-`TownyService` is registered with Sponge’s `ServiceManager`, allowing other plugins to query town membership, towns at locations, and staff status (mayor/ministers).【F:src/main/java/com/arckenver/towny/service/TownyService.java†L1-L39】
+Towns are the heart of the plugin. Founders select a name, board, and optional tag, then manage the following:
 
-`TaxesCollectRunnable` runs daily, collecting resident head taxes, per-plot rent, and town upkeep; it handles exemptions, removes citizens for bankruptcy, forfeits unpaid plots, and notifies staff, using Sponge’s economy API for transfers.【F:src/main/java/com/arckenver/towny/task/TaxesCollectRunnable.java†L30-L205】
+* **Government**: Mayor leadership with configurable assistant ranks (e.g., councillors, ministers).
+* **Territory**: Claims expand using town blocks purchased with in-game currency. Outposts allow remote settlements, while home blocks govern spawn and daily upkeep.
+* **Economy**: Town banks hold shared funds for taxes, upkeep, and public services. Mayors can deposit or withdraw with appropriate permissions.
+* **Permissions & Flags**: Town flags control PvP, fire spread, mobs, explosions, and build/break permissions for residents, allies, or outsiders.
+* **Communication**: Town chat channels keep conversations private, while optional spy monitoring ensures administrators can audit traffic when required.
 
-`RentCollectRunnable` executes hourly, charging renters via plot or player accounts, evicting renters on failure, and broadcasting rent reminders when due.【F:src/main/java/com/arckenver/towny/task/RentCollectRunnable.java†L1-L173】
+### 4.3 Plots
 
-### Chat channels
-`TownyMessageChannel` extends Sponge’s message channel so towns can broadcast private chat to citizens, and `AdminSpyMessageChannel` mirrors Towny’s spy channel so admins can listen in.【F:src/main/java/com/arckenver/towny/channel/TownyMessageChannel.java†L1-L120】【F:src/main/java/com/arckenver/towny/channel/AdminSpyMessageChannel.java†L1-L88】
+Plots are subdivisions of town land:
 
-## Command architecture
-### Registration strategy
-`TownyCmds.create` wires Sponge `CommandSpec` roots for `/town`, `/townyadmin`, `/plot`, `/townyworld`, and `/resident`, then reflectively loads every executor class inside each subpackage by invoking their static `create(CommandSpec.Builder)` helpers. This mirrors Towny’s modular command layout while keeping Sponge registration centralized.【F:src/main/java/com/arckenver/towny/cmdexecutor/TownyCmds.java†L20-L71】
+* May be sold or rented to residents, granting localised control inside the town.
+* Support co-owners, plot-level permissions, and bespoke flags overriding town defaults.
+* Can be marked for specific uses (e.g., shop, farm, embassy) depending on town policy.
+* Offer rent cycles ranging from hourly to daily, automatically charging residents and repossessing if payments lapse.
 
-Custom argument elements in `cmdelement` implement tab completion and validation for player names, citizens, towns, account owners, and worlds to keep executors concise.【F:src/main/java/com/arckenver/towny/cmdelement/PlayerNameElement.java†L1-L120】【F:src/main/java/com/arckenver/towny/cmdelement/TownyNameElement.java†L1-L120】
+### 4.4 Nations (Future Scope)
 
-### `/resident` suite
-The resident package supplies help plus targeted executors:
-* `ResidentExecutor` renders the `/resident` help banner with Towny-specific descriptions.【F:src/main/java/com/arckenver/towny/cmdexecutor/resident/ResidentExecutor.java†L1-L53】
-* `ResidentInfoExecutor`, `ResidentListExecutor`, `ResidentPlotListExecutor`, `ResidentFriendExecutor`, `ResidentModeExecutor`, `ResidentSetExecutor`, `ResidentSetAboutExecutor`, `ResidentTaxExecutor`, `ResidentSpawnExecutor`, and `ResidentToggleExecutor` implement information queries, friend management, mode toggles, profile updates, tax status, teleporting to own town spawns, and toggle flags, mirroring Spigot Towny commands.【F:src/main/java/com/arckenver/towny/cmdexecutor/resident/ResidentInfoExecutor.java†L1-L160】【F:src/main/java/com/arckenver/towny/cmdexecutor/resident/ResidentFriendExecutor.java†L1-L140】
+While the Sponge remake emphasises town-level play, nation support is on the roadmap. Keep an eye on release notes for updates on cross-town alliances, national taxes, and war mechanics.
 
-### `/town` suite
-The town command package mirrors Towny’s extensive feature set:
-* Governance & metadata: `TownBoardExecutor`, `TownySetDisplayNameExecutor`, `TownySetnameExecutor`, `TownySettagExecutor`, `TownyMinisterExecutor`, `TownyCitizenExecutor` manage boards, display names, tags, staff appointments, and resident info.【F:src/main/java/com/arckenver/towny/cmdexecutor/towny/TownBoardExecutor.java†L20-L120】【F:src/main/java/com/arckenver/towny/cmdexecutor/towny/TownyMinisterExecutor.java†L1-L158】
-* Territory: `TownyClaimExecutor`, `TownyClaimOutpostExecutor`, `TownyUnclaimExecutor`, `TownMapExecutor`, `TownyMarkExecutor`, `TownyHereExecutor`, `TownyHomeExecutor`, `TownyVisitExecutor` handle selection-based claiming, outposts, unclaim refunds, ASCII maps, particle markers, here/home info, and visiting public towns.【F:src/main/java/com/arckenver/towny/cmdexecutor/towny/TownyClaimExecutor.java†L20-L120】【F:src/main/java/com/arckenver/towny/cmdexecutor/towny/TownMapExecutor.java†L1-L180】
-* Economy: `TownyDepositExecutor`, `TownyWithdrawExecutor`, `TownyTaxesExecutor`, `TownyBuyextraExecutor`, `TownyCostExecutor`, `TownySetRentIntervalExecutor` cover bank transfers, tax adjustments, extra block purchases, cost displays, and rent interval configuration.【F:src/main/java/com/arckenver/towny/cmdexecutor/towny/TownyDepositExecutor.java†L1-L160】【F:src/main/java/com/arckenver/towny/cmdexecutor/towny/TownySetRentIntervalExecutor.java†L1-L120】
-* Membership: `TownyInviteExecutor`, `TownyJoinExecutor`, `TownyKickExecutor`, `TownyLeaveExecutor`, `TownyResignExecutor`, `TownyCreateExecutor` manage invitations, join requests, removals, voluntary leaves, mayor resignations, and town creation prompts.【F:src/main/java/com/arckenver/towny/cmdexecutor/towny/TownyInviteExecutor.java†L1-L200】【F:src/main/java/com/arckenver/towny/cmdexecutor/towny/TownyCreateExecutor.java†L1-L220】
-* Flags & permissions: `TownyPermExecutor`, `TownyFlagExecutor`, `TownyChatExecutor`, `TownySpawnExecutor`, `TownyDelspawnExecutor`, `TownySetspawnExecutor` cover permission toggles, boolean flags, town chat channel, spawn teleportation, spawn removal, and spawn placement with validation.【F:src/main/java/com/arckenver/towny/cmdexecutor/towny/TownyPermExecutor.java†L1-L220】【F:src/main/java/com/arckenver/towny/cmdexecutor/towny/TownySetspawnExecutor.java†L1-L160】
-* Information: `TownyInfoExecutor`, `TownyListExecutor`, `TownyHelpExecutor`, `TownyCostExecutor` display detailed summaries, lists, and help text.【F:src/main/java/com/arckenver/towny/cmdexecutor/towny/TownyInfoExecutor.java†L1-L220】【F:src/main/java/com/arckenver/towny/cmdexecutor/towny/TownyHelpExecutor.java†L1-L120】
+---
 
-### `/plot` suite
-`PlotExecutor` renders help, while subcommands such as `PlotInfoExecutor`, `PlotListExecutor`, `PlotCreateExecutor`, `PlotDeleteExecutor`, `PlotRenameExecutor`, `PlotSetownerExecutor`, `PlotDelownerExecutor`, `PlotCoownerExecutor`, `PlotPermExecutor`, `PlotFlagExecutor`, `PlotSellExecutor`, `PlotUnsellExecutor`, `PlotBuyExecutor`, `PlotRentExecutor`, `PlotPutRentExecutor`, `PlotDepositExecutor`, `PlotWithdrawExecutor`, `PlotReturnExecutor`, and `PlotSetDisplayNameExecutor` implement per-plot management, sale/rent workflows, ownership transfer, and balance adjustments.【F:src/main/java/com/arckenver/towny/cmdexecutor/plot/PlotExecutor.java†L15-L45】【F:src/main/java/com/arckenver/towny/cmdexecutor/plot/PlotRentExecutor.java†L1-L200】
+## 5. Economy & Taxation
 
-### `/townyadmin` suite
-The admin package adds server-operator tools for forcing joins/leaves, creating or deleting towns, granting extra blocks/spawns, editing flags and perms, teleport spy, reloads, economy adjustments, rent collection, and upkeep forcing. Executors include `TownyadminExecutor` (help), `TownyadminReloadExecutor`, `TownyadminCreateExecutor`, `TownyadminClaimExecutor`, `TownyadminUnclaimExecutor`, `TownyadminDeleteExecutor`, `TownyadminSetpresExecutor`, `TownyadminForcejoinExecutor`, `TownyadminForceleaveExecutor`, `TownyadminEcoExecutor`, `TownyadminPermExecutor`, `TownyadminFlagExecutor`, `TownyadminSpyExecutor`, `TownyadminForceupkeepExecutor`, `TownyadminExtraExecutor`, `TownyadminExtraplayerExecutor`, `TownyadminExtraspawnExecutor`, `TownyadminExtraspawnplayerExecutor`, `TownyadminSetRentIntervalExecutor`, `TownyadminSetnameExecutor`, `TownyadminSetDisplayNameExecutor`, `TownyadminSetspawnExecutor`, `TownyadminDelspawnExecutor`, and `TownyadminCollectRentExecutor`.【F:src/main/java/com/arckenver/towny/cmdexecutor/townyadmin/TownyadminExecutor.java†L15-L63】【F:src/main/java/com/arckenver/towny/cmdexecutor/townyadmin/TownyadminForceupkeepExecutor.java†L1-L160】
+### 5.1 Claiming Costs
 
-### `/townyworld` suite
-The world-level commands mirror Towny’s world toggles: `TownyworldExecutor` (help/info), `TownyworldInfoExecutor`, `TownyworldListExecutor`, `TownyworldEnableExecutor`, `TownyworldDisableExecutor`, `TownyworldPermExecutor`, and `TownyworldFlagExecutor` manage per-world enablement, permissions, and flags for the plugin.【F:src/main/java/com/arckenver/towny/cmdexecutor/townyworld/TownyworldExecutor.java†L15-L70】【F:src/main/java/com/arckenver/towny/cmdexecutor/townyworld/TownyworldFlagExecutor.java†L1-L132】
+Towns spend currency to acquire new blocks. Configure base prices, additional outpost costs, and multipliers for expanding beyond default limits. Town banks must retain enough funds to cover both purchase costs and daily upkeep.
 
-## Gameplay listeners and events
-`PlayerConnectionListener`, `PlayerMoveListener`, `BuildPermListener`, `InteractPermListener`, `PvpListener`, `FireListener`, `ExplosionListener`, `MobSpawningListener`, `GoldenAxeListener`, and `ChatListener` enforce Towny’s rules: join/quit announcements, wilderness/town toast titles, build/break/place permission checks, interact throttling, PvP/fire/explosion/mob flag enforcement, golden axe selection for claims, and town chat or spy routing.【F:src/main/java/com/arckenver/towny/listener/PlayerConnectionListener.java†L1-L200】【F:src/main/java/com/arckenver/towny/listener/BuildPermListener.java†L1-L120】【F:src/main/java/com/arckenver/towny/listener/GoldenAxeListener.java†L1-L200】
+### 5.2 Upkeep
 
-`PlayerTeleportEvent` extends Sponge’s event API to fire custom teleport events for residents when spawn travel occurs.【F:src/main/java/com/arckenver/towny/event/PlayerTeleportEvent.java†L1-L83】
+* **Town Upkeep**: Charged daily per claimed block plus optional extras for outposts or embassies. If a town cannot pay, residents may be evicted, and claims can regress.
+* **Plot Upkeep**: Optional per-plot upkeep ensures private owners contribute to town expenses.
 
-## Utilities and helpers
-`Utils` centralizes formatting (e.g., price formatting, toast components), whitelist parsing, resident/town display templates, geometric math, fake player detection, and command cooldown helpers, reducing duplication across executors and listeners.【F:src/main/java/com/arckenver/towny/Utils.java†L1-L220】【F:src/main/java/com/arckenver/towny/Utils.java†L221-L440】
+### 5.3 Taxes
 
-`cmdelement` classes (`PlayerNameElement`, `CitizenNameElement`, `TownyNameElement`, `WorldNameElement`, `AccountOwnerElement`) provide Sponge command argument parsing for online/offline players, residents, towns, worlds, and economy accounts, surfacing detailed error messages when lookup fails.【F:src/main/java/com/arckenver/towny/cmdelement/PlayerNameElement.java†L1-L120】【F:src/main/java/com/arckenver/towny/cmdelement/AccountOwnerElement.java†L1-L120】
+* **Resident Taxes**: Daily charges applied to each resident. Mayors can exempt certain ranks or set percentage-based taxes.
+* **Plot Taxes**: Additional daily fees on owned plots, encouraging active land use.
 
-## Data files and persistence layout
-Towns persist under `towns/<uuid>.json` with Gson-serialized `Towny` objects, while residents share a single `residents.json` file for profiles. `DataHandler` loads these at startup, caches them, and writes back on save or key changes, keeping runtime state consistent across command, listener, and task invocations.【F:src/main/java/com/arckenver/towny/DataHandler.java†L37-L139】【F:src/main/java/com/arckenver/towny/DataHandler.java†L139-L200】
+### 5.4 Rent System
 
-## Extensibility points
-External Sponge mods can rely on the registered `TownyService` to resolve a player’s town, check mayor/minister status, or discover the town covering a location. Chat and spy channels expose Sponge `MessageChannel` implementations for integrations that want to broadcast or monitor Towny traffic.【F:src/main/java/com/arckenver/towny/service/TownyService.java†L1-L39】【F:src/main/java/com/arckenver/towny/channel/TownyMessageChannel.java†L1-L120】
+* Towns can list plots for rent with configurable intervals (e.g., hourly, daily).
+* Rent automatically charges the tenant’s balance; failures trigger warnings, then eviction.
+* Optional deposit or upfront payment protects the town against early departures.
 
+### 5.5 Bank Operations
+
+Commands allow residents with permission to deposit personal funds into the town bank or withdraw for municipal projects. The plugin interacts with the registered economy service to ensure consistent balances.
+
+---
+
+## 6. Command Reference
+
+Towny Sponge Remake mirrors the classic Towny command layout. Below is a high-level overview; consult in-game help (`/towny ?`) for context-sensitive details.
+
+### 6.1 Resident Commands (`/resident`)
+
+| Command | Purpose |
+| --- | --- |
+| `/resident` | Displays resident overview, including town membership, balance, and status toggles. |
+| `/resident friend <add/remove/list>` | Manage personal friend lists, impacting cooperative plot permissions. |
+| `/resident spawn` | Teleport to your town spawn or rented plot spawn if allowed. |
+| `/resident mode <set/clear>` | Toggle modes such as map viewing, claim selection, or spy participation (where permitted). |
+| `/resident set about <message>` | Update your resident biography shown to others. |
+
+### 6.2 Town Commands (`/town`)
+
+| Command | Purpose |
+| --- | --- |
+| `/town new <name>` | Create a new town at your current location if you meet the founding requirements. |
+| `/town claim` | Claim the chunk you stand in; additional arguments handle multiple chunks, outposts, or selection claims. |
+| `/town unclaim` | Release owned land to reduce upkeep or reallocate resources. |
+| `/town deposit <amount>` / `/town withdraw <amount>` | Transfer funds between your personal account and the town bank. |
+| `/town set <parameter>` | Configure town board, spawn, tax rates, flags, and permission matrices. |
+| `/town invite <player>` / `/town kick <player>` | Manage resident membership. |
+| `/town rank <add/remove> <player> <rank>` | Promote or demote residents to custom roles with associated permissions. |
+
+### 6.3 Plot Commands (`/plot`)
+
+| Command | Purpose |
+| --- | --- |
+| `/plot claim` / `/plot unclaim` | Purchase or release the plot you stand in, respecting town policies. |
+| `/plot set <type>` | Define plot category (e.g., shop, embassy) for organisational purposes. |
+| `/plot perm <group> <toggle>` | Adjust build, destroy, switch, or item-use permissions for friends, allies, residents, or outsiders. |
+| `/plot flag <flag> <on/off>` | Override town-wide flags (PvP, mobs, explosions) on a per-plot basis. |
+| `/plot rent <price> <interval>` | List or cancel rental offerings. |
+
+### 6.4 Administrative Commands (`/townyadmin`)
+
+| Command | Purpose |
+| --- | --- |
+| `/townyadmin` | Opens the administrative help tree. |
+| `/townyadmin town <name> <action>` | Force-create, delete, or modify towns directly. |
+| `/townyadmin resident <name> <action>` | Adjust resident data, including forced joins, leaves, or toggle resets. |
+| `/townyadmin toggle <flag>` | Override world-level or global flags instantly. |
+| `/townyadmin economy <subcommand>` | Inject or remove currency from town and resident accounts. |
+| `/townyadmin collectrent` | Manually trigger rent collection to resolve scheduling issues. |
+
+### 6.5 World Commands (`/townyworld`)
+
+| Command | Purpose |
+| --- | --- |
+| `/townyworld` | Display current world settings such as PvP, explosions, and wilderness permissions. |
+| `/townyworld toggle <flag>` | Enable or disable world-level flags like fire spread or mob spawning. |
+| `/townyworld perm <group> <toggle>` | Control who may build or interact in the wilderness. |
+
+### 6.6 Map & Visualization
+
+* `/towny map` displays an ASCII minimap showing nearby town claims and wilderness.
+* `/towny here` summarises the current chunk: owner, plot type, permissions, and taxation.
+* `/plot marker` toggles particle outlines marking plot boundaries for easier land management.
+
+---
+
+## 7. Permissions & Ranks
+
+Towny integrates with Sponge permission managers. The plugin ships a granular node layout enabling precise control:
+
+* **Global Nodes**: Gate access to each command root (`towny.command.town`, `towny.command.plot`, etc.).
+* **Subcommand Nodes**: Provide fine-grained access, e.g., `towny.command.town.claim`, `towny.command.resident.spawn`.
+* **Administrative Nodes**: Reserved for staff (`towny.command.townyadmin.*`) covering forced actions and global toggles.
+* **Bypass & Spy**: Nodes controlling plot protection bypass, admin spy visibility, and debug outputs.
+
+Use your permissions plugin to create ranks such as Mayor, Assistant, Citizen, or Visitor. Assign appropriate nodes so only trusted ranks can manage finances, change flags, or edit plots.
+
+---
+
+## 8. Communication Channels
+
+* **Town Chat**: `/tc` or `/town chat` switches residents into a private channel. Messages broadcast only to residents and assistants.
+* **Admin Spy**: Staff with spy privileges can mirror town chat to monitor for rule infractions. Spy status can be toggled per-resident for transparency.
+* **Invite Notifications**: Residents receive clickable invitations for town joins, plot rentals, and teleports through Sponge’s interactive message system.
+
+---
+
+## 9. Scheduling & Automation
+
+Towny Sponge Remake automates several recurring tasks:
+
+* **Daily Upkeep Cycle**: Collects town upkeep, resident taxes, and plot taxes. Towns lacking funds risk losing residents or reverting claims.
+* **Hourly Rent Cycle**: Processes plot rent payments, issuing reminders before evicting defaulting tenants.
+* **Data Saves**: Regularly persists towns, residents, and plot data to JSON files under `data/towny/` to guard against crashes.
+* **Economy Sync**: Watches for changes in the registered economy provider and re-establishes links automatically if the service reloads.
+
+---
+
+## 10. Configuration Highlights
+
+* **General Settings**: Toggle features like friendly fire, wilderness build permissions, grief prevention defaults, or server-wide PvP rules.
+* **Prices & Taxes**: Adjust base claim cost, additional block multipliers, rent amounts, daily taxes, and fees for extras like teleportation.
+* **Ranks & Titles**: Define custom rank titles, prefixes, and the permissions they unlock.
+* **Notifications**: Configure whether residents receive titles, action bar messages, or chat alerts for events such as entering towns or violating flags.
+* **Integration Hooks**: Enable or disable compatibility tweaks for map plugins, scoreboard trackers, or external mods.
+
+---
+
+## 11. Data Storage & Backups
+
+* All persistent data lives in `data/towny/` inside the server directory.
+* Town files (`towns/<uuid>.json`) describe land, flags, residents, and financial state.
+* Resident data (`residents.json`) stores player records, including ranks and balances.
+* Regular backups are vital—schedule automated zips or off-site syncs to protect community progress.
+
+---
+
+## 12. Troubleshooting & FAQs
+
+**Q: Why can’t players build in the wilderness?**
+A: Check `/townyworld perm` to ensure the wilderness build flag is enabled. Additionally, confirm your permission plugin grants the necessary build rights.
+
+**Q: Taxes or rent are not collecting. What should I do?**
+A: Verify an economy provider is installed and functioning. Staff can run `/townyadmin collectrent` to force the scheduler, then inspect the console for warnings about insufficient funds or misconfigured prices.
+
+**Q: Residents are being kicked for bankruptcy. How do we prevent this?**
+A: Lower resident taxes, adjust rent intervals, or encourage towns to subsidise members via the town bank. Consider enabling grace periods for new residents by temporarily exempting them from taxes.
+
+**Q: Can I change the language to something other than English?**
+A: Yes. Duplicate the language file in `config/towny/lang/`, translate entries, and set the desired locale in the main configuration. Reload the plugin or restart the server for changes to apply.
+
+**Q: How do I migrate from the Spigot version?**
+A: Use the provided data conversion scripts (when available) or recreate towns manually. Back up both servers before attempting migration. Some features may differ due to Sponge platform behaviour.
+
+---
+
+## 13. Support & Contribution
+
+* **Issue Tracking**: Report bugs and feature requests on the project’s issue tracker with reproduction steps, logs, and configuration snippets.
+* **Pull Requests**: Contributions are welcome—follow the coding standards outlined in the repository README and submit PRs with comprehensive testing notes.
+* **Community Channels**: Join the official Discord or forums (if provided) to discuss best practices, share town showcases, and coordinate with other server owners.
+
+---
+
+## 14. Release Notes & Roadmap
+
+Stay informed by reviewing each release changelog. Upcoming milestones include:
+
+* Extended nation mechanics including alliances, capitals, and global taxation.
+* Enhanced map visualisation with web-based claim viewers.
+* Optional war events with configurable siege rules and victory conditions.
+* API extensions exposing more resident and town data for third-party integrations.
+
+---
+
+## 15. Glossary
+
+| Term | Definition |
+| --- | --- |
+| **Resident** | A tracked player profile with personal settings, town membership, and financial status. |
+| **Town** | Player-governed settlement controlling claimed land, flags, and economy. |
+| **Plot** | Subdivision of town land that can be owned, rented, or managed separately. |
+| **Outpost** | Remote claim disconnected from the town’s main territory, often with increased upkeep. |
+| **Upkeep** | Recurring cost paid by towns to retain claimed blocks and services. |
+| **Rent** | Periodic payment allowing residents to occupy a plot without permanent ownership. |
+| **Flag** | Toggle controlling behaviours like PvP, fire spread, or mob spawning. |
+| **Permission Matrix** | Combined rules that determine whether residents, allies, or outsiders may interact with blocks or entities. |
+| **Economy Service** | Sponge plugin providing virtual currency transactions utilised by Towny. |
+| **Spy Mode** | Administrator tool mirroring town chat to ensure rule compliance. |
+
+---
+
+By following this guide, Sponge server owners can deploy the Towny Sponge Remake with confidence, fostering vibrant towns, thriving economies, and collaborative community storytelling. For the latest updates, always consult the project repository and release announcements.
