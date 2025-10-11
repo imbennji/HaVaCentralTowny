@@ -1,5 +1,4 @@
 # Towny Sponge Remake Wiki
-1
 ## Overview
 
 ---
