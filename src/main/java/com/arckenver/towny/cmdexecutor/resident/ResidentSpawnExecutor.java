@@ -36,11 +36,11 @@ public class ResidentSpawnExecutor implements CommandExecutor {
 
     @Override public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
         if (!(src instanceof Player)) throw new CommandException(Text.of(TextColors.RED, "Players only."));
-        Player p = (Player) src;
-        UUID id = p.getUniqueId();
+        Player player = (Player) src;
+        UUID id = player.getUniqueId();
 
-        Towny t = DataHandler.getTownyOfPlayer(id);
-        if (t == null) throw new CommandException(Text.of(TextColors.RED, "You’re not in a town."));
+        Towny town = DataHandler.getTownyOfPlayer(id);
+        if (town == null) throw new CommandException(Text.of(TextColors.RED, "You’re not in a town."));
 
         long now = System.currentTimeMillis();
         long cooldownEnds = DataHandler.getResidentSpawnCooldown(id);
@@ -49,75 +49,117 @@ public class ResidentSpawnExecutor implements CommandExecutor {
             throw new CommandException(Text.of(TextColors.RED, "Spawn on cooldown for ", TextColors.GOLD, formatDuration(remaining)));
         }
 
-        boolean preferBed = DataHandler.getResidentPreferBedSpawn(id);
-        Optional<Location<World>> bedLocation = Optional.empty();
-        if (preferBed) {
-            bedLocation = resolveBedSpawn(p);
-        }
-
-        Location<World> dest;
-        boolean usingBed = bedLocation.isPresent();
-        if (usingBed) {
-            dest = bedLocation.get();
-        } else {
-            dest = t.getSpawns().get("home");
-            if (dest == null && !t.getSpawns().isEmpty()) {
-                for (Map.Entry<String, Location<World>> e : t.getSpawns().entrySet()) { dest = e.getValue(); break; }
-            }
-            if (dest == null) throw new CommandException(Text.of(TextColors.RED, "Your town has no spawn set."));
-        }
-
-        long warmupSeconds = ConfigHandler.getNode("others", "residentSpawnWarmupSeconds").getLong(5L);
-        long cooldownSeconds = ConfigHandler.getNode("others", "residentSpawnCooldownSeconds").getLong(300L);
-
         long warmupEnd = DataHandler.getResidentBedSpawnWarmup(id);
         if (warmupEnd > now) {
             long remaining = warmupEnd - now;
             throw new CommandException(Text.of(TextColors.RED, "Spawn warmup in progress: ", TextColors.GOLD, formatDuration(remaining)));
         }
 
+        SpawnTarget target = determineSpawnTarget(player, town, id);
+
+        long warmupSeconds = ConfigHandler.getNode("others", "residentSpawnWarmupSeconds").getLong(5L);
+        long cooldownMillis = TimeUnit.SECONDS.toMillis(ConfigHandler.getNode("others", "residentSpawnCooldownSeconds").getLong(300L));
+
         if (warmupSeconds > 0) {
             long warmupTarget = now + TimeUnit.SECONDS.toMillis(warmupSeconds);
             DataHandler.setResidentBedSpawnWarmup(id, warmupTarget);
-            p.sendMessage(Text.of(TextColors.AQUA, "Preparing to teleport in ", TextColors.YELLOW, warmupSeconds, TextColors.AQUA, "s..."));
-            Location<World> finalDest = dest;
-            boolean finalUsingBed = usingBed;
-            Towny finalTown = t;
+            player.sendMessage(Text.of(TextColors.AQUA, "Preparing to teleport in ", TextColors.YELLOW, warmupSeconds, TextColors.AQUA, "s..."));
             Sponge.getScheduler().createTaskBuilder()
                     .delay(warmupSeconds, TimeUnit.SECONDS)
-                    .execute(() -> performTeleport(id, finalDest, finalUsingBed, finalTown, cooldownSeconds))
+                    .execute(() -> performTeleport(id, target, cooldownMillis))
                     .submit(TownyPlugin.getInstance());
         } else {
-            performTeleport(id, dest, usingBed, t, cooldownSeconds);
+            performTeleport(id, target, cooldownMillis);
         }
         return CommandResult.success();
     }
 
-    private void performTeleport(UUID id, Location<World> dest, boolean usingBed, Towny town, long cooldownSeconds) {
+    private SpawnTarget determineSpawnTarget(Player player, Towny town, UUID residentId) throws CommandException {
+        boolean preferBed = DataHandler.getResidentPreferBedSpawn(residentId);
+        if (preferBed) {
+            Optional<Location<World>> bed = resolveBedSpawn(player);
+            if (bed.isPresent()) {
+                return SpawnTarget.toBed(bed.get());
+            }
+            player.sendMessage(Text.of(TextColors.YELLOW, "No bed spawn found; using town spawn instead."));
+        }
+
+        String preferredSpawn = DataHandler.getResidentPreferredSpawn(residentId);
+        Location<World> dest = null;
+        String spawnName = null;
+        if (preferredSpawn != null && !preferredSpawn.trim().isEmpty()) {
+            dest = town.getSpawn(preferredSpawn);
+            if (dest == null) {
+                DataHandler.setResidentPreferredSpawn(residentId, "");
+                player.sendMessage(Text.of(TextColors.RED, "Preferred spawn '", preferredSpawn, "' no longer exists."));
+            } else {
+                spawnName = preferredSpawn;
+            }
+        }
+
+        if (dest == null) {
+            dest = town.getSpawns().get("home");
+            spawnName = "home";
+        }
+
+        if (dest == null && !town.getSpawns().isEmpty()) {
+            for (Map.Entry<String, Location<World>> entry : town.getSpawns().entrySet()) {
+                dest = entry.getValue();
+                spawnName = entry.getKey();
+                if (dest != null) {
+                    break;
+                }
+            }
+        }
+
+        if (dest == null) {
+            throw new CommandException(Text.of(TextColors.RED, "Your town has no spawn set."));
+        }
+
+        return SpawnTarget.toTown(dest, spawnName, town.getUUID());
+    }
+
+    private void performTeleport(UUID id, SpawnTarget target, long cooldownMillis) {
+        DataHandler.setResidentBedSpawnWarmup(id, 0L);
+
         Optional<Player> optPlayer = Sponge.getServer().getPlayer(id);
         if (!optPlayer.isPresent()) {
             return;
         }
-        Player target = optPlayer.get();
-        target.setLocation(dest);
-        DataHandler.setResidentBedSpawnWarmup(id, 0L);
-        DataHandler.markResidentSpawn(id, town != null ? town.getUUID() : null, TimeUnit.SECONDS.toMillis(cooldownSeconds));
-        Text message = usingBed
-                ? Text.of(TextColors.GREEN, "Teleported to bed spawn.")
-                : Text.of(TextColors.GREEN, "Teleported to town spawn.");
-        target.sendMessage(message);
+
+        Player targetPlayer = optPlayer.get();
+        targetPlayer.setLocation(target.location);
+        DataHandler.markResidentSpawn(id, target.townId, cooldownMillis);
+
+        Text message;
+        if (target.isBed) {
+            message = Text.of(TextColors.GREEN, "Teleported to bed spawn.");
+        } else if (target.spawnName != null && !target.spawnName.isEmpty()) {
+            message = Text.of(TextColors.GREEN, "Teleported to town spawn ", TextColors.GOLD, target.spawnName, TextColors.GREEN, ".");
+        } else {
+            message = Text.of(TextColors.GREEN, "Teleported to town spawn.");
+        }
+        targetPlayer.sendMessage(message);
     }
 
     private Optional<Location<World>> resolveBedSpawn(Player player) {
-        Optional<Location<World>> bedFromKey = player.get(Keys.RESPAWN_LOCATIONS)
-                .flatMap(map -> map.values().stream().findFirst()
-                        .flatMap(respawn -> toLocation(respawn)));
+        return player.get(Keys.RESPAWN_LOCATIONS).flatMap(map -> {
+            RespawnLocation sameWorld = map.get(player.getWorld().getUniqueId());
+            if (sameWorld != null) {
+                Optional<Location<World>> sameWorldLocation = toLocation(sameWorld);
+                if (sameWorldLocation.isPresent()) {
+                    return sameWorldLocation;
+                }
+            }
 
-        if (bedFromKey.isPresent()) {
-            return bedFromKey;
-        }
-
-        return Optional.empty();
+            for (RespawnLocation respawn : map.values()) {
+                Optional<Location<World>> location = toLocation(respawn);
+                if (location.isPresent()) {
+                    return location;
+                }
+            }
+            return Optional.empty();
+        });
     }
 
     private Optional<Location<World>> toLocation(RespawnLocation respawn) {
@@ -140,5 +182,27 @@ public class ResidentSpawnExecutor implements CommandExecutor {
             return minutes + "m " + seconds + "s";
         }
         return seconds + "s";
+    }
+
+    private static final class SpawnTarget {
+        private final Location<World> location;
+        private final boolean isBed;
+        private final String spawnName;
+        private final UUID townId;
+
+        private SpawnTarget(Location<World> location, boolean isBed, String spawnName, UUID townId) {
+            this.location = location;
+            this.isBed = isBed;
+            this.spawnName = spawnName;
+            this.townId = townId;
+        }
+
+        private static SpawnTarget toBed(Location<World> location) {
+            return new SpawnTarget(location, true, null, null);
+        }
+
+        private static SpawnTarget toTown(Location<World> location, String spawnName, UUID townId) {
+            return new SpawnTarget(location, false, spawnName, townId);
+        }
     }
 }
