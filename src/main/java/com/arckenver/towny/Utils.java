@@ -31,6 +31,8 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 import com.arckenver.towny.claim.ChunkClaimUtils;
 import com.arckenver.towny.object.Nation;
