@@ -360,26 +360,6 @@ public class Utils
                         }
                 }
 
-                UUID king = nation.getKing();
-                if (king != null) {
-                        builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_KING + ": "));
-                        builder.append(Text.of(TextColors.YELLOW, DataHandler.getPlayerName(king)));
-                }
-
-                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_ASSISTANTS + ": "));
-                if (nation.getAssistants().isEmpty()) {
-                        builder.append(Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE));
-                } else {
-                        boolean firstAssistant = true;
-                        for (UUID assistant : nation.getAssistants()) {
-                                if (!firstAssistant) {
-                                        builder.append(Text.of(TextColors.GOLD, ", "));
-                                }
-                                builder.append(Text.of(TextColors.YELLOW, DataHandler.getPlayerName(assistant)));
-                                firstAssistant = false;
-                        }
-                }
-
                 builder.append(Text.of(TextColors.GOLD, "\nTowns: "));
                 if (nation.getTowns().isEmpty()) {
                         builder.append(Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE));
@@ -401,80 +381,10 @@ public class Utils
                         }
                 }
 
-                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_OPEN + ": ", TextColors.YELLOW, nation.isOpen()));
-                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_PUBLIC + ": ", TextColors.YELLOW, nation.isPublic()));
-                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_NEUTRAL + ": ", TextColors.YELLOW, nation.isNeutral()));
-
-                BigDecimal balance = null;
-                if (TownyPlugin.getEcoService() != null) {
-                        Optional<Account> account = TownyPlugin.getEcoService().getOrCreateAccount("nation-" + nation.getUUID());
-                        if (account.isPresent()) {
-                                balance = account.get().getBalance(TownyPlugin.getEcoService().getDefaultCurrency());
-                        }
-                }
-                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_MONEY + ": "));
-                builder.append((balance == null) ? Text.of(TextColors.GRAY, LanguageHandler.FORMAT_UNKNOWN) : formatPrice(TextColors.YELLOW, balance));
-
+                builder.append(Text.of(TextColors.GOLD, "\nOpen: ", TextColors.YELLOW, nation.isOpen()));
+                builder.append(Text.of(TextColors.GOLD, "\nNeutral: ", TextColors.YELLOW, nation.isNeutral()));
                 builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_TAXES + ": "));
-                if (nation.isTaxPercentage()) {
-                        builder.append(Text.of(TextColors.YELLOW, String.format("%.2f%%", nation.getTaxes())));
-                } else {
-                        builder.append(formatPrice(TextColors.YELLOW, BigDecimal.valueOf(nation.getTaxes())));
-                }
-
-                Location<World> spawn = nation.getSpawn();
-                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_SPAWN + ": "));
-                if (spawn == null) {
-                        builder.append(Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE));
-                } else {
-                        builder.append(Text.of(TextColors.YELLOW,
-                                        spawn.getExtent().getName() + " @ " + spawn.getBlockX() + ", " + spawn.getBlockY() + ", " + spawn.getBlockZ()));
-                }
-
-                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_SPAWN_COST + ": "));
-                builder.append(formatPrice(TextColors.YELLOW, BigDecimal.valueOf(nation.getSpawnCost())));
-
-                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_ALLIES + ": "));
-                if (nation.getAllies().isEmpty()) {
-                        builder.append(Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE));
-                } else {
-                        boolean first = true;
-                        for (UUID allyId : nation.getAllies()) {
-                                Nation ally = DataHandler.getNation(allyId);
-                                if (ally == null) {
-                                        continue;
-                                }
-                                if (!first) {
-                                        builder.append(Text.of(TextColors.GOLD, ", "));
-                                }
-                                builder.append(Text.of(TextColors.YELLOW, ally.getName()));
-                                first = false;
-                        }
-                        if (first) {
-                                builder.append(Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE));
-                        }
-                }
-
-                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_ENEMIES + ": "));
-                if (nation.getEnemies().isEmpty()) {
-                        builder.append(Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE));
-                } else {
-                        boolean first = true;
-                        for (UUID enemyId : nation.getEnemies()) {
-                                Nation enemy = DataHandler.getNation(enemyId);
-                                if (enemy == null) {
-                                        continue;
-                                }
-                                if (!first) {
-                                        builder.append(Text.of(TextColors.GOLD, ", "));
-                                }
-                                builder.append(Text.of(TextColors.YELLOW, enemy.getName()));
-                                first = false;
-                        }
-                        if (first) {
-                                builder.append(Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE));
-                        }
-                }
+                builder.append(formatPrice(TextColors.YELLOW, BigDecimal.valueOf(nation.getTaxes())));
 
                 return builder.build();
         }

@@ -37,14 +37,6 @@ public class NationDeserializer implements JsonDeserializer<Nation> {
             }
         }
 
-        if (obj.has("king")) {
-            try {
-                nation.setKing(UUID.fromString(obj.get("king").getAsString()));
-            } catch (IllegalArgumentException ignored) {
-                nation.setKing(null);
-            }
-        }
-
         if (obj.has("open")) {
             nation.setOpen(obj.get("open").getAsBoolean());
         }
@@ -53,20 +45,8 @@ public class NationDeserializer implements JsonDeserializer<Nation> {
             nation.setNeutral(obj.get("neutral").getAsBoolean());
         }
 
-        if (obj.has("public")) {
-            nation.setPublic(obj.get("public").getAsBoolean());
-        }
-
         if (obj.has("taxes")) {
             nation.setTaxes(obj.get("taxes").getAsDouble());
-        }
-
-        if (obj.has("taxPercentage")) {
-            nation.setTaxPercentage(obj.get("taxPercentage").getAsBoolean());
-        }
-
-        if (obj.has("spawnCost")) {
-            nation.setSpawnCost(obj.get("spawnCost").getAsDouble());
         }
 
         if (obj.has("spawn")) {
@@ -109,16 +89,6 @@ public class NationDeserializer implements JsonDeserializer<Nation> {
             for (JsonElement element : obj.get("enemies").getAsJsonArray()) {
                 try {
                     nation.addEnemy(UUID.fromString(element.getAsString()));
-                } catch (IllegalArgumentException ignored) {
-                    // skip invalid entry
-                }
-            }
-        }
-
-        if (obj.has("assistants")) {
-            for (JsonElement element : obj.get("assistants").getAsJsonArray()) {
-                try {
-                    nation.addAssistant(UUID.fromString(element.getAsString()));
                 } catch (IllegalArgumentException ignored) {
                     // skip invalid entry
                 }

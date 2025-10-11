@@ -16,10 +16,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.UUID;
-
 public class NationKickExecutor implements CommandExecutor {
     public static void create(CommandSpec.Builder cmd) {
         cmd.child(CommandSpec.builder()
@@ -68,26 +64,6 @@ public class NationKickExecutor implements CommandExecutor {
         }
 
         nation.removeTown(targetTown.getUUID());
-
-        for (UUID assistantId : new HashSet<>(nation.getAssistants())) {
-            Optional<UUID> assistantTownId = DataHandler.getResidentTownId(assistantId);
-            if (!assistantTownId.isPresent() || assistantTownId.get().equals(targetTown.getUUID())) {
-                nation.removeAssistant(assistantId);
-            }
-        }
-
-        if (nation.getKing() != null) {
-            Optional<UUID> kingTownId = DataHandler.getResidentTownId(nation.getKing());
-            if (!kingTownId.isPresent() || kingTownId.get().equals(targetTown.getUUID())) {
-                Towny capital = nation.getCapital() != null ? DataHandler.getTowny(nation.getCapital()) : null;
-                if (capital != null && capital.getPresident() != null) {
-                    nation.setKing(capital.getPresident());
-                } else {
-                    nation.setKing(null);
-                }
-            }
-        }
-
         DataHandler.saveNation(nation.getUUID());
         targetTown.clearNation();
         DataHandler.saveTowny(targetTown.getUUID());
