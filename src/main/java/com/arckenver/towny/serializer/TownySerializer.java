@@ -143,21 +143,25 @@ public class TownySerializer implements JsonSerializer<Towny> {
 		}
 		json.add("spawns", spawns);
 
-		if (towny.getPresident() != null)
-			json.add("mayor", new JsonPrimitive(towny.getPresident().toString()));
+                if (towny.getPresident() != null)
+                        json.add("mayor", new JsonPrimitive(towny.getPresident().toString()));
 
-		JsonArray comayorArray = new JsonArray();
-		for (UUID minister : towny.getMinisters()) {
+                JsonArray comayorArray = new JsonArray();
+                for (UUID minister : towny.getMinisters()) {
 			comayorArray.add(new JsonPrimitive(minister.toString()));
 		}
 		json.add("comayor", comayorArray);
 
 		JsonArray citizensArray = new JsonArray();
-		for (UUID citizen : towny.getCitizens()) {
-			citizensArray.add(new JsonPrimitive(citizen.toString()));
-		}
-		json.add("citizens", citizensArray);
+                for (UUID citizen : towny.getCitizens()) {
+                        citizensArray.add(new JsonPrimitive(citizen.toString()));
+                }
+                json.add("citizens", citizensArray);
 
-		return json;
-	}
+                if (towny.hasNation()) {
+                        json.add("nation", new JsonPrimitive(towny.getNationUUID().toString()));
+                }
+
+                return json;
+        }
 }

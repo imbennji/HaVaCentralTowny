@@ -37,9 +37,10 @@ public class Towny {
 	private UUID mayor;
 	private ArrayList<UUID> comayor;
 	private ArrayList<UUID> citizens;
-	private Hashtable<String, Hashtable<String, Boolean>> perms;
-	private Hashtable<String, Boolean> flags;
-	private Hashtable<UUID, Plot> plots;
+        private Hashtable<String, Hashtable<String, Boolean>> perms;
+        private Hashtable<String, Boolean> flags;
+        private Hashtable<UUID, Plot> plots;
+        private UUID nationUUID;
 	private int extras;
 	private int extraspawns;
 	private double taxes;
@@ -83,8 +84,9 @@ public class Towny {
 		this.plots = new Hashtable<>();
 		this.extras = 0;
 		this.extraspawns = 0;
-		this.taxes = ConfigHandler.getNode("towny", "defaultTaxes").getDouble();
-	}
+                this.taxes = ConfigHandler.getNode("towny", "defaultTaxes").getDouble();
+                this.nationUUID = null;
+        }
 
 	public UUID getUUID() {
 		return uuid;
@@ -343,6 +345,22 @@ public class Towny {
                 this.extras = normalizeChunkCount(extras);
                 if (this.extras < 0)
                         this.extras = 0;
+        }
+
+        public boolean hasNation() {
+                return nationUUID != null;
+        }
+
+        public UUID getNationUUID() {
+                return nationUUID;
+        }
+
+        public void setNationUUID(UUID nationUUID) {
+                this.nationUUID = nationUUID;
+        }
+
+        public void clearNation() {
+                this.nationUUID = null;
         }
 
         public void addExtras(int extras) {

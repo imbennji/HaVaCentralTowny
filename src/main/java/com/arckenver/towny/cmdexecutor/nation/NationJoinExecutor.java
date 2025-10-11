@@ -1,0 +1,79 @@
+package com.arckenver.towny.cmdexecutor.nation;
+
+import com.arckenver.towny.DataHandler;
+import com.arckenver.towny.LanguageHandler;
+import com.arckenver.towny.cmdelement.NationNameElement;
+import com.arckenver.towny.object.Nation;
+import com.arckenver.towny.object.NationRequest;
+import com.arckenver.towny.object.Towny;
+import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.spec.CommandExecutor;
+import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
+
+public class NationJoinExecutor implements CommandExecutor {
+    public static void create(CommandSpec.Builder cmd) {
+        cmd.child(CommandSpec.builder()
+                .description(Text.of(""))
+                .permission("towny.command.nation.join")
+                .arguments(new NationNameElement(Text.of("nation")))
+                .executor(new NationJoinExecutor())
+                .build(), "join");
+    }
+
+    @Override
+    public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
+        if (!(src instanceof Player)) {
+            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+            return CommandResult.success();
+        }
+
+        Player player = (Player) src;
+        Towny town = DataHandler.getTownyOfPlayer(player.getUniqueId());
+        if (town == null) {
+            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOTOWN));
+            return CommandResult.success();
+        }
+
+        if (!town.isPresident(player.getUniqueId())) {
+            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_TOWNPRES));
+            return CommandResult.success();
+        }
+
+        if (town.hasNation()) {
+            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_TOWN_HAS_NATION));
+            return CommandResult.success();
+        }
+
+        String nationName = ctx.<String>getOne("nation").orElse("");
+        Nation nation = DataHandler.getNation(nationName);
+        if (nation == null) {
+            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_NOT_FOUND));
+            return CommandResult.success();
+        }
+
+        NationRequest invite = DataHandler.getNationInviteRequest(nation.getUUID(), town.getUUID());
+        if (!nation.isOpen() && invite == null) {
+            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_INVITE_REQUIRED));
+            return CommandResult.success();
+        }
+
+        nation.addTown(town.getUUID());
+        if (invite != null) {
+            DataHandler.removeNationInviteRequest(invite);
+        }
+        DataHandler.saveNation(nation.getUUID());
+
+        town.setNationUUID(nation.getUUID());
+        DataHandler.saveTowny(town.getUUID());
+
+        src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_NATION_JOINED.replace("{TOWN}", town.getName())));
+        return CommandResult.success();
+    }
+}
