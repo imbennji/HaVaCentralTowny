@@ -16,6 +16,8 @@ import com.arckenver.towny.channel.AdminSpyMessageChannel;
 import com.arckenver.towny.channel.TownyMessageChannel;
 import com.arckenver.towny.claim.ChunkClaimUtils;
 import com.arckenver.towny.object.*;
+import com.arckenver.towny.serializer.NationDeserializer;
+import com.arckenver.towny.serializer.NationSerializer;
 import com.arckenver.towny.serializer.TownyDeserializer;
 import com.arckenver.towny.serializer.TownySerializer;
 import com.flowpowered.math.vector.Vector2i;
@@ -42,37 +44,43 @@ import org.spongepowered.api.world.World;
 public class DataHandler
 {
 	// --- Files / serialization ---
-	private static File townyDir;
-	private static Gson gson;
+        private static File townyDir;
+        private static File nationDir;
+        private static Gson gson;
 
 	// Residents file + storage
 	private static final Map<UUID, Resident> RESIDENTS = new HashMap<>();
 	private static File residentsFile;
 
 	// --- Existing storage ---
-	private static Hashtable<UUID, Towny> towny;
+        private static Hashtable<UUID, Towny> towny;
+        private static Hashtable<UUID, Nation> nations;
 	private static Hashtable<UUID, Hashtable<Vector2i, ArrayList<Towny>>> worldChunks;
 	private static HashMap<UUID, Towny> lastTownyWalkedOn;
 	private static HashMap<UUID, Plot> lastPlotWalkedOn;
 	private static Hashtable<UUID, Point> firstPoints;
 	private static Hashtable<UUID, Point> secondPoints;
 	private static Hashtable<UUID, UUID> markJobs;
-	private static ArrayList<Request> inviteRequests;
-	private static ArrayList<Request> joinRequests;
+        private static ArrayList<Request> inviteRequests;
+        private static ArrayList<Request> joinRequests;
+        private static ArrayList<NationRequest> nationInviteRequests;
 	private static AdminSpyMessageChannel spyChannel;
 
 	// ------------------------------------------------------------
 	// Lifecycle
 	// ------------------------------------------------------------
-	public static void init(File rootDir)
-	{
-		townyDir = new File(rootDir, "towns");
+        public static void init(File rootDir)
+        {
+                townyDir = new File(rootDir, "towns");
+                nationDir = new File(rootDir, "nations");
 
-		gson = (new GsonBuilder())
-				.registerTypeAdapter(Towny.class, new TownySerializer())
-				.registerTypeAdapter(Towny.class, new TownyDeserializer())
-				.setPrettyPrinting()
-				.create();
+                gson = (new GsonBuilder())
+                                .registerTypeAdapter(Towny.class, new TownySerializer())
+                                .registerTypeAdapter(Towny.class, new TownyDeserializer())
+                                .registerTypeAdapter(Nation.class, new NationSerializer())
+                                .registerTypeAdapter(Nation.class, new NationDeserializer())
+                                .setPrettyPrinting()
+                                .create();
 
 		// residents.json (next to towns/)
 		residentsFile = new File(rootDir, "residents.json");
@@ -86,15 +94,17 @@ public class DataHandler
 		}
 	}
 
-	public static void load()
-	{
-		townyDir.mkdirs();
-		towny = new Hashtable<>();
+        public static void load()
+        {
+                townyDir.mkdirs();
+                towny = new Hashtable<>();
+                nationDir.mkdirs();
+                nations = new Hashtable<>();
 
-		File[] files = townyDir.listFiles();
-		if (files != null) {
-			for (File f : files)
-			{
+                File[] files = townyDir.listFiles();
+                if (files != null) {
+                        for (File f : files)
+                        {
 				if (f.isFile() && f.getName().matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.json"))
 				{
 					try {
@@ -105,30 +115,50 @@ public class DataHandler
 						TownyPlugin.getLogger().error("Error while loading file " + f.getName(), e);
 					}
 				}
-			}
-		}
+                        }
+                }
 
-		// Load residents
-		loadResidents();
+                File[] nationFiles = nationDir.listFiles();
+                if (nationFiles != null) {
+                        for (File f : nationFiles) {
+                                if (f.isFile() && f.getName().matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.json")) {
+                                        try {
+                                                String json = new String(Files.readAllBytes(f.toPath()), StandardCharsets.UTF_8);
+                                                Nation nation = gson.fromJson(json, Nation.class);
+                                                nations.put(nation.getUUID(), nation);
+                                        } catch (IOException e) {
+                                                TownyPlugin.getLogger().error("Error while loading nation file " + f.getName(), e);
+                                        }
+                                }
+                        }
+                }
 
-		calculateWorldChunks();
-		lastTownyWalkedOn = new HashMap<>();
-		lastPlotWalkedOn = new HashMap<>();
-		firstPoints = new Hashtable<>();
-		secondPoints = new Hashtable<>();
-		markJobs = new Hashtable<>();
-		inviteRequests = new ArrayList<>();
-		joinRequests = new ArrayList<>();
-		spyChannel = new AdminSpyMessageChannel();
-	}
+                // Load residents
+                loadResidents();
 
-	public static void save()
-	{
-		for (UUID uuid : towny.keySet()) {
-			saveTowny(uuid);
-		}
-		saveResidents();
-	}
+                calculateWorldChunks();
+                reconcileNationMemberships();
+                lastTownyWalkedOn = new HashMap<>();
+                lastPlotWalkedOn = new HashMap<>();
+                firstPoints = new Hashtable<>();
+                secondPoints = new Hashtable<>();
+                markJobs = new Hashtable<>();
+                inviteRequests = new ArrayList<>();
+                joinRequests = new ArrayList<>();
+                nationInviteRequests = new ArrayList<>();
+                spyChannel = new AdminSpyMessageChannel();
+        }
+
+        public static void save()
+        {
+                for (UUID uuid : towny.keySet()) {
+                        saveTowny(uuid);
+                }
+                for (UUID uuid : nations.keySet()) {
+                        saveNation(uuid);
+                }
+                saveResidents();
+        }
 
 	// ------------------------------------------------------------
 	// Admin spy channel
@@ -141,15 +171,15 @@ public class DataHandler
 	// ------------------------------------------------------------
 	// Towny (town) API
 	// ------------------------------------------------------------
-	public static void addTowny(Towny townyInstance) {
-		towny.put(townyInstance.getUUID(), townyInstance);
-		saveTowny(townyInstance.getUUID());
-	}
+        public static void addTowny(Towny townyInstance) {
+                towny.put(townyInstance.getUUID(), townyInstance);
+                saveTowny(townyInstance.getUUID());
+        }
 
-	public static Towny getTowny(UUID uuid)
-	{
-		return towny.get(uuid);
-	}
+        public static Towny getTowny(UUID uuid)
+        {
+                return towny.get(uuid);
+        }
 
 	public static Towny getTowny(String name)
 	{
@@ -214,16 +244,27 @@ public class DataHandler
 		return null;
 	}
 
-	public static void removeTowny(UUID uuid)
-	{
-		Towny oldTowny = getTowny(uuid);
-		if (oldTowny != null) {
-			MessageChannel.TO_CONSOLE.send(Text.of("Removing Towny " + uuid + ": "));
-			MessageChannel.TO_CONSOLE.send(Utils.formatTownyDescription(oldTowny, Utils.CLICKER_ADMIN));
-		}
-		towny.remove(uuid);
+        public static void removeTowny(UUID uuid)
+        {
+                Towny oldTowny = getTowny(uuid);
+                if (oldTowny != null) {
+                        MessageChannel.TO_CONSOLE.send(Text.of("Removing Towny " + uuid + ": "));
+                        MessageChannel.TO_CONSOLE.send(Utils.formatTownyDescription(oldTowny, Utils.CLICKER_ADMIN));
+                        if (oldTowny.hasNation()) {
+                                Nation nation = nations.get(oldTowny.getNationUUID());
+                                if (nation != null) {
+                                        nation.removeTown(uuid);
+                                        if (nation.getCapital() == null || nation.getTowns().isEmpty()) {
+                                                removeNation(nation.getUUID());
+                                        } else {
+                                                saveNation(nation.getUUID());
+                                        }
+                                }
+                        }
+                }
+                towny.remove(uuid);
 
-		ArrayList<UUID> toRemove = new ArrayList<>();
+                ArrayList<UUID> toRemove = new ArrayList<>();
 		for (Towny t : lastTownyWalkedOn.values())
 		{
 			if (t != null && t.getUUID().equals(uuid))
@@ -241,9 +282,96 @@ public class DataHandler
 		inviteRequests.removeIf(req -> req.getTownyUUID().equals(uuid));
 		joinRequests.removeIf(req -> req.getTownyUUID().equals(uuid));
 
-		File file = new File(townyDir, uuid.toString() + ".json");
-		file.delete();
-	}
+                File file = new File(townyDir, uuid.toString() + ".json");
+                file.delete();
+        }
+
+        public static void addNation(Nation nation)
+        {
+                nations.put(nation.getUUID(), nation);
+                saveNation(nation.getUUID());
+        }
+
+        public static Nation getNation(UUID uuid)
+        {
+                return nations.get(uuid);
+        }
+
+        public static Nation getNation(String name)
+        {
+                for (Nation nation : nations.values())
+                {
+                        if (nation.getRealName().equalsIgnoreCase(name))
+                        {
+                                return nation;
+                        }
+                }
+                return null;
+        }
+
+        public static Collection<Nation> getNations()
+        {
+                return nations.values();
+        }
+
+        public static Nation getNationByTag(String tag)
+        {
+                if (tag == null) {
+                        return null;
+                }
+                for (Nation nation : nations.values())
+                {
+                        if (nation.hasTag() && nation.getTag().equalsIgnoreCase(tag))
+                        {
+                                return nation;
+                        }
+                }
+                return null;
+        }
+
+        public static Nation getNationOfTown(UUID townUUID)
+        {
+                Towny t = towny.get(townUUID);
+                if (t == null || !t.hasNation())
+                {
+                        return null;
+                }
+                return nations.get(t.getNationUUID());
+        }
+
+        public static Nation getNationOfPlayer(UUID playerUUID)
+        {
+                Towny town = getTownyOfPlayer(playerUUID);
+                if (town == null)
+                {
+                        return null;
+                }
+                return town.hasNation() ? nations.get(town.getNationUUID()) : null;
+        }
+
+        public static void removeNation(UUID uuid)
+        {
+                Nation nation = nations.remove(uuid);
+                if (nation == null)
+                {
+                        return;
+                }
+
+                for (UUID townUUID : new LinkedHashSet<>(nation.getTowns()))
+                {
+                        Towny t = towny.get(townUUID);
+                        if (t != null)
+                        {
+                                t.clearNation();
+                                saveTowny(townUUID);
+                        }
+                }
+
+                nationInviteRequests.removeIf(req -> req.getNationUUID().equals(uuid));
+
+                File file = new File(nationDir, uuid.toString() + ".json");
+                file.delete();
+        }
 
 	public static Hashtable<UUID, Towny> getTowny()
 	{
@@ -412,14 +540,134 @@ public class DataHandler
 				canClaim(world.getLocation(rect.getMinX(), 0, rect.getMinY()), ignoreMinDistance, toExclude);
 	}
 
-	public static void calculateWorldChunks()
-	{
-		worldChunks = new Hashtable<>();
-		for (Towny t : towny.values())
-		{
-			addToWorldChunks(t);
-		}
-	}
+        public static void calculateWorldChunks()
+        {
+                worldChunks = new Hashtable<>();
+                for (Towny t : towny.values())
+                {
+                        addToWorldChunks(t);
+                }
+        }
+
+        private static void reconcileNationMemberships()
+        {
+                // Ensure towns reference an existing nation
+                for (Towny t : towny.values())
+                {
+                        if (!t.hasNation())
+                        {
+                                continue;
+                        }
+                        Nation nation = nations.get(t.getNationUUID());
+                        if (nation == null)
+                        {
+                                t.clearNation();
+                                continue;
+                        }
+                        if (!nation.hasTown(t.getUUID()))
+                        {
+                                nation.addTown(t.getUUID());
+                        }
+                }
+
+                // Remove orphaned towns from nations and resynchronise membership
+                for (Nation nation : nations.values())
+                {
+                        java.util.Set<UUID> entries = new LinkedHashSet<>(nation.getTowns());
+                        for (UUID townId : entries)
+                        {
+                                Towny t = towny.get(townId);
+                                if (t == null)
+                                {
+                                        nation.removeTown(townId);
+                                        continue;
+                                }
+                                if (!nation.getUUID().equals(t.getNationUUID()))
+                                {
+                                        t.setNationUUID(nation.getUUID());
+                                }
+                        }
+
+                        if (nation.getCapital() != null && !nation.hasTown(nation.getCapital()))
+                        {
+                                nation.setCapital(null);
+                        }
+
+                        if (nation.getCapital() == null)
+                        {
+                                for (UUID townId : nation.getTowns())
+                                {
+                                        Towny t = towny.get(townId);
+                                        if (t != null)
+                                        {
+                                                nation.setCapital(t.getUUID());
+                                                break;
+                                        }
+                                }
+                        }
+
+                        java.util.Set<UUID> validResidents = new LinkedHashSet<>();
+                        for (UUID townId : nation.getTowns())
+                        {
+                                Towny t = towny.get(townId);
+                                if (t == null)
+                                {
+                                        continue;
+                                }
+                                if (t.getPresident() != null)
+                                {
+                                        validResidents.add(t.getPresident());
+                                }
+                                validResidents.addAll(t.getCitizens());
+                                validResidents.addAll(t.getMinisters());
+                        }
+
+                        for (UUID assistant : new LinkedHashSet<>(nation.getAssistants()))
+                        {
+                                if (!validResidents.contains(assistant))
+                                {
+                                        nation.removeAssistant(assistant);
+                                }
+                        }
+
+                        if (nation.getKing() != null && !validResidents.contains(nation.getKing()))
+                        {
+                                nation.setKing(null);
+                        }
+
+                        if (nation.getKing() == null)
+                        {
+                                UUID capitalId = nation.getCapital();
+                                if (capitalId != null)
+                                {
+                                        Towny capitalTown = towny.get(capitalId);
+                                        if (capitalTown != null && capitalTown.getPresident() != null)
+                                        {
+                                                nation.setKing(capitalTown.getPresident());
+                                        }
+                                }
+                        }
+
+                        if (nation.getKing() == null)
+                        {
+                                for (UUID townId : nation.getTowns())
+                                {
+                                        Towny t = towny.get(townId);
+                                        if (t != null && t.getPresident() != null)
+                                        {
+                                                nation.setKing(t.getPresident());
+                                                break;
+                                        }
+                                }
+                        }
+
+                        if (nation.getTowns().isEmpty())
+                        {
+                                nation.clearAssistants();
+                                nation.setKing(null);
+                        }
+                }
+        }
 
 	public static void addToWorldChunks(Towny t)
 	{
@@ -642,31 +890,71 @@ public class DataHandler
 		inviteRequests.add(req);
 	}
 
-	public static void removeInviteRequest(Request req)
-	{
-		inviteRequests.remove(req);
-	}
+        public static void removeInviteRequest(Request req)
+        {
+                inviteRequests.remove(req);
+        }
+
+        public static NationRequest getNationInviteRequest(UUID nationUUID, UUID townUUID)
+        {
+                for (NationRequest req : nationInviteRequests)
+                {
+                        if (req.match(nationUUID, townUUID))
+                        {
+                                return req;
+                        }
+                }
+                return null;
+        }
+
+        public static void addNationInviteRequest(NationRequest req)
+        {
+                nationInviteRequests.add(req);
+        }
+
+        public static void removeNationInviteRequest(NationRequest req)
+        {
+                nationInviteRequests.remove(req);
+        }
 
 	// ------------------------------------------------------------
 	// Save towns
 	// ------------------------------------------------------------
-	public static void saveTowny(UUID uuid) {
-		Towny t = towny.get(uuid);
-		if (t == null) {
-			TownyPlugin.getLogger().warn("Trying to save null towny!");
-			return;
-		}
-		File file = new File(townyDir, uuid.toString() + ".json");
-		try {
-			if (!file.exists()) {
-				file.createNewFile();
-			}
-			String json = gson.toJson(t, Towny.class);
-			Files.write(file.toPath(), json.getBytes(StandardCharsets.UTF_8));
-		} catch (IOException e) {
-			TownyPlugin.getLogger().error("Error while saving file " + file.getName() + " for towny " + t.getName(), e);
-		}
-	}
+        public static void saveTowny(UUID uuid) {
+                Towny t = towny.get(uuid);
+                if (t == null) {
+                        TownyPlugin.getLogger().warn("Trying to save null towny!");
+                        return;
+                }
+                File file = new File(townyDir, uuid.toString() + ".json");
+                try {
+                        if (!file.exists()) {
+                                file.createNewFile();
+                        }
+                        String json = gson.toJson(t, Towny.class);
+                        Files.write(file.toPath(), json.getBytes(StandardCharsets.UTF_8));
+                } catch (IOException e) {
+                        TownyPlugin.getLogger().error("Error while saving file " + file.getName() + " for towny " + t.getName(), e);
+                }
+        }
+
+        public static void saveNation(UUID uuid) {
+                Nation nation = nations.get(uuid);
+                if (nation == null) {
+                        TownyPlugin.getLogger().warn("Trying to save null nation!");
+                        return;
+                }
+                File file = new File(nationDir, uuid.toString() + ".json");
+                try {
+                        if (!file.exists()) {
+                                file.createNewFile();
+                        }
+                        String json = gson.toJson(nation, Nation.class);
+                        Files.write(file.toPath(), json.getBytes(StandardCharsets.UTF_8));
+                } catch (IOException e) {
+                        TownyPlugin.getLogger().error("Error while saving nation file " + file.getName() + " for nation " + nation.getName(), e);
+                }
+        }
 
 	// ------------------------------------------------------------
 	// Residents: load/save + helpers

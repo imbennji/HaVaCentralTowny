@@ -1,0 +1,80 @@
+package com.arckenver.towny.cmdexecutor.nation;
+
+import com.arckenver.towny.DataHandler;
+import com.arckenver.towny.LanguageHandler;
+import com.arckenver.towny.cmdelement.TownyNameElement;
+import com.arckenver.towny.object.Nation;
+import com.arckenver.towny.object.Towny;
+import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.spec.CommandExecutor;
+import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextColors;
+
+public class NationSetCapitalExecutor implements CommandExecutor {
+    public static void create(CommandSpec.Builder cmd) {
+        cmd.child(CommandSpec.builder()
+                .description(Text.of(""))
+                .permission("towny.command.nation.setcapital")
+                .arguments(GenericArguments.optional(new TownyNameElement(Text.of("town"))))
+                .executor(new NationSetCapitalExecutor())
+                .build(), "setcapital", "capital");
+    }
+
+    @Override
+    public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
+        if (!(src instanceof Player)) {
+            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+            return CommandResult.success();
+        }
+
+        if (!ctx.<String>getOne("town").isPresent()) {
+            src.sendMessage(Text.of(TextColors.YELLOW, "/nation setcapital <town>"));
+            return CommandResult.success();
+        }
+
+        Player player = (Player) src;
+        Towny playerTown = DataHandler.getTownyOfPlayer(player.getUniqueId());
+        if (playerTown == null || !playerTown.hasNation()) {
+            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NONATION));
+            return CommandResult.success();
+        }
+
+        Nation nation = DataHandler.getNation(playerTown.getNationUUID());
+        if (nation == null) {
+            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_NOT_FOUND));
+            return CommandResult.success();
+        }
+
+        if (!nation.isKing(player.getUniqueId())) {
+            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_NATIONLEADER));
+            return CommandResult.success();
+        }
+
+        String townName = ctx.<String>getOne("town").get();
+        Towny targetTown = DataHandler.getTowny(townName);
+        if (targetTown == null) {
+            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDTOWN));
+            return CommandResult.success();
+        }
+
+        if (!targetTown.hasNation() || !nation.getUUID().equals(targetTown.getNationUUID())) {
+            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_NO_TARGET_TOWN));
+            return CommandResult.success();
+        }
+
+        nation.setCapital(targetTown.getUUID());
+        if (targetTown.getPresident() != null) {
+            nation.setKing(targetTown.getPresident());
+        }
+
+        DataHandler.saveNation(nation.getUUID());
+        src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_NATION_CAPITAL));
+        return CommandResult.success();
+    }
+}

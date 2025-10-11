@@ -67,16 +67,21 @@ public class ConfigHandler
                 Utils.ensurePositiveNumber(config.getNode("prices", "extraChunkPrice"), ChunkClaimUtils.CHUNK_AREA * 0.5);
                 Utils.ensurePositiveNumber(config.getNode("prices", "chunkClaimPrice"), ChunkClaimUtils.CHUNK_AREA * 0.3);
                 Utils.ensurePositiveNumber(config.getNode("prices", "outpostCreationPrice"), 1000);
+                Utils.ensurePositiveNumber(config.getNode("prices", "nationCreationPrice"), 75000);
                 Utils.ensurePositiveNumber(config.getNode("prices", "plotTaxPerDay"), 10);
                 Utils.ensurePositiveNumber(config.getNode("others", "chunksPerCitizen"), 4);
 		Utils.ensurePositiveNumber(config.getNode("others", "maxTownySpawns"), 3);
 		Utils.ensurePositiveNumber(config.getNode("others", "minTownyDistance"), 500);
                 Utils.ensurePositiveNumber(config.getNode("others", "maxExtraChunks"), 20);
-		Utils.ensurePositiveNumber(config.getNode("others", "minTownyNameLength"), 3);
-		Utils.ensurePositiveNumber(config.getNode("others", "maxTownyNameLength"), 13);
-		Utils.ensurePositiveNumber(config.getNode("others", "minTownyTagLength"), 3);
-		Utils.ensurePositiveNumber(config.getNode("others", "maxTownyTagLength"), 5);
-		Utils.ensurePositiveNumber(config.getNode("others", "minTownyDisplayLength"), 3);
+                Utils.ensurePositiveNumber(config.getNode("others", "minTownyNameLength"), 3);
+                Utils.ensurePositiveNumber(config.getNode("others", "maxTownyNameLength"), 13);
+                Utils.ensurePositiveNumber(config.getNode("others", "minTownyTagLength"), 3);
+                Utils.ensurePositiveNumber(config.getNode("others", "maxTownyTagLength"), 5);
+                Utils.ensurePositiveNumber(config.getNode("others", "minNationNameLength"), 3);
+                Utils.ensurePositiveNumber(config.getNode("others", "maxNationNameLength"), 13);
+                Utils.ensurePositiveNumber(config.getNode("others", "minNationTagLength"), 2);
+                Utils.ensurePositiveNumber(config.getNode("others", "maxNationTagLength"), 6);
+                Utils.ensurePositiveNumber(config.getNode("others", "minTownyDisplayLength"), 3);
 		Utils.ensurePositiveNumber(config.getNode("others", "maxTownyDisplayLength"), 32);
 		Utils.ensurePositiveNumber(config.getNode("others", "minPlotNameLength"), 3);
 		Utils.ensurePositiveNumber(config.getNode("others", "maxPlotNameLength"), 13);
@@ -137,10 +142,19 @@ public class ConfigHandler
 				"&2({ARG})"
 		);
 
-		Utils.ensureBoolean(config.getNode("towny", "canEditTaxes"), true);
-		Utils.ensurePositiveNumber(config.getNode("towny", "defaultTaxes"), 50);
-		Utils.ensurePositiveNumber(config.getNode("towny", "maxTaxes"), 100);
-		Utils.ensurePositiveNumber(config.getNode("towny", "defaultRentInterval"), 24);
+                Utils.ensureBoolean(config.getNode("towny", "canEditTaxes"), true);
+                Utils.ensurePositiveNumber(config.getNode("towny", "defaultTaxes"), 50);
+                Utils.ensurePositiveNumber(config.getNode("towny", "maxTaxes"), 100);
+                Utils.ensurePositiveNumber(config.getNode("towny", "defaultRentInterval"), 24);
+
+                Utils.ensurePositiveNumber(config.getNode("nation", "defaultTaxes"), 0);
+                Utils.ensurePositiveNumber(config.getNode("nation", "maxTaxes"), 1000);
+                Utils.ensureBoolean(config.getNode("nation", "flags", "open"), false);
+                Utils.ensureBoolean(config.getNode("nation", "flags", "neutral"), false);
+                Utils.ensureBoolean(config.getNode("nation", "flags", "public"), false);
+                Utils.ensureBoolean(config.getNode("nation", "defaultTaxPercentage"), false);
+                Utils.ensurePositiveNumber(config.getNode("nation", "defaultSpawnCost"), 0D);
+                Utils.ensurePositiveNumber(config.getNode("nation", "maxSpawnCost"), 1000D);
 
 		Utils.ensureBoolean(config.getNode("towny", "flags", "pvp"), false);
 		Utils.ensureBoolean(config.getNode("towny", "flags", "mobs"), false);

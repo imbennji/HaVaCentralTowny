@@ -161,9 +161,9 @@ public class TownyDeserializer implements JsonDeserializer<Towny> {
 		}
 
 		// --- non-admin data ---
-		if (!isAdmin) {
-			if (obj.has("mayor"))
-				towny.setPresident(UUID.fromString(obj.get("mayor").getAsString()));
+                if (!isAdmin) {
+                        if (obj.has("mayor"))
+                                towny.setPresident(UUID.fromString(obj.get("mayor").getAsString()));
 
 			if (obj.has("comayor")) {
 				for (JsonElement element : obj.get("comayor").getAsJsonArray()) {
@@ -179,11 +179,19 @@ public class TownyDeserializer implements JsonDeserializer<Towny> {
 
 			if (obj.has("taxes"))
 				towny.setTaxes(obj.get("taxes").getAsDouble());
-			if (obj.has("extras"))
-				towny.setExtras(obj.get("extras").getAsInt());
-			if (obj.has("extraspawns"))
-				towny.setExtraSpawns(obj.get("extraspawns").getAsInt());
-		}
-		return towny;
-	}
+                        if (obj.has("extras"))
+                                towny.setExtras(obj.get("extras").getAsInt());
+                        if (obj.has("extraspawns"))
+                                towny.setExtraSpawns(obj.get("extraspawns").getAsInt());
+                }
+
+                if (obj.has("nation")) {
+                        try {
+                                towny.setNationUUID(UUID.fromString(obj.get("nation").getAsString()));
+                        } catch (IllegalArgumentException ignored) {
+                                towny.clearNation();
+                        }
+                }
+                return towny;
+        }
 }
