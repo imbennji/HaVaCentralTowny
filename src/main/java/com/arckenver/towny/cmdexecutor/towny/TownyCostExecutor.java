@@ -33,8 +33,8 @@ public class TownyCostExecutor implements CommandExecutor
 				TextColors.GOLD, "\n", LanguageHandler.COST_MSG_TOWNCREATE, TextColors.GRAY, " - ", TextColors.YELLOW, ConfigHandler.getNode("prices", "townyCreationPrice").getDouble(),
 				TextColors.GOLD, "\n", LanguageHandler.COST_MSG_OUTPOSTCREATE, TextColors.GRAY, " - ", TextColors.YELLOW, ConfigHandler.getNode("prices", "outpostCreationPrice").getDouble(),
 				TextColors.GOLD, "\n", LanguageHandler.COST_MSG_UPKEEP, TextColors.GRAY, " - ", TextColors.YELLOW, ConfigHandler.getNode("prices", "upkeepPerCitizen").getDouble(),
-				TextColors.GOLD, "\n", LanguageHandler.COST_MSG_CLAIMPRICE, TextColors.GRAY, " - ", TextColors.YELLOW, ConfigHandler.getNode("prices", "blockClaimPrice").getDouble(),
-				TextColors.GOLD, "\n", LanguageHandler.COST_MSG_EXTRAPRICE, TextColors.GRAY, " - ", TextColors.YELLOW, ConfigHandler.getNode("prices", "extraPrice").getDouble()));
+                                TextColors.GOLD, "\n", LanguageHandler.COST_MSG_CLAIMPRICE, TextColors.GRAY, " - ", TextColors.YELLOW, ConfigHandler.getNode("prices", "chunkClaimPrice").getDouble(),
+                                TextColors.GOLD, "\n", LanguageHandler.COST_MSG_EXTRAPRICE, TextColors.GRAY, " - ", TextColors.YELLOW, ConfigHandler.getNode("prices", "extraChunkPrice").getDouble()));
 		return CommandResult.success();
 	}
 }

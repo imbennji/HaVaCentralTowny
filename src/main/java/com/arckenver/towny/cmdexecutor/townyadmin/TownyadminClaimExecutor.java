@@ -1,6 +1,6 @@
 package com.arckenver.towny.cmdexecutor.townyadmin;
 
-import com.arckenver.towny.listener.GoldenAxeListener;
+import com.arckenver.towny.claim.ChunkClaimUtils;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -40,8 +40,8 @@ public class TownyadminClaimExecutor implements CommandExecutor
 		if (src instanceof Player)
 		{
 			Player player = (Player) src;
-			// Automatically set the points based on the player's current chunk
-			GoldenAxeListener.setAutomaticPoints(player);
+                        // Automatically set the points based on the player's current chunk
+                        ChunkClaimUtils.selectCurrentChunk(player);
 			String townyName = ctx.<String>getOne("towny").get();
 			Towny towny = DataHandler.getTowny(townyName);
 			if (towny == null)
@@ -49,11 +49,11 @@ public class TownyadminClaimExecutor implements CommandExecutor
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADTOWNNNAME));
 				return CommandResult.success();
 			}
-			Point a = DataHandler.getFirstPoint(player.getUniqueId());
-			Point b = DataHandler.getSecondPoint(player.getUniqueId());
-			if (a == null || b == null)
-			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDAXESELECT));
+                        Point a = DataHandler.getFirstPoint(player.getUniqueId());
+                        Point b = DataHandler.getSecondPoint(player.getUniqueId());
+                        if (a == null || b == null)
+                        {
+                                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDCHUNKSELECT));
 				return CommandResult.success();
 			}
 			if (!ConfigHandler.getNode("worlds").getNode(a.getWorld().getName()).getNode("enabled").getBoolean())
@@ -82,8 +82,8 @@ public class TownyadminClaimExecutor implements CommandExecutor
 	}
 
 	public CommandResult claimLand(Player player, String townyName) {
-		// Automatically set the points based on the player's current chunk
-		GoldenAxeListener.setAutomaticPoints(player);
+                // Automatically set the points based on the player's current chunk
+                ChunkClaimUtils.selectCurrentChunk(player);
 
 		Towny towny = DataHandler.getTowny(townyName);
 		if (towny == null) {
@@ -94,8 +94,8 @@ public class TownyadminClaimExecutor implements CommandExecutor
 		Point a = DataHandler.getFirstPoint(player.getUniqueId());
 		Point b = DataHandler.getSecondPoint(player.getUniqueId());
 
-		if (a == null || b == null) {
-			player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDAXESELECT));
+                if (a == null || b == null) {
+                        player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDCHUNKSELECT));
 			return CommandResult.success();
 		}
 

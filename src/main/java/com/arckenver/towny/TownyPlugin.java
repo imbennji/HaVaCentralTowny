@@ -72,8 +72,7 @@ public class TownyPlugin {
 
 		Sponge.getEventManager().registerListeners(this, new PlayerConnectionListener());
 		Sponge.getEventManager().registerListeners(this, new PlayerMoveListener());
-		Sponge.getEventManager().registerListeners(this, new GoldenAxeListener());
-		Sponge.getEventManager().registerListeners(this, new PvpListener());
+                Sponge.getEventManager().registerListeners(this, new PvpListener());
 		Sponge.getEventManager().registerListeners(this, new FireListener());
 		Sponge.getEventManager().registerListeners(this, new ExplosionListener());
 		Sponge.getEventManager().registerListeners(this, new MobSpawningListener());

@@ -50,7 +50,7 @@ Towny Sponge Remake reimagines the beloved town management gameplay of the origi
 | Step | Description |
 | --- | --- |
 | 1. Economy Service | Register a Sponge economy plugin so Towny can transact taxes, rent, and bank deposits. Without one, monetary features gracefully disable. |
-| 2. Configure Prices | Adjust claim costs, tax defaults, bonus block prices, and rent amounts in `config/towny/TownsConfig.conf`. |
+| 2. Configure Prices | Adjust claim costs, tax defaults, bonus chunk prices, and rent amounts in `config/towny/TownsConfig.conf`. |
 | 3. Language Customisation | Edit `config/towny/lang/en_US.lang` (or your locale) to personalise in-game messages and help output. |
 | 4. Permission Nodes | Assign town-related permissions through your permission manager (LuckPerms, etc.) to expose commands and features to specific ranks. |
 | 5. World Flags | Use `/townyworld` commands to toggle wilderness build permissions, PvP, fire spread, and other world-level behaviours. |
@@ -76,7 +76,7 @@ Residents can join towns, purchase plots, pay rent, set personal spawn points wi
 Towns are the heart of the plugin. Founders select a name, board, and optional tag, then manage the following:
 
 * **Government**: Mayor leadership with configurable assistant ranks (e.g., councillors, ministers).
-* **Territory**: Claims expand using town blocks purchased with in-game currency. Outposts allow remote settlements, while home blocks govern spawn and daily upkeep.
+* **Territory**: Claims expand using town chunks purchased with in-game currency. Outposts allow remote settlements, while home chunks govern spawn and daily upkeep.
 * **Economy**: Town banks hold shared funds for taxes, upkeep, and public services. Mayors can deposit or withdraw with appropriate permissions.
 * **Permissions & Flags**: Town flags control PvP, fire spread, mobs, explosions, and build/break permissions for residents, allies, or outsiders.
 * **Communication**: Town chat channels keep conversations private, while optional spy monitoring ensures administrators can audit traffic when required.
@@ -100,11 +100,11 @@ While the Sponge remake emphasises town-level play, nation support is on the roa
 
 ### 5.1 Claiming Costs
 
-Towns spend currency to acquire new blocks. Configure base prices, additional outpost costs, and multipliers for expanding beyond default limits. Town banks must retain enough funds to cover both purchase costs and daily upkeep.
+Towns spend currency to acquire new chunks. Configure base prices, additional outpost costs, and multipliers for expanding beyond default limits. Town banks must retain enough funds to cover both purchase costs and daily upkeep.
 
 ### 5.2 Upkeep
 
-* **Town Upkeep**: Charged daily per claimed block plus optional extras for outposts or embassies. If a town cannot pay, residents may be evicted, and claims can regress.
+* **Town Upkeep**: Charged daily per claimed chunk plus optional extras for outposts or embassies. If a town cannot pay, residents may be evicted, and claims can regress.
 * **Plot Upkeep**: Optional per-plot upkeep ensures private owners contribute to town expenses.
 
 ### 5.3 Taxes
@@ -222,7 +222,7 @@ Towny Sponge Remake automates several recurring tasks:
 ## 10. Configuration Highlights
 
 * **General Settings**: Toggle features like friendly fire, wilderness build permissions, grief prevention defaults, or server-wide PvP rules.
-* **Prices & Taxes**: Adjust base claim cost, additional block multipliers, rent amounts, daily taxes, and fees for extras like teleportation.
+* **Prices & Taxes**: Adjust base claim cost, additional chunk multipliers, rent amounts, daily taxes, and fees for extras like teleportation.
 * **Ranks & Titles**: Define custom rank titles, prefixes, and the permissions they unlock.
 * **Notifications**: Configure whether residents receive titles, action bar messages, or chat alerts for events such as entering towns or violating flags.
 * **Integration Hooks**: Enable or disable compatibility tweaks for map plugins, scoreboard trackers, or external mods.
@@ -284,7 +284,7 @@ Stay informed by reviewing each release changelog. Upcoming milestones include:
 | **Town** | Player-governed settlement controlling claimed land, flags, and economy. |
 | **Plot** | Subdivision of town land that can be owned, rented, or managed separately. |
 | **Outpost** | Remote claim disconnected from the town’s main territory, often with increased upkeep. |
-| **Upkeep** | Recurring cost paid by towns to retain claimed blocks and services. |
+| **Upkeep** | Recurring cost paid by towns to retain claimed chunks and services. |
 | **Rent** | Periodic payment allowing residents to occupy a plot without permanent ownership. |
 | **Flag** | Toggle controlling behaviours like PvP, fire spread, or mob spawning. |
 | **Permission Matrix** | Combined rules that determine whether residents, allies, or outsiders may interact with blocks or entities. |

@@ -3,7 +3,7 @@ package com.arckenver.towny.cmdexecutor.towny;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import com.arckenver.towny.listener.GoldenAxeListener;
+import com.arckenver.towny.claim.ChunkClaimUtils;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -48,7 +48,7 @@ public class TownyUnclaimExecutor implements CommandExecutor
 		{
 			Player player = (Player) src;
 
-			GoldenAxeListener.setAutomaticPoints(player);
+                        ChunkClaimUtils.selectCurrentChunk(player);
 
 			Towny towny = DataHandler.getTownyOfPlayer(player.getUniqueId());
 			if (towny == null)
@@ -61,11 +61,11 @@ public class TownyUnclaimExecutor implements CommandExecutor
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_TOWNSTAFF));
 				return CommandResult.success();
 			}
-			Point a = DataHandler.getFirstPoint(player.getUniqueId());
-			Point b = DataHandler.getSecondPoint(player.getUniqueId());
-			if (a == null || b == null)
-			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDAXESELECT));
+                        Point a = DataHandler.getFirstPoint(player.getUniqueId());
+                        Point b = DataHandler.getSecondPoint(player.getUniqueId());
+                        if (a == null || b == null)
+                        {
+                                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDCHUNKSELECT));
 				return CommandResult.success();
 			}
 			if (!ConfigHandler.getNode("worlds").getNode(a.getWorld().getName()).getNode("enabled").getBoolean())
@@ -97,12 +97,15 @@ public class TownyUnclaimExecutor implements CommandExecutor
 			}
 			Region claimed = towny.getRegion().copy();
 			claimed.removeRect(rect);
-			int toUnclaim = towny.getRegion().size() - claimed.size();
+                        int blocksToUnclaim = towny.getRegion().size() - claimed.size();
+                        int chunksToUnclaim = (blocksToUnclaim <= 0)
+                                        ? 0
+                                        : (int) Math.max(1, Math.round(blocksToUnclaim / (double) ChunkClaimUtils.CHUNK_AREA));
 			
-			BigDecimal refund = BigDecimal.valueOf(0);
-			if (ConfigHandler.getNode("prices", "unclaimRefundPercentage").getInt() != 0)
-			{
-				if (TownyPlugin.getEcoService() == null)
+                        BigDecimal refund = BigDecimal.ZERO;
+                        if (ConfigHandler.getNode("prices", "unclaimRefundPercentage").getInt() != 0)
+                        {
+                                if (TownyPlugin.getEcoService() == null)
 				{
 					src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOECO));
 					return CommandResult.success();
@@ -113,7 +116,9 @@ public class TownyUnclaimExecutor implements CommandExecutor
 					src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOTOWN));
 					return CommandResult.success();
 				}
-				refund = BigDecimal.valueOf(toUnclaim * ConfigHandler.getNode("prices", "blockClaimPrice").getInt() * (ConfigHandler.getNode("prices", "unclaimRefundPercentage").getInt() / 100));
+                                double pricePerChunk = ConfigHandler.getNode("prices", "chunkClaimPrice").getDouble();
+                                double refundPercent = ConfigHandler.getNode("prices", "unclaimRefundPercentage").getDouble() / 100D;
+                                refund = BigDecimal.valueOf(chunksToUnclaim * pricePerChunk * refundPercent);
 				TransactionResult result = optAccount.get().deposit(TownyPlugin.getEcoService().getDefaultCurrency(), refund, TownyPlugin.getCause());
 				if (result.getResult() != ResultType.SUCCESS)
 				{
@@ -126,9 +131,11 @@ public class TownyUnclaimExecutor implements CommandExecutor
 			towny.setRegion(claimed);
 			DataHandler.addToWorldChunks(towny);
 			DataHandler.saveTowny(towny.getUUID());
-			if (!refund.equals(BigDecimal.ZERO))
-			{
-				String str = LanguageHandler.INFO_UNCLAIMREFUND.replaceAll("\\{NUM\\}", Integer.toString(toUnclaim)).replaceAll("\\{PRECENT\\}", ConfigHandler.getNode("prices", "blockClaimPrice").getString());
+                        if (!refund.equals(BigDecimal.ZERO))
+                        {
+                                String str = LanguageHandler.INFO_UNCLAIMREFUND
+                                                .replaceAll("\\{NUM\\}", Integer.toString(chunksToUnclaim))
+                                                .replaceAll("\\{PERCENT\\}", ConfigHandler.getNode("prices", "unclaimRefundPercentage").getString());
 				src.sendMessage(Text.builder()
 						.append(Text.of(TextColors.AQUA, str.split("\\{AMOUNT\\}")[0]))
 						.append(Utils.formatPrice(TextColors.AQUA, refund))

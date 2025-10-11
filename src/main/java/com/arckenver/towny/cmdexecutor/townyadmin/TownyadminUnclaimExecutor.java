@@ -16,6 +16,7 @@ import org.spongepowered.api.world.World;
 import com.arckenver.towny.ConfigHandler;
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
+import com.arckenver.towny.claim.ChunkClaimUtils;
 import com.arckenver.towny.object.Towny;
 import com.arckenver.towny.object.Point;
 import com.arckenver.towny.object.Rect;
@@ -43,7 +44,8 @@ public class TownyadminUnclaimExecutor implements CommandExecutor
 				src.sendMessage(Text.of(TextColors.YELLOW, "/ta unclaim <towny>"));
 				return CommandResult.success();
 			}
-			Player player = (Player) src;
+                        Player player = (Player) src;
+                        ChunkClaimUtils.selectCurrentChunk(player);
 			String townyName = ctx.<String>getOne("towny").get();
 			Towny towny = DataHandler.getTowny(townyName);
 			if (towny == null)
@@ -51,11 +53,11 @@ public class TownyadminUnclaimExecutor implements CommandExecutor
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADTOWNNNAME));
 				return CommandResult.success();
 			}
-			Point a = DataHandler.getFirstPoint(player.getUniqueId());
-			Point b = DataHandler.getSecondPoint(player.getUniqueId());
-			if (a == null || b == null)
-			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDAXESELECT));
+                        Point a = DataHandler.getFirstPoint(player.getUniqueId());
+                        Point b = DataHandler.getSecondPoint(player.getUniqueId());
+                        if (a == null || b == null)
+                        {
+                                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDCHUNKSELECT));
 				return CommandResult.success();
 			}
 			if (!ConfigHandler.getNode("worlds").getNode(a.getWorld().getName()).getNode("enabled").getBoolean())

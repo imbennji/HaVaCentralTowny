@@ -10,6 +10,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.World;
 
+import com.arckenver.towny.claim.ChunkClaimUtils;
 import com.arckenver.towny.object.Towny;
 
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -33,11 +34,11 @@ public class ConfigHandler
 		load(null);
 	}
 
-	public static void load(CommandSource src)
-	{
-		// load file
-		try
-		{
+        public static void load(CommandSource src)
+        {
+                // load file
+                try
+                {
 			if (!configFile.exists())
 			{
 				configFile.getParentFile().mkdirs();
@@ -55,20 +56,22 @@ public class ConfigHandler
 			{
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_CONFIGFILE));
 			}
-		}
+                }
 
-		// check integrity
-		Utils.ensurePositiveNumber(config.getNode("prices", "townyCreationPrice"), 2500);
-		Utils.ensurePositiveNumber(config.getNode("prices", "upkeepPerCitizen"), 100);
-		Utils.ensurePositiveNumber(config.getNode("prices", "unclaimRefundPercentage"), 0);
-		Utils.ensurePositiveNumber(config.getNode("prices", "extraPrice"), 0.5);
-		Utils.ensurePositiveNumber(config.getNode("prices", "blockClaimPrice"), 0.3);
-		Utils.ensurePositiveNumber(config.getNode("prices", "outpostCreationPrice"), 1000);
-		Utils.ensurePositiveNumber(config.getNode("prices", "plotTaxPerDay"), 10);
-		Utils.ensurePositiveNumber(config.getNode("others", "blocksPerCitizen"), 1000);
+                migrateLegacyKeys();
+
+                // check integrity
+                Utils.ensurePositiveNumber(config.getNode("prices", "townyCreationPrice"), 2500);
+                Utils.ensurePositiveNumber(config.getNode("prices", "upkeepPerCitizen"), 100);
+                Utils.ensurePositiveNumber(config.getNode("prices", "unclaimRefundPercentage"), 0);
+                Utils.ensurePositiveNumber(config.getNode("prices", "extraChunkPrice"), ChunkClaimUtils.CHUNK_AREA * 0.5);
+                Utils.ensurePositiveNumber(config.getNode("prices", "chunkClaimPrice"), ChunkClaimUtils.CHUNK_AREA * 0.3);
+                Utils.ensurePositiveNumber(config.getNode("prices", "outpostCreationPrice"), 1000);
+                Utils.ensurePositiveNumber(config.getNode("prices", "plotTaxPerDay"), 10);
+                Utils.ensurePositiveNumber(config.getNode("others", "chunksPerCitizen"), 4);
 		Utils.ensurePositiveNumber(config.getNode("others", "maxTownySpawns"), 3);
 		Utils.ensurePositiveNumber(config.getNode("others", "minTownyDistance"), 500);
-		Utils.ensurePositiveNumber(config.getNode("others", "maxExtra"), 5000);
+                Utils.ensurePositiveNumber(config.getNode("others", "maxExtraChunks"), 20);
 		Utils.ensurePositiveNumber(config.getNode("others", "minTownyNameLength"), 3);
 		Utils.ensurePositiveNumber(config.getNode("others", "maxTownyNameLength"), 13);
 		Utils.ensurePositiveNumber(config.getNode("others", "minTownyTagLength"), 3);
@@ -78,9 +81,8 @@ public class ConfigHandler
 		Utils.ensurePositiveNumber(config.getNode("others", "minPlotNameLength"), 3);
 		Utils.ensurePositiveNumber(config.getNode("others", "maxPlotNameLength"), 13);
 
-		Utils.ensureBoolean(config.getNode("others", "enableTownyRanks"), true);
-		Utils.ensureBoolean(config.getNode("others", "enableTownyTag"), true);
-		Utils.ensureBoolean(config.getNode("others", "enableGoldenAxe"), true);
+                Utils.ensureBoolean(config.getNode("others", "enableTownyRanks"), true);
+                Utils.ensureBoolean(config.getNode("others", "enableTownyTag"), true);
 
 		// chat formats (use {TOWN}, not {NATION})
 		Utils.ensureString(
@@ -193,11 +195,11 @@ public class ConfigHandler
 		{
 			Utils.ensureString(config.getNode("whitelist", "build").getAppendedNode(), "gravestone:gravestone");
 			Utils.ensureString(config.getNode("whitelist", "build").getAppendedNode(), "modname:blockname");
-		}
+        }
 
-		if (!config.getNode("whitelist", "break").hasListChildren() || config.getNode("whitelist", "break").getChildrenList().isEmpty())
-		{
-			Utils.ensureString(config.getNode("whitelist", "break").getAppendedNode(), "modname:blockname");
+                if (!config.getNode("whitelist", "break").hasListChildren() || config.getNode("whitelist", "break").getChildrenList().isEmpty())
+                {
+                        Utils.ensureString(config.getNode("whitelist", "break").getAppendedNode(), "modname:blockname");
 		}
 
 		if (!config.getNode("whitelist", "use").hasListChildren() || config.getNode("whitelist", "use").getChildrenList().isEmpty())
@@ -284,17 +286,55 @@ public class ConfigHandler
 			}
 		}
 
-		save();
-		if (src != null)
-		{
-			src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_CONFIGRELOADED));
-		}
-	}
+                save();
+                if (src != null)
+                {
+                        src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_CONFIGRELOADED));
+                }
+        }
 
-	public static void save()
-	{
-		try
-		{
+        private static void migrateLegacyKeys()
+        {
+                migratePriceNode(config.getNode("prices"), "blockClaimPrice", "chunkClaimPrice");
+                migratePriceNode(config.getNode("prices"), "extraPrice", "extraChunkPrice");
+                migrateChunkCountNode(config.getNode("others"), "blocksPerCitizen", "chunksPerCitizen");
+                migrateChunkCountNode(config.getNode("others"), "maxExtra", "maxExtraChunks");
+        }
+
+        private static void migratePriceNode(CommentedConfigurationNode parent, String oldKey, String newKey)
+        {
+                CommentedConfigurationNode legacy = parent.getNode(oldKey);
+                CommentedConfigurationNode modern = parent.getNode(newKey);
+                if (!modern.isVirtual())
+                {
+                        return;
+                }
+                if (!legacy.isVirtual())
+                {
+                        modern.setValue(legacy.getDouble() * ChunkClaimUtils.CHUNK_AREA);
+                }
+        }
+
+        private static void migrateChunkCountNode(CommentedConfigurationNode parent, String oldKey, String newKey)
+        {
+                CommentedConfigurationNode legacy = parent.getNode(oldKey);
+                CommentedConfigurationNode modern = parent.getNode(newKey);
+                if (!modern.isVirtual())
+                {
+                        return;
+                }
+                if (!legacy.isVirtual())
+                {
+                        int legacyValue = legacy.getInt();
+                        int converted = (int) Math.max(0, Math.ceil(legacyValue / (double) ChunkClaimUtils.CHUNK_AREA));
+                        modern.setValue(converted);
+                }
+        }
+
+        public static void save()
+        {
+                try
+                {
 			configManager.save(config);
 		}
 		catch (IOException e)
