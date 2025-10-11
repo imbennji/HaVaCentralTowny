@@ -2,7 +2,6 @@ package com.arckenver.towny.cmdexecutor.nation;
 
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
-import com.arckenver.towny.cmdelement.TownyNameElement;
 import com.arckenver.towny.object.Nation;
 import com.arckenver.towny.object.Towny;
 import org.spongepowered.api.command.CommandException;
@@ -16,14 +15,14 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-public class NationKickExecutor implements CommandExecutor {
+public class NationToggleOpenExecutor implements CommandExecutor {
     public static void create(CommandSpec.Builder cmd) {
         cmd.child(CommandSpec.builder()
                 .description(Text.of(""))
-                .permission("towny.command.nation.kick")
-                .arguments(new TownyNameElement(Text.of("town")))
-                .executor(new NationKickExecutor())
-                .build(), "kick", "remove");
+                .permission("towny.command.nation.toggleopen")
+                .arguments(GenericArguments.optional(GenericArguments.bool(Text.of("open"))))
+                .executor(new NationToggleOpenExecutor())
+                .build(), "toggleopen", "open");
     }
 
     @Override
@@ -34,41 +33,28 @@ public class NationKickExecutor implements CommandExecutor {
         }
 
         Player player = (Player) src;
-        Towny playerTown = DataHandler.getTownyOfPlayer(player.getUniqueId());
-        if (playerTown == null || !playerTown.hasNation()) {
+        Towny town = DataHandler.getTownyOfPlayer(player.getUniqueId());
+        if (town == null || !town.hasNation()) {
             src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NONATION));
             return CommandResult.success();
         }
 
-        Nation nation = DataHandler.getNation(playerTown.getNationUUID());
+        Nation nation = DataHandler.getNation(town.getNationUUID());
         if (nation == null) {
             src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_NOT_FOUND));
             return CommandResult.success();
         }
 
-        if (!nation.isCapital(playerTown.getUUID()) || !playerTown.isPresident(player.getUniqueId())) {
+        if (!nation.isCapital(town.getUUID()) || !town.isPresident(player.getUniqueId())) {
             src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_NATIONLEADER));
             return CommandResult.success();
         }
 
-        String townName = ctx.<String>getOne("town").orElse("");
-        Towny targetTown = DataHandler.getTowny(townName);
-        if (targetTown == null || !targetTown.hasNation() || !nation.getUUID().equals(targetTown.getNationUUID())) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_TOWN_NO_NATION));
-            return CommandResult.success();
-        }
-
-        if (nation.isCapital(targetTown.getUUID())) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_CAPITAL_REQUIRED));
-            return CommandResult.success();
-        }
-
-        nation.removeTown(targetTown.getUUID());
+        boolean open = ctx.<Boolean>getOne("open").orElse(!nation.isOpen());
+        nation.setOpen(open);
         DataHandler.saveNation(nation.getUUID());
-        targetTown.clearNation();
-        DataHandler.saveTowny(targetTown.getUUID());
 
-        src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_NATION_LEFT.replace("{TOWN}", targetTown.getName())));
+        src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_NATION_OPEN));
         return CommandResult.success();
     }
 }

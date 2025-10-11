@@ -151,10 +151,6 @@ public class ConfigHandler
                 Utils.ensurePositiveNumber(config.getNode("nation", "maxTaxes"), 1000);
                 Utils.ensureBoolean(config.getNode("nation", "flags", "open"), false);
                 Utils.ensureBoolean(config.getNode("nation", "flags", "neutral"), false);
-                Utils.ensureBoolean(config.getNode("nation", "flags", "public"), false);
-                Utils.ensureBoolean(config.getNode("nation", "defaultTaxPercentage"), false);
-                Utils.ensurePositiveNumber(config.getNode("nation", "defaultSpawnCost"), 0D);
-                Utils.ensurePositiveNumber(config.getNode("nation", "maxSpawnCost"), 1000D);
 
 		Utils.ensureBoolean(config.getNode("towny", "flags", "pvp"), false);
 		Utils.ensureBoolean(config.getNode("towny", "flags", "mobs"), false);

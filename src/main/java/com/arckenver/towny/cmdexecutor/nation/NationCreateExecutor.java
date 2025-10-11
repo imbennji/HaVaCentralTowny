@@ -112,13 +112,9 @@ public class NationCreateExecutor implements CommandExecutor {
         Nation nation = new Nation(UUID.randomUUID(), rawName);
         nation.setCapital(town.getUUID());
         nation.addTown(town.getUUID());
-        nation.setKing(town.getPresident());
         nation.setOpen(ConfigHandler.getNode("nation", "flags", "open").getBoolean());
         nation.setNeutral(ConfigHandler.getNode("nation", "flags", "neutral").getBoolean());
-        nation.setPublic(ConfigHandler.getNode("nation", "flags", "public").getBoolean());
         nation.setTaxes(ConfigHandler.getNode("nation", "defaultTaxes").getDouble());
-        nation.setTaxPercentage(ConfigHandler.getNode("nation", "defaultTaxPercentage").getBoolean());
-        nation.setSpawnCost(ConfigHandler.getNode("nation", "defaultSpawnCost").getDouble());
 
         DataHandler.addNation(nation);
         town.setNationUUID(nation.getUUID());
