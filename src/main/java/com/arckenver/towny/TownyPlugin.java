@@ -26,7 +26,7 @@ import com.arckenver.towny.service.TownyService;
 import com.arckenver.towny.task.TaxesCollectRunnable;
 import com.google.inject.Inject;
 
-@Plugin(id = "towny-relaunched", name = "Towny/Towns", authors = {"V43"}, version = "1.0")
+@Plugin(id = "towny-relaunched", name = "Towny/Towns", authors = {"V43"}, version = "1.0", description = "Modernized Towny experience for Sponge")
 public class TownyPlugin {
 	private File rootDir;
 

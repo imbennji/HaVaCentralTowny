@@ -26,9 +26,15 @@ public class NationSerializer implements JsonSerializer<Nation> {
         if (nation.getCapital() != null) {
             json.add("capital", new JsonPrimitive(nation.getCapital().toString()));
         }
+        if (nation.getKing() != null) {
+            json.add("king", new JsonPrimitive(nation.getKing().toString()));
+        }
         json.add("open", new JsonPrimitive(nation.isOpen()));
         json.add("neutral", new JsonPrimitive(nation.isNeutral()));
+        json.add("public", new JsonPrimitive(nation.isPublic()));
         json.add("taxes", new JsonPrimitive(nation.getTaxes()));
+        json.add("taxPercentage", new JsonPrimitive(nation.isTaxPercentage()));
+        json.add("spawnCost", new JsonPrimitive(nation.getSpawnCost()));
 
         Location<World> spawn = nation.getSpawn();
         if (spawn != null) {
@@ -57,6 +63,12 @@ public class NationSerializer implements JsonSerializer<Nation> {
             enemies.add(new JsonPrimitive(enemy.toString()));
         }
         json.add("enemies", enemies);
+
+        JsonArray assistants = new JsonArray();
+        for (UUID assistant : nation.getAssistants()) {
+            assistants.add(new JsonPrimitive(assistant.toString()));
+        }
+        json.add("assistants", assistants);
         return json;
     }
 }
