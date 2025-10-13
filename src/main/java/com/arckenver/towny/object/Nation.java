@@ -2,6 +2,7 @@ package com.arckenver.towny.object;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
@@ -16,6 +17,18 @@ import org.spongepowered.api.world.World;
  * layered on later without breaking serialization.
  */
 public class Nation {
+    public enum GovernmentType {
+        DEMOCRACY,
+        MONARCHY,
+        THEOCRACY,
+        COMMUNIST,
+        CAPITALIST;
+
+        public String getDisplayName() {
+            String name = name().toLowerCase(Locale.ENGLISH);
+            return name.substring(0, 1).toUpperCase(Locale.ENGLISH) + name.substring(1);
+        }
+    }
     private UUID uuid;
     private String name;
     private String tag;
@@ -29,6 +42,7 @@ public class Nation {
     private boolean taxPercentage;
     private double spawnCost;
     private Location<World> spawn;
+    private GovernmentType government;
 
     private final Set<UUID> towns = new LinkedHashSet<>();
     private final Set<UUID> allies = new LinkedHashSet<>();
@@ -46,6 +60,7 @@ public class Nation {
         this.taxes = 0D;
         this.taxPercentage = false;
         this.spawnCost = 0D;
+        this.government = GovernmentType.DEMOCRACY;
     }
 
     public UUID getUUID() {
@@ -171,6 +186,14 @@ public class Nation {
         this.spawnCost = spawnCost;
     }
 
+    public GovernmentType getGovernment() {
+        return government;
+    }
+
+    public void setGovernment(GovernmentType government) {
+        this.government = government == null ? GovernmentType.DEMOCRACY : government;
+    }
+
     public Set<UUID> getTowns() {
         return Collections.unmodifiableSet(towns);
     }
@@ -228,5 +251,9 @@ public class Nation {
 
     public boolean isAssistant(UUID playerUUID) {
         return assistants.contains(playerUUID);
+    }
+
+    public boolean isStaff(UUID playerUUID) {
+        return isKing(playerUUID) || isAssistant(playerUUID);
     }
 }

@@ -24,18 +24,27 @@ public class PlotPermExecutor implements CommandExecutor
 		cmd.child(CommandSpec.builder()
 				.description(Text.of(""))
 				.permission("towny.command.plot.perm")
-				.arguments(
-						GenericArguments.choices(Text.of("type"),
-								ImmutableMap.<String, String> builder()
-										.put(Towny.TYPE_OUTSIDER, Towny.TYPE_OUTSIDER)
-										.put(Towny.TYPE_CITIZEN, Towny.TYPE_CITIZEN)
-										.put(Towny.TYPE_COOWNER, Towny.TYPE_COOWNER)
-										.build()),
-						GenericArguments.choices(Text.of("perm"),
-								ImmutableMap.<String, String> builder()
-										.put(Towny.PERM_BUILD, Towny.PERM_BUILD)
-										.put(Towny.PERM_INTERACT, Towny.PERM_INTERACT)
-										.build()),
+                                .arguments(
+                                                GenericArguments.choices(Text.of("type"),
+                                                                ImmutableMap.<String, String> builder()
+                                                                                .put("friend", Towny.TYPE_FRIEND)
+                                                                                .put("coowner", Towny.TYPE_FRIEND)
+                                                                                .put("resident", Towny.TYPE_RESIDENT)
+                                                                                .put("citizen", Towny.TYPE_RESIDENT)
+                                                                                .put("ally", Towny.TYPE_ALLY)
+                                                                                .put("outsider", Towny.TYPE_OUTSIDER)
+                                                                                .build()),
+                                                GenericArguments.choices(Text.of("perm"),
+                                                                ImmutableMap.<String, String> builder()
+                                                                                .put("build", Towny.PERM_BUILD)
+                                                                                .put("destroy", Towny.PERM_DESTROY)
+                                                                                .put("break", Towny.PERM_DESTROY)
+                                                                                .put("switch", Towny.PERM_SWITCH)
+                                                                                .put("itemuse", Towny.PERM_ITEM_USE)
+                                                                                .put("item_use", Towny.PERM_ITEM_USE)
+                                                                                .put("use", Towny.PERM_ITEM_USE)
+                                                                                .put("interact", Towny.PERM_SWITCH)
+                                                                                .build()),
 						GenericArguments.optional(GenericArguments.bool(Text.of("bool"))))
 				.executor(new PlotPermExecutor())
 				.build(), "perm");

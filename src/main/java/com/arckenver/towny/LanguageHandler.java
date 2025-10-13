@@ -175,6 +175,7 @@ public class LanguageHandler
         public static String INFO_NATION_SPAWN_TRAVEL = "Teleporting to nation spawn";
         public static String INFO_NATION_TAXES = "Nation taxes updated";
         public static String INFO_NATION_TAXES_PERCENT = "Nation tax mode toggled";
+        public static String INFO_NATION_GOVERNMENT = "Nation government updated to {GOVERNMENT}";
         public static String INFO_NATION_DEPOSIT = "Deposited {AMOUNT} into the nation bank";
         public static String INFO_NATION_WITHDRAW = "Withdrew {AMOUNT} from the nation bank";
 
@@ -323,8 +324,11 @@ public class LanguageHandler
 	public static String INFO_CHANGEOWNER = "{PLAYER} set you as the owner of plot {PLOT}";
 	public static String ERROR_SELECTIONCONTAINPLOT = "Your selection contains a plot of your town";
 	public static String ERROR_PLOTNOTINTOWN = "Selected plot is not inside your town's region";
-	public static String ERROR_PERM_BUILD = "You don't have permission to build here";
-	public static String ERROR_PERM_INTERACT = "You don't have permission to interact here";
+        public static String ERROR_PERM_BUILD = "You don't have permission to build here";
+        public static String ERROR_PERM_INTERACT = "You don't have permission to interact here";
+        public static String ERROR_PERM_DESTROY = "You don't have permission to destroy here";
+        public static String ERROR_PERM_SWITCH = "You don't have permission to use switches here";
+        public static String ERROR_PERM_ITEMUSE = "You don't have permission to use items here";
 	public static String ERROR_PLAYERNOTINTOWN = "Player is not part of a town";
 	public static String ERROR_PLAYERISPRES = "Player is mayor of their town, use /townyadmin setpres";
 	public static String SUCCESS_GENERAL = "Success!";
@@ -361,12 +365,15 @@ public class LanguageHandler
         public static String FORMAT_ASSISTANTS = "Assistants";
         public static String FORMAT_ALLIES = "Allies";
         public static String FORMAT_ENEMIES = "Enemies";
+        public static String FORMAT_GOVERNMENT = "Government";
         public static String FORMAT_OPEN = "Open";
         public static String FORMAT_PUBLIC = "Public";
         public static String FORMAT_NEUTRAL = "Neutral";
         public static String FORMAT_PERMISSIONS = "Permissions";
-	public static String FORMAT_OUTSIDERS = "Outsiders";
-	public static String FORMAT_FLAGS = "Flags";
+        public static String FORMAT_OUTSIDERS = "Outsiders";
+        public static String FORMAT_RESIDENTS = "Residents";
+        public static String FORMAT_FRIENDS = "Friends";
+        public static String FORMAT_FLAGS = "Flags";
 	public static String FORMAT_OWNER = "Owner";
 	public static String FORMAT_COOWNER = "CoOwners";
 	public static String FORMAT_NONE = "None";
@@ -391,8 +398,11 @@ public class LanguageHandler
         public static String HEADER_TOWNLIST = "Town List";
         public static String HEADER_NATIONLIST = "Nation List";
 	public static String HEADER_WORLDLIST = "World List";
-	public static String TYPE_BUILD = "BUILD";
-	public static String TYPE_INTERACT = "INTERACT";
+        public static String TYPE_BUILD = "BUILD";
+        public static String TYPE_DESTROY = "DESTROY";
+        public static String TYPE_SWITCH = "SWITCH";
+        public static String TYPE_ITEMUSE = "ITEM USE";
+        public static String TYPE_INTERACT = "INTERACT";
 	public static String VALUE_TRUE = "true";
 
 	public static String ERROR_NEGATIVEINTERVAL = "You can't input negative values for rent intervals!";

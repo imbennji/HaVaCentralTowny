@@ -35,6 +35,7 @@ public class NationSerializer implements JsonSerializer<Nation> {
         json.add("taxes", new JsonPrimitive(nation.getTaxes()));
         json.add("taxPercentage", new JsonPrimitive(nation.isTaxPercentage()));
         json.add("spawnCost", new JsonPrimitive(nation.getSpawnCost()));
+        json.add("government", new JsonPrimitive(nation.getGovernment().name().toLowerCase()));
 
         Location<World> spawn = nation.getSpawn();
         if (spawn != null) {

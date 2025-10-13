@@ -65,8 +65,11 @@ public class TownyworldEnableExecutor implements CommandExecutor
 		
 		node.getNode("enabled").setValue(true);
 		
-		node.getNode("perms").getNode(Towny.PERM_BUILD).setValue(true);
-		node.getNode("perms").getNode(Towny.PERM_INTERACT).setValue(true);
+                node.getNode("perms").getNode(Towny.PERM_BUILD).setValue(true);
+                node.getNode("perms").getNode(Towny.PERM_DESTROY).setValue(true);
+                node.getNode("perms").getNode(Towny.PERM_SWITCH).setValue(true);
+                node.getNode("perms").getNode(Towny.PERM_ITEM_USE).setValue(true);
+                node.getNode("perms").getNode(Towny.PERM_INTERACT).setValue(true);
 		
 		node.getNode("flags", "pvp").setValue(true);
 		node.getNode("flags", "mobs").setValue(true);

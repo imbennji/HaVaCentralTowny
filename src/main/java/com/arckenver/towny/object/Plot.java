@@ -2,7 +2,11 @@ package com.arckenver.towny.object;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
 
@@ -17,12 +21,15 @@ public class Plot
 	private String name;
 	private String displayName;
 	private UUID owner;
-	private ArrayList<UUID> coowners;
-	private Rect rect;
-	private Hashtable<String, Hashtable<String, Boolean>> perms;
-	private Hashtable<String, Boolean> flags;
-	private BigDecimal price;
-	private BigDecimal rentalPrice;
+        private ArrayList<UUID> coowners;
+        private Rect rect;
+        private Hashtable<String, Hashtable<String, Boolean>> perms;
+        private Hashtable<String, Boolean> flags;
+        private BigDecimal price;
+        private BigDecimal rentalPrice;
+
+        private static final List<String> PLOT_PERMISSION_KEYS = Arrays.asList(
+                        Towny.PERM_BUILD, Towny.PERM_DESTROY, Towny.PERM_SWITCH, Towny.PERM_ITEM_USE);
 	
 	public Plot(UUID uuid, String name, Rect rect)
 	{
@@ -30,39 +37,109 @@ public class Plot
 	}
 	
 	@SuppressWarnings("serial")
-	public Plot(UUID uuid, String name, Rect rect, UUID owner)
-	{
-		this.uuid = uuid;
-		this.name = name;
-		this.owner = owner;
+        public Plot(UUID uuid, String name, Rect rect, UUID owner)
+        {
+                this.uuid = uuid;
+                this.name = name;
+                this.owner = owner;
 		this.coowners = new ArrayList<UUID>();
 		this.rect = rect;
 		
 
-		this.flags = new Hashtable<String, Boolean>();
-		for (Entry<Object, ? extends CommentedConfigurationNode> e : ConfigHandler.getNode("flags", "plots").getChildrenMap().entrySet())
-		{
-			flags.put(e.getKey().toString(), e.getValue().getBoolean());
-		}
-		this.perms = new Hashtable<String, Hashtable<String, Boolean>>()
-		{{
-			put(Towny.TYPE_OUTSIDER, new Hashtable<String, Boolean>()
-			{{
-				put(Towny.PERM_BUILD, ConfigHandler.getNode("plots", "perms").getNode(Towny.TYPE_OUTSIDER).getNode(Towny.PERM_BUILD).getBoolean());
-				put(Towny.PERM_INTERACT, ConfigHandler.getNode("plots", "perms").getNode(Towny.TYPE_OUTSIDER).getNode(Towny.PERM_INTERACT).getBoolean());
-			}});
-			put(Towny.TYPE_CITIZEN, new Hashtable<String, Boolean>()
-			{{
-				put(Towny.PERM_BUILD, ConfigHandler.getNode("plots", "perms").getNode(Towny.TYPE_CITIZEN).getNode(Towny.PERM_BUILD).getBoolean());
-				put(Towny.PERM_INTERACT, ConfigHandler.getNode("plots", "perms").getNode(Towny.TYPE_CITIZEN).getNode(Towny.PERM_INTERACT).getBoolean());
-			}});
-			put(Towny.TYPE_COOWNER, new Hashtable<String, Boolean>()
-			{{
-				put(Towny.PERM_BUILD, ConfigHandler.getNode("plots", "perms").getNode(Towny.TYPE_COOWNER).getNode(Towny.PERM_BUILD).getBoolean());
-				put(Towny.PERM_INTERACT, ConfigHandler.getNode("plots", "perms").getNode(Towny.TYPE_COOWNER).getNode(Towny.PERM_INTERACT).getBoolean());
-			}});
-		}};
-	}
+                this.flags = new Hashtable<String, Boolean>();
+                for (Entry<Object, ? extends CommentedConfigurationNode> e : ConfigHandler.getNode("flags", "plots").getChildrenMap().entrySet())
+                {
+                        flags.put(e.getKey().toString(), e.getValue().getBoolean());
+                }
+                this.perms = new Hashtable<>();
+                ensurePlotPermContainer(Towny.TYPE_FRIEND);
+                ensurePlotPermContainer(Towny.TYPE_RESIDENT);
+                ensurePlotPermContainer(Towny.TYPE_ALLY);
+                ensurePlotPermContainer(Towny.TYPE_OUTSIDER);
+        }
+
+        private Hashtable<String, Boolean> ensurePlotPermContainer(String type) {
+                String canonical = Towny.canonicalizePlotType(type);
+                return perms.computeIfAbsent(canonical, this::buildPlotPermDefaults);
+        }
+
+        private Hashtable<String, Boolean> buildPlotPermDefaults(String type) {
+                Hashtable<String, Boolean> defaults = new Hashtable<>();
+                for (String key : PLOT_PERMISSION_KEYS) {
+                        defaults.put(key, resolvePlotPermDefault(type, key));
+                }
+                return defaults;
+        }
+
+        private boolean resolvePlotPermDefault(String type, String permKey) {
+                CommentedConfigurationNode base = ConfigHandler.getNode("plots", "perms");
+                CommentedConfigurationNode node = base.getNode(type, permKey);
+                if (!node.isVirtual()) {
+                        return node.getBoolean(defaultPlotPermValue(type, permKey));
+                }
+                if (Towny.PERM_DESTROY.equals(permKey)) {
+                        return base.getNode(type, Towny.PERM_BUILD).getBoolean(defaultPlotPermValue(type, Towny.PERM_BUILD));
+                }
+                if (Towny.PERM_SWITCH.equals(permKey) || Towny.PERM_ITEM_USE.equals(permKey)) {
+                        CommentedConfigurationNode legacy = base.getNode(type, Towny.PERM_INTERACT);
+                        if (!legacy.isVirtual()) {
+                                return legacy.getBoolean(defaultPlotPermValue(type, permKey));
+                        }
+                }
+
+                // Legacy type fallbacks
+                if (Towny.TYPE_FRIEND.equals(type)) {
+                        CommentedConfigurationNode legacyType = base.getNode("coowner", permKey);
+                        if (!legacyType.isVirtual()) {
+                                return legacyType.getBoolean(defaultPlotPermValue(type, permKey));
+                        }
+                        if (Towny.PERM_SWITCH.equals(permKey) || Towny.PERM_ITEM_USE.equals(permKey)) {
+                                CommentedConfigurationNode legacyInteract = base.getNode("coowner", Towny.PERM_INTERACT);
+                                if (!legacyInteract.isVirtual()) {
+                                        return legacyInteract.getBoolean(defaultPlotPermValue(type, permKey));
+                                }
+                        }
+                }
+                if (Towny.TYPE_RESIDENT.equals(type)) {
+                        CommentedConfigurationNode legacyType = base.getNode("citizen", permKey);
+                        if (!legacyType.isVirtual()) {
+                                return legacyType.getBoolean(defaultPlotPermValue(type, permKey));
+                        }
+                        if (Towny.PERM_SWITCH.equals(permKey) || Towny.PERM_ITEM_USE.equals(permKey)) {
+                                CommentedConfigurationNode legacyInteract = base.getNode("citizen", Towny.PERM_INTERACT);
+                                if (!legacyInteract.isVirtual()) {
+                                        return legacyInteract.getBoolean(defaultPlotPermValue(type, permKey));
+                                }
+                        }
+                }
+                return defaultPlotPermValue(type, permKey);
+        }
+
+        private boolean defaultPlotPermValue(String type, String permKey) {
+                if (Towny.TYPE_FRIEND.equals(type)) {
+                        return true;
+                }
+                if (Towny.TYPE_RESIDENT.equals(type)) {
+                        if (Towny.PERM_BUILD.equals(permKey) || Towny.PERM_DESTROY.equals(permKey)) {
+                                return false;
+                        }
+                        return true;
+                }
+                return false;
+        }
+
+        private boolean getPlotPermInternal(String type, String permKey) {
+                Hashtable<String, Boolean> map = ensurePlotPermContainer(type);
+                if (!map.containsKey(permKey)) {
+                        map.put(permKey, resolvePlotPermDefault(type, permKey));
+                }
+                return map.get(permKey);
+        }
+
+        private void setPlotPermInternal(String type, String permKey, boolean value) {
+                Hashtable<String, Boolean> map = ensurePlotPermContainer(type);
+                map.put(permKey, value);
+        }
 	
 	public UUID getUUID()
 	{
@@ -180,20 +257,40 @@ public class Plot
 		return flags.containsKey(flag);
 	}
 	
-	public boolean getPerm(String type, String perm)
-	{
-		return perms.get(type).get(perm);
-	}
+        public boolean getPerm(String type, String perm)
+        {
+                Collection<String> keys = Towny.expandPermKeys(perm);
+                if (keys.isEmpty()) {
+                        return false;
+                }
+                String canonicalType = Towny.canonicalizePlotType(type);
+                boolean allowed = true;
+                for (String key : keys) {
+                        allowed = allowed && getPlotPermInternal(canonicalType, key);
+                }
+                return allowed;
+        }
 
-	public Hashtable<String, Hashtable<String, Boolean>> getPerms()
-	{
-		return perms;
-	}
+        public Hashtable<String, Hashtable<String, Boolean>> getPerms()
+        {
+                ensurePlotPermContainer(Towny.TYPE_FRIEND);
+                ensurePlotPermContainer(Towny.TYPE_RESIDENT);
+                ensurePlotPermContainer(Towny.TYPE_ALLY);
+                ensurePlotPermContainer(Towny.TYPE_OUTSIDER);
+                return perms;
+        }
 
-	public void setPerm(String type, String perm, boolean bool)
-	{
-		perms.get(type).put(perm, bool);
-	}
+        public void setPerm(String type, String perm, boolean bool)
+        {
+                String canonicalType = Towny.canonicalizePlotType(type);
+                Collection<String> keys = Towny.expandPermKeys(perm);
+                if (keys.isEmpty()) {
+                        return;
+                }
+                for (String key : keys) {
+                        setPlotPermInternal(canonicalType, key, bool);
+                }
+        }
 	
 	public BigDecimal getPrice()
 	{

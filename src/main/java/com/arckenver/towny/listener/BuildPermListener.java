@@ -24,6 +24,7 @@ import com.arckenver.towny.ConfigHandler;
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
 import com.arckenver.towny.Utils;
+import com.arckenver.towny.object.Towny;
 
 public class BuildPermListener
 {
@@ -40,7 +41,7 @@ public class BuildPermListener
 		.forEach(trans -> trans.getOriginal().getLocation().ifPresent(loc -> {
 			if (ConfigHandler.getNode("worlds").getNode(trans.getFinal().getLocation().get().getExtent().getName()).getNode("enabled").getBoolean()
 					&& !ConfigHandler.isWhitelisted("build", trans.getFinal().getState().getType().getId())
-					&& !DataHandler.getPerm("build", player.getUniqueId(), loc))
+                                        && !DataHandler.getPerm(Towny.PERM_DESTROY, player.getUniqueId(), loc))
 			{
 				if(trans.getOriginal().getState().getType().equals(BlockTypes.WOODEN_PRESSURE_PLATE)
 						|| trans.getOriginal().getState().getType().equals(BlockTypes.STONE_PRESSURE_PLATE)
@@ -52,8 +53,8 @@ public class BuildPermListener
 				}
 
 				trans.setValid(false);
-				try {
-					player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_BUILD));
+                                try {
+                                        player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_DESTROY));
 				} catch (Exception e) {}
 			}
 		}));
@@ -72,11 +73,11 @@ public class BuildPermListener
 		for (Location<World> loc : event.getLocations()) {
 			if (ConfigHandler.getNode("worlds").getNode(loc.getExtent().getName()).getNode("enabled").getBoolean()
 					&& !ConfigHandler.isWhitelisted("break", loc.getBlock().getId())
-					&& !DataHandler.getPerm("build", player.getUniqueId(), loc))
+                                        && !DataHandler.getPerm(Towny.PERM_DESTROY, player.getUniqueId(), loc))
 			{
 				event.setCancelled(true);
-				try {
-					player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_BUILD));
+                                try {
+                                        player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_DESTROY));
 				} catch (Exception e) {}
 				return;
 			}
@@ -96,11 +97,11 @@ public class BuildPermListener
 		.forEach(trans -> trans.getOriginal().getLocation().ifPresent(loc -> {
 			if (ConfigHandler.getNode("worlds").getNode(trans.getFinal().getLocation().get().getExtent().getName()).getNode("enabled").getBoolean()
 					&& !ConfigHandler.isWhitelisted("build", trans.getFinal().getState().getType().getId())
-					&& !DataHandler.getPerm("build", player.getUniqueId(), loc))
+                                        && !DataHandler.getPerm(Towny.PERM_BUILD, player.getUniqueId(), loc))
 			{
 				trans.setValid(false);
-				try {
-					player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_BUILD));
+                                try {
+                                        player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_BUILD));
 				} catch (Exception e) {}
 			}
 		}));
@@ -121,14 +122,14 @@ public class BuildPermListener
 			if (!ConfigHandler.isWhitelisted("break", trans.getFinal().getState().getType().getId())
 					&& ConfigHandler.getNode("worlds").getNode(trans.getFinal().getLocation().get().getExtent().getName()).getNode("enabled").getBoolean())
 			{
-				if (user != null && !DataHandler.getPerm("build", user.getUniqueId(), loc))
+                        if (user != null && !DataHandler.getPerm(Towny.PERM_DESTROY, user.getUniqueId(), loc))
 				{
 					trans.setValid(false);
-					if (user instanceof Player) {
-						try {
-							((Player) user).sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_BUILD));
-						} catch (Exception e) {}
-					}
+                                        if (user instanceof Player) {
+                                                try {
+                                                        ((Player) user).sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_DESTROY));
+                                                } catch (Exception e) {}
+                                        }
 				}
 			}
 		}));
@@ -145,7 +146,7 @@ public class BuildPermListener
 		{
 			return;
 		}
-		if (!DataHandler.getPerm("build", player.getUniqueId(), event.getTargetTile().getLocation()))
+                if (!DataHandler.getPerm(Towny.PERM_BUILD, player.getUniqueId(), event.getTargetTile().getLocation()))
 		{
 			event.setCancelled(true);
 		}
@@ -161,11 +162,11 @@ public class BuildPermListener
 		if (event.getCause().contains(SpawnTypes.PLACEMENT))
 		{
 			try {
-				if (!ConfigHandler.getNode("worlds").getNode(event.getEntities().get(0).getWorld().getName()).getNode("enabled").getBoolean())
-					return;
-				if (!ConfigHandler.isWhitelisted("spawn", event.getEntities().get(0).getType().getId())
-						&& !DataHandler.getPerm("build", player.getUniqueId(), event.getEntities().get(0).getLocation()))
-					event.setCancelled(true);
+                                if (!ConfigHandler.getNode("worlds").getNode(event.getEntities().get(0).getWorld().getName()).getNode("enabled").getBoolean())
+                                        return;
+                                if (!ConfigHandler.isWhitelisted("spawn", event.getEntities().get(0).getType().getId())
+                                                && !DataHandler.getPerm(Towny.PERM_BUILD, player.getUniqueId(), event.getEntities().get(0).getLocation()))
+                                        event.setCancelled(true);
 			} catch (IndexOutOfBoundsException e) {}
 		}
 	}

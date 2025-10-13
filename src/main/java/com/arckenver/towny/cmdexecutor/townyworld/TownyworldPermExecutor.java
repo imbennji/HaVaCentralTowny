@@ -24,12 +24,18 @@ public class TownyworldPermExecutor implements CommandExecutor
 		cmd.child(CommandSpec.builder()
 				.description(Text.of(""))
 				.permission("towny.command.townyworld.perm")
-				.arguments(
-						GenericArguments.choices(Text.of("perm"),
-								ImmutableMap.<String, String> builder()
-										.put(Towny.PERM_BUILD, Towny.PERM_BUILD)
-										.put(Towny.PERM_INTERACT, Towny.PERM_INTERACT)
-										.build()),
+                                .arguments(
+                                                GenericArguments.choices(Text.of("perm"),
+                                                                ImmutableMap.<String, String> builder()
+                                                                                .put("build", Towny.PERM_BUILD)
+                                                                                .put("destroy", Towny.PERM_DESTROY)
+                                                                                .put("break", Towny.PERM_DESTROY)
+                                                                                .put("switch", Towny.PERM_SWITCH)
+                                                                                .put("itemuse", Towny.PERM_ITEM_USE)
+                                                                                .put("item_use", Towny.PERM_ITEM_USE)
+                                                                                .put("use", Towny.PERM_ITEM_USE)
+                                                                                .put("interact", Towny.PERM_SWITCH)
+                                                                                .build()),
 						GenericArguments.optional(GenericArguments.bool(Text.of("bool"))))
 				.executor(new TownyworldPermExecutor())
 				.build(), "perm");
@@ -60,11 +66,14 @@ public class TownyworldPermExecutor implements CommandExecutor
 				return CommandResult.success();
 			}
 		}
-		String perm = ctx.<String>getOne("perm").get();
-		boolean currentVal = ConfigHandler.getNode("worlds").getNode(worldName).getNode("perms").getNode(perm).getBoolean();
-		boolean bool = (ctx.<Boolean>getOne("bool").isPresent()) ? ctx.<Boolean>getOne("bool").get() : !currentVal;
-		ConfigHandler.getNode("worlds").getNode(worldName).getNode("perms").getNode(perm).setValue(bool);
-		ConfigHandler.save();
+                String perm = ctx.<String>getOne("perm").get();
+                boolean currentVal = ConfigHandler.getNode("worlds").getNode(worldName).getNode("perms").getNode(perm).getBoolean();
+                boolean bool = (ctx.<Boolean>getOne("bool").isPresent()) ? ctx.<Boolean>getOne("bool").get() : !currentVal;
+                ConfigHandler.getNode("worlds").getNode(worldName).getNode("perms").getNode(perm).setValue(bool);
+                if (Towny.PERM_SWITCH.equals(perm)) {
+                        ConfigHandler.getNode("worlds").getNode(worldName).getNode("perms").getNode(Towny.PERM_INTERACT).setValue(bool);
+                }
+                ConfigHandler.save();
 		src.sendMessage(Utils.formatWorldDescription(worldName));
 		return CommandResult.success();
 	}
