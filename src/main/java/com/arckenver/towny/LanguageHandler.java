@@ -8,8 +8,11 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 
+import com.arckenver.towny.lang.SpigotLanguageImporter;
+
 public class LanguageHandler
 {
+        private static File rootDir;
 	public static String HELP_DESC_CMD_SETSPAWN = "set spawn with the given name";
 	public static String HELP_DESC_CMD_DELSPAWN = "delete spawn with the given name";
 	public static String HELP_DESC_CMD_SETNAME = "set town's name";
@@ -415,14 +418,15 @@ public class LanguageHandler
         public static String COST_MSG_EXTRAPRICE = "Price per extra chunk";
 	public static String INFO_PLOTFS = "{PLAYER} made plot {PLOT} not for sale";
 
-	private static File languageFile;
-	private static ConfigurationLoader<CommentedConfigurationNode> languageManager;
-	private static CommentedConfigurationNode language;
+        private static File languageFile;
+        private static ConfigurationLoader<CommentedConfigurationNode> languageManager;
+        private static CommentedConfigurationNode language;
 
-	public static void init(File rootDir)
-	{
-		languageFile = new File(rootDir, "TownsLanguage.conf");
-		languageManager = HoconConfigurationLoader.builder().setPath(languageFile.toPath()).build();
+        public static void init(File rootDir)
+        {
+                LanguageHandler.rootDir = rootDir;
+                languageFile = new File(rootDir, "TownsLanguage.conf");
+                languageManager = HoconConfigurationLoader.builder().setPath(languageFile.toPath()).build();
 
 		try
 		{
@@ -443,15 +447,21 @@ public class LanguageHandler
 
 	}
 
-	public static void load()
-	{
-		Field fields[] = LanguageHandler.class.getFields();
-		for (int i = 0; i < fields.length; ++i) {
-			if (fields[i].getType() != String.class)
-				continue ;
-			if (language.getNode(fields[i].getName()).getString() != null) {
-				try {
-					fields[i].set(String.class, language.getNode(fields[i].getName()).getString());
+        public static void load()
+        {
+                Field fields[] = LanguageHandler.class.getFields();
+                java.util.Map<String, String> defaults = new java.util.HashMap<>();
+                for (int i = 0; i < fields.length; ++i) {
+                        if (fields[i].getType() != String.class)
+                                continue ;
+                        try {
+                                defaults.put(fields[i].getName(), (String) fields[i].get(String.class));
+                        } catch (IllegalArgumentException | IllegalAccessException e) {
+                                TownyPlugin.getLogger().error("Error when reading default language string " + fields[i].getName());
+                        }
+                        if (language.getNode(fields[i].getName()).getString() != null) {
+                                try {
+                                        fields[i].set(String.class, language.getNode(fields[i].getName()).getString());
 				} catch (IllegalArgumentException|IllegalAccessException e) {
 					TownyPlugin.getLogger().error("Error whey loading language string " + fields[i].getName());
 					e.printStackTrace();
@@ -463,11 +473,32 @@ public class LanguageHandler
 					TownyPlugin.getLogger().error("Error whey saving language string " + fields[i].getName());
 					e.printStackTrace();
 				}
-			}
-		}
+                        }
+                }
 
-		save();
-	}
+                if (rootDir != null) {
+                        java.util.Map<String, String> overrides = SpigotLanguageImporter.load(rootDir, defaults);
+                        if (!overrides.isEmpty()) {
+                                for (int i = 0; i < fields.length; ++i) {
+                                        if (fields[i].getType() != String.class)
+                                                continue;
+                                        String override = overrides.get(fields[i].getName());
+                                        if (override == null)
+                                                continue;
+                                        try {
+                                                fields[i].set(String.class, override);
+                                                language.getNode(fields[i].getName()).setValue(override);
+                                        } catch (IllegalArgumentException | IllegalAccessException e) {
+                                                TownyPlugin.getLogger().error("Error when applying spigot language override for "
+                                                                + fields[i].getName());
+                                                e.printStackTrace();
+                                        }
+                                }
+                        }
+                }
+
+                save();
+        }
 
 	public static void save()
 	{
