@@ -10,6 +10,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.world.World;
 
 import java.lang.reflect.Type;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -67,6 +68,15 @@ public class NationDeserializer implements JsonDeserializer<Nation> {
 
         if (obj.has("spawnCost")) {
             nation.setSpawnCost(obj.get("spawnCost").getAsDouble());
+        }
+
+        if (obj.has("government")) {
+            try {
+                String gov = obj.get("government").getAsString();
+                nation.setGovernment(Nation.GovernmentType.valueOf(gov.toUpperCase(Locale.ENGLISH)));
+            } catch (IllegalArgumentException ignored) {
+                nation.setGovernment(Nation.GovernmentType.DEMOCRACY);
+            }
         }
 
         if (obj.has("spawn")) {

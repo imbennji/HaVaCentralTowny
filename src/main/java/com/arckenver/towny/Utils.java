@@ -346,6 +346,8 @@ public class Utils
                 }
 
                 builder.append(Text.of(TextColors.GOLD, "\nID: ", TextColors.GREEN, nation.getRealName()));
+                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_GOVERNMENT + ": ", TextColors.YELLOW,
+                                nation.getGovernment().getDisplayName()));
 
                 if (nation.getCapital() != null) {
                         Towny capital = DataHandler.getTowny(nation.getCapital());
@@ -381,12 +383,58 @@ public class Utils
                         }
                 }
 
-                builder.append(Text.of(TextColors.GOLD, "\nOpen: ", TextColors.YELLOW, nation.isOpen()));
-                builder.append(Text.of(TextColors.GOLD, "\nNeutral: ", TextColors.YELLOW, nation.isNeutral()));
+                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_OPEN + ": ", TextColors.YELLOW, nation.isOpen()));
+                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_PUBLIC + ": ", TextColors.YELLOW, nation.isPublic()));
+                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_NEUTRAL + ": ", TextColors.YELLOW, nation.isNeutral()));
+
                 builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_TAXES + ": "));
-                builder.append(formatPrice(TextColors.YELLOW, BigDecimal.valueOf(nation.getTaxes())));
+                if (nation.isTaxPercentage()) {
+                        builder.append(Text.of(TextColors.YELLOW, nation.getTaxes() + "%"));
+                } else {
+                        builder.append(formatPrice(TextColors.YELLOW, BigDecimal.valueOf(nation.getTaxes())));
+                }
+
+                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_SPAWN_COST + ": "));
+                builder.append(formatPrice(TextColors.YELLOW, BigDecimal.valueOf(nation.getSpawnCost())));
+
+                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_ASSISTANTS + ": "));
+                structureX(
+                                nation.getAssistants().iterator(),
+                                builder,
+                                b -> b.append(Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE)),
+                                (b, assistant) -> b.append(citizenClickable(TextColors.YELLOW, DataHandler.getPlayerName(assistant))),
+                                b -> b.append(Text.of(TextColors.GOLD, ", ")));
+
+                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_ALLIES + ": "));
+                builder.append(formatNationRelationList(nation.getAllies()));
+
+                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_ENEMIES + ": "));
+                builder.append(formatNationRelationList(nation.getEnemies()));
 
                 return builder.build();
+        }
+
+        private static Text formatNationRelationList(Set<UUID> relationIds) {
+                Text.Builder listBuilder = Text.builder();
+                boolean first = true;
+                for (UUID id : relationIds) {
+                        Nation related = DataHandler.getNation(id);
+                        if (related == null) {
+                                continue;
+                        }
+                        if (!first) {
+                                listBuilder.append(Text.of(TextColors.GOLD, ", "));
+                        }
+                        listBuilder.append(Text.builder(related.getName())
+                                        .color(TextColors.YELLOW)
+                                        .onClick(TextActions.runCommand("/n info " + related.getRealName()))
+                                        .build());
+                        first = false;
+                }
+                if (first) {
+                        listBuilder.append(Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE));
+                }
+                return listBuilder.build();
         }
 
         private static String formatDuration(long millis) {
@@ -442,65 +490,64 @@ public class Utils
 			}
 		}
 
-		if (clicker == CLICKER_NONE)
-		{
-			builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_PERMISSIONS + ":\n    " + LanguageHandler.FORMAT_OUTSIDERS + ": "));
-			builder.append(Text.of((plot.getPerm(Towny.TYPE_OUTSIDER, Towny.PERM_BUILD)) ? TextColors.GREEN : TextColors.RED, LanguageHandler.TYPE_BUILD));
-			builder.append(Text.of(TextColors.GOLD, "/"));
-			builder.append(Text.of((plot.getPerm(Towny.TYPE_OUTSIDER, Towny.PERM_INTERACT)) ? TextColors.GREEN : TextColors.RED, LanguageHandler.TYPE_INTERACT));
-			builder.append(Text.of(TextColors.GOLD, "\n    " + LanguageHandler.FORMAT_CITIZENS + ": "));
-			builder.append(Text.of((plot.getPerm(Towny.TYPE_CITIZEN, Towny.PERM_BUILD)) ? TextColors.GREEN : TextColors.RED, LanguageHandler.TYPE_BUILD));
-			builder.append(Text.of(TextColors.GOLD, "/"));
-			builder.append(Text.of((plot.getPerm(Towny.TYPE_CITIZEN, Towny.PERM_INTERACT)) ? TextColors.GREEN : TextColors.RED, LanguageHandler.TYPE_INTERACT));
-			builder.append(Text.of(TextColors.GOLD, "\n    " + LanguageHandler.FORMAT_COOWNER + ": "));
-			builder.append(Text.of((plot.getPerm(Towny.TYPE_COOWNER, Towny.PERM_BUILD)) ? TextColors.GREEN : TextColors.RED, LanguageHandler.TYPE_BUILD));
-			builder.append(Text.of(TextColors.GOLD, "/"));
-			builder.append(Text.of((plot.getPerm(Towny.TYPE_COOWNER, Towny.PERM_INTERACT)) ? TextColors.GREEN : TextColors.RED, LanguageHandler.TYPE_INTERACT));
+                String[][] permGroups = new String[][] {
+                                {LanguageHandler.FORMAT_OUTSIDERS, Towny.TYPE_OUTSIDER},
+                                {LanguageHandler.FORMAT_ALLIES, Towny.TYPE_ALLY},
+                                {LanguageHandler.FORMAT_RESIDENTS, Towny.TYPE_RESIDENT},
+                                {LanguageHandler.FORMAT_FRIENDS, Towny.TYPE_FRIEND}
+                };
+                String[][] permOptions = new String[][] {
+                                {LanguageHandler.TYPE_BUILD, Towny.PERM_BUILD},
+                                {LanguageHandler.TYPE_DESTROY, Towny.PERM_DESTROY},
+                                {LanguageHandler.TYPE_SWITCH, Towny.PERM_SWITCH},
+                                {LanguageHandler.TYPE_ITEMUSE, Towny.PERM_ITEM_USE}
+                };
 
-			builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_FLAGS + ":"));
-			for (Entry<String, Boolean> e : plot.getFlags().entrySet())
-			{
-				builder.append(Text.of(TextColors.GOLD, "\n    " + StringUtils.capitalize(e.getKey().toLowerCase()) + ": "));
+                if (clicker == CLICKER_NONE)
+                {
+                        builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_PERMISSIONS + ":"));
+                        for (String[] group : permGroups) {
+                                builder.append(Text.of(TextColors.GOLD, "\n    " + group[0] + ": "));
+                                boolean first = true;
+                                for (String[] option : permOptions) {
+                                        if (!first) {
+                                                builder.append(Text.of(TextColors.GOLD, "/"));
+                                        }
+                                        boolean allowed = plot.getPerm(group[1], option[1]);
+                                        builder.append(Text.of(allowed ? TextColors.GREEN : TextColors.RED, option[0]));
+                                        first = false;
+                                }
+                        }
+
+                        builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_FLAGS + ":"));
+                        for (Entry<String, Boolean> e : plot.getFlags().entrySet())
+                        {
+                                builder.append(Text.of(TextColors.GOLD, "\n    " + StringUtils.capitalize(e.getKey().toLowerCase()) + ": "));
 				builder.append(Text.of((e.getValue()) ? TextColors.YELLOW : TextColors.DARK_GRAY, LanguageHandler.FLAG_ENABLED));
 				builder.append(Text.of(TextColors.GOLD, "/"));
 				builder.append(Text.of((e.getValue()) ? TextColors.DARK_GRAY : TextColors.YELLOW, LanguageHandler.FLAG_DISABLED));
 			}
 		}
-		else if (clicker == CLICKER_DEFAULT)
-		{
-			builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_PERMISSIONS + ":"));
+                else if (clicker == CLICKER_DEFAULT)
+                {
+                        builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_PERMISSIONS + ":"));
+                        for (String[] group : permGroups) {
+                                builder.append(Text.of(TextColors.GOLD, "\n    " + group[0] + ": "));
+                                boolean first = true;
+                                for (String[] option : permOptions) {
+                                        if (!first) {
+                                                builder.append(Text.of(TextColors.GOLD, "/"));
+                                        }
+                                        boolean allowed = plot.getPerm(group[1], option[1]);
+                                        builder.append(Text.builder(option[0])
+                                                        .color(allowed ? TextColors.GREEN : TextColors.RED)
+                                                        .onClick(TextActions.runCommand("/z perm " + group[1] + " " + option[1])).build());
+                                        first = false;
+                                }
+                                builder.append(Text.of(TextColors.DARK_GRAY, " <- " + LanguageHandler.CLICK));
+                        }
 
-			builder.append(Text.of(TextColors.GOLD, "\n    " + LanguageHandler.FORMAT_OUTSIDERS + ": "));
-			builder.append(Text.builder(LanguageHandler.TYPE_BUILD)
-					.color((plot.getPerm(Towny.TYPE_OUTSIDER, Towny.PERM_BUILD)) ? TextColors.GREEN : TextColors.RED)
-					.onClick(TextActions.runCommand("/z perm " + Towny.TYPE_OUTSIDER + " " + Towny.PERM_BUILD)).build());
-			builder.append(Text.of(TextColors.GOLD, "/"));
-			builder.append(Text.builder(LanguageHandler.TYPE_INTERACT)
-					.color((plot.getPerm(Towny.TYPE_OUTSIDER, Towny.PERM_INTERACT)) ? TextColors.GREEN : TextColors.RED)
-					.onClick(TextActions.runCommand("/z perm " + Towny.TYPE_OUTSIDER + " " + Towny.PERM_INTERACT)).build());
-			builder.append(Text.of(TextColors.DARK_GRAY, " <- " + LanguageHandler.CLICK));
-
-			builder.append(Text.of(TextColors.GOLD, "\n    " + LanguageHandler.FORMAT_CITIZENS + ": "));
-			builder.append(Text.builder(LanguageHandler.TYPE_BUILD)
-					.color((plot.getPerm(Towny.TYPE_CITIZEN, Towny.PERM_BUILD)) ? TextColors.GREEN : TextColors.RED)
-					.onClick(TextActions.runCommand("/z perm " + Towny.TYPE_CITIZEN + " " + Towny.PERM_BUILD)).build());
-			builder.append(Text.of(TextColors.GOLD, "/"));
-			builder.append(Text.builder(LanguageHandler.TYPE_INTERACT)
-					.color((plot.getPerm(Towny.TYPE_CITIZEN, Towny.PERM_INTERACT)) ? TextColors.GREEN : TextColors.RED)
-					.onClick(TextActions.runCommand("/z perm " + Towny.TYPE_CITIZEN + " " + Towny.PERM_INTERACT)).build());
-			builder.append(Text.of(TextColors.DARK_GRAY, " <- " + LanguageHandler.CLICK));
-
-			builder.append(Text.of(TextColors.GOLD, "\n    " + LanguageHandler.FORMAT_COOWNER + ": "));
-			builder.append(Text.builder(LanguageHandler.TYPE_BUILD)
-					.color((plot.getPerm(Towny.TYPE_COOWNER, Towny.PERM_BUILD)) ? TextColors.GREEN : TextColors.RED)
-					.onClick(TextActions.runCommand("/z perm " + Towny.TYPE_COOWNER + " " + Towny.PERM_BUILD)).build());
-			builder.append(Text.of(TextColors.GOLD, "/"));
-			builder.append(Text.builder(LanguageHandler.TYPE_INTERACT)
-					.color((plot.getPerm(Towny.TYPE_COOWNER, Towny.PERM_INTERACT)) ? TextColors.GREEN : TextColors.RED)
-					.onClick(TextActions.runCommand("/z perm " + Towny.TYPE_COOWNER + " " + Towny.PERM_INTERACT)).build());
-			builder.append(Text.of(TextColors.DARK_GRAY, " <- " + LanguageHandler.CLICK));
-
-			builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_FLAGS + ":"));
+                        builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_FLAGS + ":"));
 			for (Entry<String, Boolean> e : plot.getFlags().entrySet())
 			{
 				builder.append(Text.of(TextColors.GOLD, "\n    " + StringUtils.capitalize(e.getKey().toLowerCase()) + ": "));
@@ -539,17 +586,27 @@ public class Utils
 			return builder.build();
 		}
 
-		builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_PERMISSIONS + ": "));
+                builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_PERMISSIONS + ": "));
+                String[][] worldPermOptions = new String[][] {
+                                {LanguageHandler.TYPE_BUILD, Towny.PERM_BUILD},
+                                {LanguageHandler.TYPE_DESTROY, Towny.PERM_DESTROY},
+                                {LanguageHandler.TYPE_SWITCH, Towny.PERM_SWITCH},
+                                {LanguageHandler.TYPE_ITEMUSE, Towny.PERM_ITEM_USE}
+                };
+                boolean firstPerm = true;
+                for (String[] option : worldPermOptions) {
+                        if (!firstPerm) {
+                                builder.append(Text.of(TextColors.GOLD, "/"));
+                        }
+                        boolean allowed = ConfigHandler.getNode("worlds").getNode(name).getNode("perms", option[1]).getBoolean();
+                        builder.append(Text.builder(option[0])
+                                        .color(allowed ? TextColors.GREEN : TextColors.RED)
+                                        .onClick(TextActions.runCommand("/tw perm " + option[1]))
+                                        .build());
+                        firstPerm = false;
+                }
 
-		boolean canBuild = ConfigHandler.getNode("worlds").getNode(name).getNode("perms", "build").getBoolean();
-		builder.append(Text.builder(LanguageHandler.TYPE_BUILD).color((canBuild) ? TextColors.GREEN : TextColors.RED).onClick(TextActions.runCommand("/tw perm " + Towny.PERM_BUILD)).build());
-
-		builder.append(Text.of(TextColors.GOLD, "/"));
-
-		boolean canInteract = ConfigHandler.getNode("worlds").getNode(name).getNode("perms", "interact").getBoolean();
-		builder.append(Text.builder(LanguageHandler.TYPE_INTERACT).color((canInteract) ? TextColors.GREEN : TextColors.RED).onClick(TextActions.runCommand("/tw perm " + Towny.PERM_INTERACT)).build());
-
-		builder.append(Text.of(TextColors.DARK_GRAY, " <- " + LanguageHandler.CLICK));
+                builder.append(Text.of(TextColors.DARK_GRAY, " <- " + LanguageHandler.CLICK));
 
 		builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_FLAGS + ":"));
 		for (Entry<Object, ? extends CommentedConfigurationNode> e : ConfigHandler.getNode("worlds").getNode(name).getNode("flags").getChildrenMap().entrySet())

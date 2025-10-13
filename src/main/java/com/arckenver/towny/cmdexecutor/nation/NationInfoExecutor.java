@@ -35,6 +35,7 @@ public class NationInfoExecutor implements CommandExecutor {
         NationKickExecutor.create(cmd);
         NationSetBoardExecutor.create(cmd);
         NationSetTagExecutor.create(cmd);
+        NationSetGovernmentExecutor.create(cmd);
         NationToggleOpenExecutor.create(cmd);
     }
 

@@ -23,11 +23,15 @@ public class ConfigHandler
 	private static ConfigurationLoader<CommentedConfigurationNode> configManager;
 	private static CommentedConfigurationNode config;
 
-	public static void init(File rootDir)
-	{
-		configFile = new File(rootDir, "TownsConfig.conf");
-		configManager = HoconConfigurationLoader.builder().setPath(configFile.toPath()).build();
-	}
+        public static void init(File rootDir)
+        {
+                configFile = new File(rootDir, "TownsConfig.conf");
+                configManager = HoconConfigurationLoader.builder().setPath(configFile.toPath()).build();
+        }
+
+        private static void ensureTownPermNode(CommentedConfigurationNode node, boolean defaultValue) {
+                Utils.ensureBoolean(node, defaultValue);
+        }
 
 	public static void load()
 	{
@@ -152,54 +156,60 @@ public class ConfigHandler
                 Utils.ensureBoolean(config.getNode("nation", "flags", "open"), false);
                 Utils.ensureBoolean(config.getNode("nation", "flags", "neutral"), false);
 
-		Utils.ensureBoolean(config.getNode("towny", "flags", "pvp"), false);
-		Utils.ensureBoolean(config.getNode("towny", "flags", "mobs"), false);
-		Utils.ensureBoolean(config.getNode("towny", "flags", "fire"), false);
-		Utils.ensureBoolean(config.getNode("towny", "flags", "explosions"), false);
-		Utils.ensureBoolean(config.getNode("towny", "flags", "open"), false);
-		Utils.ensureBoolean(config.getNode("towny", "flags", "public"), false);
+                Utils.ensureBoolean(config.getNode("towny", "flags", "pvp"), false);
+                Utils.ensureBoolean(config.getNode("towny", "flags", "mobs"), false);
+                Utils.ensureBoolean(config.getNode("towny", "flags", "fire"), false);
+                Utils.ensureBoolean(config.getNode("towny", "flags", "explosions"), false);
+                Utils.ensureBoolean(config.getNode("towny", "flags", "open"), false);
+                Utils.ensureBoolean(config.getNode("towny", "flags", "public"), false);
+                Utils.ensureBoolean(config.getNode("towny", "flags", "taxpercent"), false);
+                Utils.ensureBoolean(config.getNode("towny", "flags", "jail"), false);
 
-		Utils.ensureBoolean(
-				config.getNode("towny", "perms").getNode(Towny.TYPE_OUTSIDER).getNode(Towny.PERM_BUILD),
-				false
-		);
-		Utils.ensureBoolean(
-				config.getNode("towny", "perms").getNode(Towny.TYPE_OUTSIDER).getNode(Towny.PERM_INTERACT),
-				false
-		);
-		Utils.ensureBoolean(
-				config.getNode("towny", "perms").getNode(Towny.TYPE_CITIZEN).getNode(Towny.PERM_BUILD),
-				false
-		);
-		Utils.ensureBoolean(
-				config.getNode("towny", "perms").getNode(Towny.TYPE_CITIZEN).getNode(Towny.PERM_INTERACT),
-				true
-		);
+                CommentedConfigurationNode townPermRoot = config.getNode("towny", "perms");
+                CommentedConfigurationNode legacyCitizen = townPermRoot.getNode("citizen");
+                ensureTownPermNode(townPermRoot.getNode(Towny.TYPE_RESIDENT, Towny.PERM_BUILD), legacyCitizen.getNode(Towny.PERM_BUILD).getBoolean(false));
+                ensureTownPermNode(townPermRoot.getNode(Towny.TYPE_RESIDENT, Towny.PERM_DESTROY), legacyCitizen.getNode(Towny.PERM_BUILD).getBoolean(false));
+                ensureTownPermNode(townPermRoot.getNode(Towny.TYPE_RESIDENT, Towny.PERM_SWITCH), legacyCitizen.getNode(Towny.PERM_INTERACT).getBoolean(true));
+                ensureTownPermNode(townPermRoot.getNode(Towny.TYPE_RESIDENT, Towny.PERM_ITEM_USE), legacyCitizen.getNode(Towny.PERM_INTERACT).getBoolean(true));
 
-		Utils.ensureBoolean(
-				config.getNode("plots", "perms").getNode(Towny.TYPE_OUTSIDER).getNode(Towny.PERM_BUILD),
-				false
-		);
-		Utils.ensureBoolean(
-				config.getNode("plots", "perms").getNode(Towny.TYPE_OUTSIDER).getNode(Towny.PERM_INTERACT),
-				false
-		);
-		Utils.ensureBoolean(
-				config.getNode("plots", "perms").getNode(Towny.TYPE_CITIZEN).getNode(Towny.PERM_BUILD),
-				false
-		);
-		Utils.ensureBoolean(
-				config.getNode("plots", "perms").getNode(Towny.TYPE_CITIZEN).getNode(Towny.PERM_INTERACT),
-				true
-		);
-		Utils.ensureBoolean(
-				config.getNode("plots", "perms").getNode(Towny.TYPE_COOWNER).getNode(Towny.PERM_BUILD),
-				true
-		);
-		Utils.ensureBoolean(
-				config.getNode("plots", "perms").getNode(Towny.TYPE_COOWNER).getNode(Towny.PERM_INTERACT),
-				true
-		);
+                ensureTownPermNode(townPermRoot.getNode(Towny.TYPE_ALLY, Towny.PERM_BUILD), false);
+                ensureTownPermNode(townPermRoot.getNode(Towny.TYPE_ALLY, Towny.PERM_DESTROY), false);
+                ensureTownPermNode(townPermRoot.getNode(Towny.TYPE_ALLY, Towny.PERM_SWITCH), true);
+                ensureTownPermNode(townPermRoot.getNode(Towny.TYPE_ALLY, Towny.PERM_ITEM_USE), true);
+
+                ensureTownPermNode(townPermRoot.getNode(Towny.TYPE_NATION, Towny.PERM_BUILD), false);
+                ensureTownPermNode(townPermRoot.getNode(Towny.TYPE_NATION, Towny.PERM_DESTROY), false);
+                ensureTownPermNode(townPermRoot.getNode(Towny.TYPE_NATION, Towny.PERM_SWITCH), true);
+                ensureTownPermNode(townPermRoot.getNode(Towny.TYPE_NATION, Towny.PERM_ITEM_USE), true);
+
+                ensureTownPermNode(townPermRoot.getNode(Towny.TYPE_OUTSIDER, Towny.PERM_BUILD), false);
+                ensureTownPermNode(townPermRoot.getNode(Towny.TYPE_OUTSIDER, Towny.PERM_DESTROY), false);
+                ensureTownPermNode(townPermRoot.getNode(Towny.TYPE_OUTSIDER, Towny.PERM_SWITCH), false);
+                ensureTownPermNode(townPermRoot.getNode(Towny.TYPE_OUTSIDER, Towny.PERM_ITEM_USE), false);
+
+                CommentedConfigurationNode plotPermRoot = config.getNode("plots", "perms");
+                CommentedConfigurationNode legacyCoowner = plotPermRoot.getNode("coowner");
+                CommentedConfigurationNode legacyCitizenPlot = plotPermRoot.getNode("citizen");
+
+                ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_FRIEND, Towny.PERM_BUILD), legacyCoowner.getNode(Towny.PERM_BUILD).getBoolean(true));
+                ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_FRIEND, Towny.PERM_DESTROY), legacyCoowner.getNode(Towny.PERM_BUILD).getBoolean(true));
+                ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_FRIEND, Towny.PERM_SWITCH), legacyCoowner.getNode(Towny.PERM_INTERACT).getBoolean(true));
+                ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_FRIEND, Towny.PERM_ITEM_USE), legacyCoowner.getNode(Towny.PERM_INTERACT).getBoolean(true));
+
+                ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_RESIDENT, Towny.PERM_BUILD), legacyCitizenPlot.getNode(Towny.PERM_BUILD).getBoolean(false));
+                ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_RESIDENT, Towny.PERM_DESTROY), legacyCitizenPlot.getNode(Towny.PERM_BUILD).getBoolean(false));
+                ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_RESIDENT, Towny.PERM_SWITCH), legacyCitizenPlot.getNode(Towny.PERM_INTERACT).getBoolean(true));
+                ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_RESIDENT, Towny.PERM_ITEM_USE), legacyCitizenPlot.getNode(Towny.PERM_INTERACT).getBoolean(true));
+
+                ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_ALLY, Towny.PERM_BUILD), false);
+                ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_ALLY, Towny.PERM_DESTROY), false);
+                ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_ALLY, Towny.PERM_SWITCH), false);
+                ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_ALLY, Towny.PERM_ITEM_USE), false);
+
+                ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_OUTSIDER, Towny.PERM_BUILD), false);
+                ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_OUTSIDER, Towny.PERM_DESTROY), false);
+                ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_OUTSIDER, Towny.PERM_SWITCH), false);
+                ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_OUTSIDER, Towny.PERM_ITEM_USE), false);
 
 		if (!config.getNode("whitelist", "build").hasListChildren() || config.getNode("whitelist", "build").getChildrenList().isEmpty())
 		{
@@ -281,8 +291,11 @@ public class ConfigHandler
 			Utils.ensureBoolean(node.getNode("enabled"), true);
 			if (node.getNode("enabled").getBoolean())
 			{
-				Utils.ensureBoolean(node.getNode("perms").getNode(Towny.PERM_BUILD), true);
-				Utils.ensureBoolean(node.getNode("perms").getNode(Towny.PERM_INTERACT), true);
+                            Utils.ensureBoolean(node.getNode("perms").getNode(Towny.PERM_BUILD), true);
+                            Utils.ensureBoolean(node.getNode("perms").getNode(Towny.PERM_DESTROY), true);
+                            Utils.ensureBoolean(node.getNode("perms").getNode(Towny.PERM_SWITCH), true);
+                            Utils.ensureBoolean(node.getNode("perms").getNode(Towny.PERM_ITEM_USE), true);
+                            Utils.ensureBoolean(node.getNode("perms").getNode(Towny.PERM_INTERACT), true);
 
 				Utils.ensureBoolean(node.getNode("flags", "pvp"), true);
 				Utils.ensureBoolean(node.getNode("flags", "mobs"), true);

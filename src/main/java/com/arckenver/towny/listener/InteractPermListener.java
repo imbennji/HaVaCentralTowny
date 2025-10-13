@@ -22,6 +22,7 @@ import org.spongepowered.api.text.format.TextColors;
 import com.arckenver.towny.ConfigHandler;
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
+import com.arckenver.towny.object.Towny;
 
 public class InteractPermListener
 {
@@ -34,8 +35,8 @@ public class InteractPermListener
 			return;
 		}
 		if (ConfigHandler.getNode("worlds").getNode(event.getTargetLocation().getExtent().getName()).getNode("enabled").getBoolean()
-				&& !ConfigHandler.isWhitelisted("build", event.getTargetBlock().getType().getId())
-				&& !DataHandler.getPerm("build", player.getUniqueId(), event.getTargetLocation()))
+                                && !ConfigHandler.isWhitelisted("build", event.getTargetBlock().getType().getId())
+                                && !DataHandler.getPerm(Towny.PERM_SWITCH, player.getUniqueId(), event.getTargetLocation()))
 		{
 			event.setCancelled(true);
 		}
@@ -56,13 +57,13 @@ public class InteractPermListener
                 if (optItem.isPresent() && ConfigHandler.isWhitelisted("use", optItem.get().getType().getId()))
                         return;
 		event.getTargetBlock().getLocation().ifPresent(loc -> {
-			if (!DataHandler.getPerm("interact", player.getUniqueId(), loc))
-			{
-				event.setCancelled(true);
-				if (loc.getBlockType() != BlockTypes.STANDING_SIGN && loc.getBlockType() != BlockTypes.WALL_SIGN)
-					player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_INTERACT));
-			}
-		});
+                        if (!DataHandler.getPerm(Towny.PERM_SWITCH, player.getUniqueId(), loc))
+                        {
+                                event.setCancelled(true);
+                                if (loc.getBlockType() != BlockTypes.STANDING_SIGN && loc.getBlockType() != BlockTypes.WALL_SIGN)
+                                        player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_SWITCH));
+                        }
+                });
 	}
 
 	@Listener(order=Order.FIRST, beforeModifications = true)
@@ -87,17 +88,17 @@ public class InteractPermListener
 			{
 				return;
 			}
-			if (!DataHandler.getPerm("build", player.getUniqueId(), event.getTargetEntity().getLocation()))
-			{
-				event.setCancelled(true);
-				player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_BUILD));
-			}
-			return;
-		}
-		if (!DataHandler.getPerm("interact", player.getUniqueId(), event.getTargetEntity().getLocation()))
-		{
-			event.setCancelled(true);
-			player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_INTERACT));
-		}
-	}
+                        if (!DataHandler.getPerm(Towny.PERM_DESTROY, player.getUniqueId(), event.getTargetEntity().getLocation()))
+                        {
+                                event.setCancelled(true);
+                                player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_DESTROY));
+                        }
+                        return;
+                }
+                if (!DataHandler.getPerm(Towny.PERM_ITEM_USE, player.getUniqueId(), event.getTargetEntity().getLocation()))
+                {
+                        event.setCancelled(true);
+                        player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_ITEMUSE));
+                }
+        }
 }

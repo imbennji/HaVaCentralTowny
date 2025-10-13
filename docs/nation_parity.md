@@ -1,0 +1,17 @@
+# Nation Feature Parity Checklist
+
+This checklist compares the Sponge remake’s nation systems with Spigot Towny, highlighting areas that already align with the original gameplay loop and the major gaps that remain.
+
+## Nation parity highlights (Sponge port)
+
+* **Richer nation model** – Nations now store government type, assistants, flat/percentage tax mode, spawn cost, and staff lists alongside existing capital/ally/enemy data, giving the command layer access to the same core levers Spigot exposes.【F:src/main/java/com/arckenver/towny/object/Nation.java†L18-L218】
+* **Government switching** – `/nation government <type>` lets leaders choose between the bundled government presets using autocompleted choices, persisting the selection to disk and broadcasting the change.【F:src/main/java/com/arckenver/towny/cmdexecutor/nation/NationSetGovernmentExecutor.java†L23-L75】
+* **Tax management** – `/nation taxes` mirrors Spigot’s flat/percent workflow, validating amounts against the configured maximum and storing the toggle on the nation object.【F:src/main/java/com/arckenver/towny/cmdexecutor/nation/NationTaxesExecutor.java†L19-L107】【F:src/main/java/com/arckenver/towny/ConfigHandler.java†L154-L166】
+* **Assistant staffing** – Nation assistants can now invite/kick towns, manage allies/enemies, edit the board/tag, toggle public/open/neutral status, and handle deposits/withdrawals in line with Spigot expectations.【F:src/main/java/com/arckenver/towny/object/Nation.java†L240-L253】【F:src/main/java/com/arckenver/towny/cmdexecutor/nation/NationAssistantExecutor.java†L23-L99】【F:src/main/java/com/arckenver/towny/cmdexecutor/nation/NationInviteExecutor.java†L24-L87】【F:src/main/java/com/arckenver/towny/cmdexecutor/nation/NationAllyExecutor.java†L40-L105】【F:src/main/java/com/arckenver/towny/cmdexecutor/nation/NationEnemyExecutor.java†L40-L105】【F:src/main/java/com/arckenver/towny/cmdexecutor/nation/NationSetBoardExecutor.java†L34-L55】【F:src/main/java/com/arckenver/towny/cmdexecutor/nation/NationSetTagExecutor.java†L34-L74】【F:src/main/java/com/arckenver/towny/cmdexecutor/nation/NationToggleExecutor.java†L19-L99】【F:src/main/java/com/arckenver/towny/cmdexecutor/nation/NationDepositExecutor.java†L23-L89】【F:src/main/java/com/arckenver/towny/cmdexecutor/nation/NationWithdrawExecutor.java†L23-L105】
+* **Information panel parity** – `/nation info` now prints government, tax mode, spawn cost, assistant roster, and relation lists so players see the same metadata they expect on Spigot.【F:src/main/java/com/arckenver/towny/Utils.java†L335-L414】
+
+## Remaining Nation gaps
+
+* **War & conquest systems** – Nation sieges, wartime scoring, and conquest rewards remain unimplemented despite the richer data model, leaving diplomacy limited to invites and alliances.【F:docs/spigot_parity_review.md†L41-L55】
+* **Government modifiers** – Government selection currently changes flavour text only; Spigot’s production/tax modifiers per government type still need logic hooks in upkeep, war, and plot calculations.【F:src/main/java/com/arckenver/towny/object/Nation.java†L18-L218】【F:docs/spigot_parity_review.md†L41-L44】
+* **Rank/mode integration** – Assistant rank handling doesn’t yet drive resident modes or broadcast cues for diplomatic actions, so additional feedback parity work is required.【F:src/main/java/com/arckenver/towny/cmdexecutor/nation/NationInviteExecutor.java†L24-L87】【F:docs/spigot_parity_review.md†L41-L55】

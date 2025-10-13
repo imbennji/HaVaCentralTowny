@@ -55,8 +55,8 @@ public class NationToggleExecutor implements CommandExecutor {
             return CommandResult.success();
         }
 
-        if (!nation.isCapital(town.getUUID()) || !town.isPresident(player.getUniqueId())) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_NATIONLEADER));
+        if (!nation.isStaff(player.getUniqueId())) {
+            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_NATIONSTAFF));
             return CommandResult.success();
         }
 

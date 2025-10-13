@@ -20,12 +20,160 @@ import com.flowpowered.math.vector.Vector2i;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 
 public class Towny {
-	public static final String TYPE_OUTSIDER = "outsider";
-	public static final String TYPE_CITIZEN = "citizen";
-	public static final String TYPE_COOWNER = "coowner";
+        public static final String TYPE_OUTSIDER = "outsider";
+        public static final String TYPE_RESIDENT = "resident";
+        public static final String TYPE_CITIZEN = TYPE_RESIDENT;
+        public static final String TYPE_ALLY = "ally";
+        public static final String TYPE_NATION = "nation";
+        public static final String TYPE_FRIEND = "friend";
+        public static final String TYPE_COOWNER = TYPE_FRIEND;
 
-	public static final String PERM_BUILD = "build";
-	public static final String PERM_INTERACT = "interact";
+        public static final String PERM_BUILD = "build";
+        public static final String PERM_DESTROY = "destroy";
+        public static final String PERM_SWITCH = "switch";
+        public static final String PERM_ITEM_USE = "itemuse";
+        public static final String PERM_INTERACT = "interact"; // legacy alias used by Sponge world config
+
+        private static final List<String> TOWN_PERMISSION_KEYS = Arrays.asList(
+                        PERM_BUILD, PERM_DESTROY, PERM_SWITCH, PERM_ITEM_USE);
+
+        private static final Map<String, String> TOWN_TYPE_ALIASES = new HashMap<>();
+        private static final Map<String, String> PLOT_TYPE_ALIASES = new HashMap<>();
+        private static final Map<String, String> PERM_ALIASES = new HashMap<>();
+
+        static {
+                // Town context groups
+                TOWN_TYPE_ALIASES.put(TYPE_RESIDENT, TYPE_RESIDENT);
+                TOWN_TYPE_ALIASES.put("citizens", TYPE_RESIDENT);
+                TOWN_TYPE_ALIASES.put("citizen", TYPE_RESIDENT);
+                TOWN_TYPE_ALIASES.put("res", TYPE_RESIDENT);
+                TOWN_TYPE_ALIASES.put(TYPE_ALLY, TYPE_ALLY);
+                TOWN_TYPE_ALIASES.put("allies", TYPE_ALLY);
+                TOWN_TYPE_ALIASES.put(TYPE_NATION, TYPE_NATION);
+                TOWN_TYPE_ALIASES.put("nationals", TYPE_NATION);
+                TOWN_TYPE_ALIASES.put(TYPE_OUTSIDER, TYPE_OUTSIDER);
+                TOWN_TYPE_ALIASES.put("outsiders", TYPE_OUTSIDER);
+
+                // Plot context groups (friends == co-owners)
+                PLOT_TYPE_ALIASES.put(TYPE_FRIEND, TYPE_FRIEND);
+                PLOT_TYPE_ALIASES.put("friends", TYPE_FRIEND);
+                PLOT_TYPE_ALIASES.put("coowner", TYPE_FRIEND);
+                PLOT_TYPE_ALIASES.put("coowners", TYPE_FRIEND);
+                PLOT_TYPE_ALIASES.put(TYPE_RESIDENT, TYPE_RESIDENT);
+                PLOT_TYPE_ALIASES.put("citizen", TYPE_RESIDENT);
+                PLOT_TYPE_ALIASES.put("citizens", TYPE_RESIDENT);
+                PLOT_TYPE_ALIASES.put(TYPE_ALLY, TYPE_ALLY);
+                PLOT_TYPE_ALIASES.put("allies", TYPE_ALLY);
+                PLOT_TYPE_ALIASES.put(TYPE_OUTSIDER, TYPE_OUTSIDER);
+                PLOT_TYPE_ALIASES.put("outsiders", TYPE_OUTSIDER);
+
+                // Permission aliases (legacy support + shorthand)
+                PERM_ALIASES.put(PERM_BUILD, PERM_BUILD);
+                PERM_ALIASES.put("place", PERM_BUILD);
+                PERM_ALIASES.put(PERM_DESTROY, PERM_DESTROY);
+                PERM_ALIASES.put("break", PERM_DESTROY);
+                PERM_ALIASES.put(PERM_SWITCH, PERM_SWITCH);
+                PERM_ALIASES.put("toggle", PERM_SWITCH);
+                PERM_ALIASES.put("lever", PERM_SWITCH);
+                PERM_ALIASES.put(PERM_ITEM_USE, PERM_ITEM_USE);
+                PERM_ALIASES.put("item_use", PERM_ITEM_USE);
+                PERM_ALIASES.put("use", PERM_ITEM_USE);
+                PERM_ALIASES.put(PERM_INTERACT, PERM_SWITCH);
+        }
+
+        public static String canonicalizeTownType(String type) {
+                return canonicalize(type, TOWN_TYPE_ALIASES, TYPE_OUTSIDER);
+        }
+
+        public static String canonicalizePlotType(String type) {
+                return canonicalize(type, PLOT_TYPE_ALIASES, TYPE_OUTSIDER);
+        }
+
+        public static String canonicalizePerm(String perm) {
+                if (perm == null) {
+                        return null;
+                }
+                String lowered = perm.toLowerCase(Locale.ENGLISH);
+                return PERM_ALIASES.getOrDefault(lowered, lowered);
+        }
+
+        private static String canonicalize(String raw, Map<String, String> aliases, String fallback) {
+                if (raw == null) {
+                        return fallback;
+                }
+                String lowered = raw.toLowerCase(Locale.ENGLISH);
+                return aliases.getOrDefault(lowered, lowered);
+        }
+
+        public static Collection<String> expandPermKeys(String perm) {
+                String canonical = canonicalizePerm(perm);
+                if (canonical == null) {
+                        return Collections.emptyList();
+                }
+                if (PERM_SWITCH.equals(canonical) && PERM_INTERACT.equalsIgnoreCase(perm)) {
+                        return Arrays.asList(PERM_SWITCH, PERM_ITEM_USE);
+                }
+                return Collections.singletonList(canonical);
+        }
+
+        private Hashtable<String, Boolean> ensureTownPermContainer(String type) {
+                String canonical = canonicalizeTownType(type);
+                return perms.computeIfAbsent(canonical, this::buildTownPermDefaults);
+        }
+
+        private Hashtable<String, Boolean> buildTownPermDefaults(String type) {
+                Hashtable<String, Boolean> defaults = new Hashtable<>();
+                for (String key : TOWN_PERMISSION_KEYS) {
+                        defaults.put(key, resolveTownPermDefault(type, key));
+                }
+                return defaults;
+        }
+
+        private boolean resolveTownPermDefault(String type, String permKey) {
+                CommentedConfigurationNode base = ConfigHandler.getNode("towny", "perms");
+                CommentedConfigurationNode node = base.getNode(type, permKey);
+                if (!node.isVirtual()) {
+                        return node.getBoolean(defaultTownPermValue(type, permKey));
+                }
+                if (PERM_DESTROY.equals(permKey)) {
+                        return base.getNode(type, PERM_BUILD).getBoolean(defaultTownPermValue(type, PERM_BUILD));
+                }
+                if (PERM_SWITCH.equals(permKey) || PERM_ITEM_USE.equals(permKey)) {
+                        CommentedConfigurationNode legacy = base.getNode(type, PERM_INTERACT);
+                        if (!legacy.isVirtual()) {
+                                return legacy.getBoolean(defaultTownPermValue(type, permKey));
+                        }
+                }
+                return defaultTownPermValue(type, permKey);
+        }
+
+        private boolean defaultTownPermValue(String type, String permKey) {
+                if (TYPE_RESIDENT.equals(type)) {
+                        if (PERM_BUILD.equals(permKey) || PERM_DESTROY.equals(permKey)) {
+                                return false;
+                        }
+                        if (PERM_SWITCH.equals(permKey) || PERM_ITEM_USE.equals(permKey)) {
+                                return true;
+                        }
+                }
+                if (TYPE_ALLY.equals(type) || TYPE_NATION.equals(type)) {
+                        return PERM_SWITCH.equals(permKey) || PERM_ITEM_USE.equals(permKey);
+                }
+                return false;
+        }
+
+        private boolean getTownPermInternal(String type, String permKey) {
+                Hashtable<String, Boolean> map = ensureTownPermContainer(type);
+                if (!map.containsKey(permKey)) {
+                        map.put(permKey, resolveTownPermDefault(type, permKey));
+                }
+                return map.get(permKey);
+        }
+
+        private void setTownPermInternal(String type, String permKey, boolean value) {
+                Hashtable<String, Boolean> map = ensureTownPermContainer(type);
+                map.put(permKey, value);
+        }
 
 	private UUID uuid;
 	private String name;
@@ -64,23 +212,19 @@ public class Towny {
 		this.mayor = null;
 		this.comayor = new ArrayList<>();
 		this.citizens = new ArrayList<>();
-		this.flags = new Hashtable<>();
-		this.rentInterval = ConfigHandler.getNode("towny", "defaultRentInterval").getInt();
-		this.lastRentCollectTime = LocalDateTime.of(LocalDate.now(), LocalTime.of(LocalTime.now().getHour(), 0)); //just hours
+                this.flags = new Hashtable<>();
+                this.rentInterval = ConfigHandler.getNode("towny", "defaultRentInterval").getInt();
+                this.lastRentCollectTime = LocalDateTime.of(LocalDate.now(), LocalTime.of(LocalTime.now().getHour(), 0)); //just hours
 
-		for (Entry<Object, ? extends CommentedConfigurationNode> e : ConfigHandler.getNode("towny", "flags").getChildrenMap().entrySet()) {
-			flags.put(e.getKey().toString(), e.getValue().getBoolean());
-		}
-		this.perms = new Hashtable<String, Hashtable<String, Boolean>>() {{
-			put(TYPE_OUTSIDER, new Hashtable<String, Boolean>() {{
-				put(PERM_BUILD, ConfigHandler.getNode("towny", "perms").getNode(TYPE_OUTSIDER).getNode(PERM_BUILD).getBoolean());
-				put(PERM_INTERACT, ConfigHandler.getNode("towny", "perms").getNode(TYPE_OUTSIDER).getNode(PERM_INTERACT).getBoolean());
-			}});
-			put(TYPE_CITIZEN, new Hashtable<String, Boolean>() {{
-				put(PERM_BUILD, ConfigHandler.getNode("towny", "perms").getNode(TYPE_CITIZEN).getNode(PERM_BUILD).getBoolean());
-				put(PERM_INTERACT, ConfigHandler.getNode("towny", "perms").getNode(TYPE_CITIZEN).getNode(PERM_INTERACT).getBoolean());
-			}});
-		}};
+                for (Entry<Object, ? extends CommentedConfigurationNode> e : ConfigHandler.getNode("towny", "flags").getChildrenMap().entrySet()) {
+                        flags.put(e.getKey().toString(), e.getValue().getBoolean());
+                }
+
+                this.perms = new Hashtable<>();
+                ensureTownPermContainer(TYPE_RESIDENT);
+                ensureTownPermContainer(TYPE_ALLY);
+                ensureTownPermContainer(TYPE_NATION);
+                ensureTownPermContainer(TYPE_OUTSIDER);
 		this.plots = new Hashtable<>();
 		this.extras = 0;
 		this.extraspawns = 0;
@@ -303,17 +447,37 @@ public class Towny {
 		return plot.getFlag(flag);
 	}
 
-	public boolean getPerm(String type, String perm) {
-		return perms.get(type).get(perm);
-	}
+        public boolean getPerm(String type, String perm) {
+                Collection<String> keys = expandPermKeys(perm);
+                if (keys.isEmpty()) {
+                        return false;
+                }
+                String canonicalType = canonicalizeTownType(type);
+                boolean allowed = true;
+                for (String key : keys) {
+                        allowed = allowed && getTownPermInternal(canonicalType, key);
+                }
+                return allowed;
+        }
 
-	public Hashtable<String, Hashtable<String, Boolean>> getPerms() {
-		return perms;
-	}
+        public Hashtable<String, Hashtable<String, Boolean>> getPerms() {
+                ensureTownPermContainer(TYPE_RESIDENT);
+                ensureTownPermContainer(TYPE_ALLY);
+                ensureTownPermContainer(TYPE_NATION);
+                ensureTownPermContainer(TYPE_OUTSIDER);
+                return perms;
+        }
 
-	public void setPerm(String type, String perm, boolean bool) {
-		perms.get(type).put(perm, bool);
-	}
+        public void setPerm(String type, String perm, boolean bool) {
+                String canonicalType = canonicalizeTownType(type);
+                Collection<String> keys = expandPermKeys(perm);
+                if (keys.isEmpty()) {
+                        return;
+                }
+                for (String key : keys) {
+                        setTownPermInternal(canonicalType, key, bool);
+                }
+        }
 
 	public Hashtable<UUID, Plot> getPlots() {
 		return plots;
