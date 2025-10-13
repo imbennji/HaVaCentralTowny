@@ -27,6 +27,7 @@ import com.google.common.math.IntMath;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
@@ -395,38 +396,96 @@ public class DataHandler
 		return plot.getFlag(flag);
 	}
 
-	public static boolean getPerm(String perm, UUID playerUUID, Location<World> loc)
-	{
-		Towny t = getTowny(loc);
-		if (t == null)
-		{
-			return ConfigHandler.getNode("worlds")
-					.getNode(loc.getExtent().getName())
-					.getNode("perms").getNode(perm).getBoolean();
-		}
-		Plot plot = t.getPlot(loc);
-		if (plot == null)
-		{
-			if (t.isCitizen(playerUUID))
-			{
-				if (t.isStaff(playerUUID))
-				{
-					return true;
-				}
-				return t.getPerm(Towny.TYPE_CITIZEN, perm);
-			}
-			return t.getPerm(Towny.TYPE_OUTSIDER, perm);
-		}
+        public static boolean getPerm(String perm, UUID playerUUID, Location<World> loc)
+        {
+                String canonicalPerm = Towny.canonicalizePerm(perm);
+                Towny town = getTowny(loc);
+                if (town == null)
+                {
+                        CommentedConfigurationNode permsNode = ConfigHandler.getNode("worlds")
+                                        .getNode(loc.getExtent().getName())
+                                        .getNode("perms");
+                        CommentedConfigurationNode valueNode = permsNode.getNode(canonicalPerm);
+                        if (!valueNode.isVirtual()) {
+                                return valueNode.getBoolean();
+                        }
+                        if (Towny.PERM_DESTROY.equals(canonicalPerm)) {
+                                return permsNode.getNode(Towny.PERM_BUILD).getBoolean();
+                        }
+                        if (Towny.PERM_SWITCH.equals(canonicalPerm) || Towny.PERM_ITEM_USE.equals(canonicalPerm)) {
+                                return permsNode.getNode(Towny.PERM_INTERACT).getBoolean();
+                        }
+                        return valueNode.getBoolean();
+                }
 
-		if (t.isStaff(playerUUID) || plot.isOwner(playerUUID))
-			return true;
-		if (plot.isCoowner(playerUUID))
-			return plot.getPerm(Towny.TYPE_COOWNER, perm);
-		if (t.isCitizen(playerUUID))
-			return plot.getPerm(Towny.TYPE_CITIZEN, perm);
+                Plot plot = town.getPlot(loc);
+                Towny playerTown = getTownyOfPlayer(playerUUID);
 
-		return plot.getPerm(Towny.TYPE_OUTSIDER, perm);
-	}
+                if (plot == null)
+                {
+                        if (town.isStaff(playerUUID))
+                        {
+                                return true;
+                        }
+                        if (town.isCitizen(playerUUID))
+                        {
+                                return town.getPerm(Towny.TYPE_RESIDENT, canonicalPerm);
+                        }
+                        if (playerTown != null)
+                        {
+                                if (shareNation(town, playerTown))
+                                {
+                                        return town.getPerm(Towny.TYPE_NATION, canonicalPerm);
+                                }
+                                if (areNationsAllied(town, playerTown))
+                                {
+                                        return town.getPerm(Towny.TYPE_ALLY, canonicalPerm);
+                                }
+                        }
+                        return town.getPerm(Towny.TYPE_OUTSIDER, canonicalPerm);
+                }
+
+                if (town.isStaff(playerUUID) || plot.isOwner(playerUUID))
+                        return true;
+                if (plot.isCoowner(playerUUID))
+                        return plot.getPerm(Towny.TYPE_FRIEND, canonicalPerm);
+                if (town.isCitizen(playerUUID))
+                        return plot.getPerm(Towny.TYPE_RESIDENT, canonicalPerm);
+                if (playerTown != null)
+                {
+                        if (shareNation(town, playerTown) || areNationsAllied(town, playerTown))
+                        {
+                                return plot.getPerm(Towny.TYPE_ALLY, canonicalPerm);
+                        }
+                }
+
+                return plot.getPerm(Towny.TYPE_OUTSIDER, canonicalPerm);
+        }
+
+        private static boolean shareNation(Towny town, Towny other) {
+                if (town == null || other == null) {
+                        return false;
+                }
+                if (!town.hasNation() || !other.hasNation()) {
+                        return false;
+                }
+                return town.getNationUUID().equals(other.getNationUUID());
+        }
+
+        private static boolean areNationsAllied(Towny town, Towny other) {
+                if (town == null || other == null) {
+                        return false;
+                }
+                if (!town.hasNation() || !other.hasNation()) {
+                        return false;
+                }
+                Nation nation = getNation(town.getNationUUID());
+                Nation target = getNation(other.getNationUUID());
+                if (nation == null || target == null) {
+                        return false;
+                }
+                return nation.getAllies().contains(target.getUUID()) || target.getAllies().contains(nation.getUUID());
+        }
 
 	// ------------------------------------------------------------
 	// Players convenience

@@ -8,8 +8,11 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 
+import com.arckenver.towny.lang.SpigotLanguageImporter;
+
 public class LanguageHandler
 {
+        private static File rootDir;
 	public static String HELP_DESC_CMD_SETSPAWN = "set spawn with the given name";
 	public static String HELP_DESC_CMD_DELSPAWN = "delete spawn with the given name";
 	public static String HELP_DESC_CMD_SETNAME = "set town's name";
@@ -175,6 +178,7 @@ public class LanguageHandler
         public static String INFO_NATION_SPAWN_TRAVEL = "Teleporting to nation spawn";
         public static String INFO_NATION_TAXES = "Nation taxes updated";
         public static String INFO_NATION_TAXES_PERCENT = "Nation tax mode toggled";
+        public static String INFO_NATION_GOVERNMENT = "Nation government updated to {GOVERNMENT}";
         public static String INFO_NATION_DEPOSIT = "Deposited {AMOUNT} into the nation bank";
         public static String INFO_NATION_WITHDRAW = "Withdrew {AMOUNT} from the nation bank";
 
@@ -323,8 +327,11 @@ public class LanguageHandler
 	public static String INFO_CHANGEOWNER = "{PLAYER} set you as the owner of plot {PLOT}";
 	public static String ERROR_SELECTIONCONTAINPLOT = "Your selection contains a plot of your town";
 	public static String ERROR_PLOTNOTINTOWN = "Selected plot is not inside your town's region";
-	public static String ERROR_PERM_BUILD = "You don't have permission to build here";
-	public static String ERROR_PERM_INTERACT = "You don't have permission to interact here";
+        public static String ERROR_PERM_BUILD = "You don't have permission to build here";
+        public static String ERROR_PERM_INTERACT = "You don't have permission to interact here";
+        public static String ERROR_PERM_DESTROY = "You don't have permission to destroy here";
+        public static String ERROR_PERM_SWITCH = "You don't have permission to use switches here";
+        public static String ERROR_PERM_ITEMUSE = "You don't have permission to use items here";
 	public static String ERROR_PLAYERNOTINTOWN = "Player is not part of a town";
 	public static String ERROR_PLAYERISPRES = "Player is mayor of their town, use /townyadmin setpres";
 	public static String SUCCESS_GENERAL = "Success!";
@@ -361,12 +368,15 @@ public class LanguageHandler
         public static String FORMAT_ASSISTANTS = "Assistants";
         public static String FORMAT_ALLIES = "Allies";
         public static String FORMAT_ENEMIES = "Enemies";
+        public static String FORMAT_GOVERNMENT = "Government";
         public static String FORMAT_OPEN = "Open";
         public static String FORMAT_PUBLIC = "Public";
         public static String FORMAT_NEUTRAL = "Neutral";
         public static String FORMAT_PERMISSIONS = "Permissions";
-	public static String FORMAT_OUTSIDERS = "Outsiders";
-	public static String FORMAT_FLAGS = "Flags";
+        public static String FORMAT_OUTSIDERS = "Outsiders";
+        public static String FORMAT_RESIDENTS = "Residents";
+        public static String FORMAT_FRIENDS = "Friends";
+        public static String FORMAT_FLAGS = "Flags";
 	public static String FORMAT_OWNER = "Owner";
 	public static String FORMAT_COOWNER = "CoOwners";
 	public static String FORMAT_NONE = "None";
@@ -391,8 +401,11 @@ public class LanguageHandler
         public static String HEADER_TOWNLIST = "Town List";
         public static String HEADER_NATIONLIST = "Nation List";
 	public static String HEADER_WORLDLIST = "World List";
-	public static String TYPE_BUILD = "BUILD";
-	public static String TYPE_INTERACT = "INTERACT";
+        public static String TYPE_BUILD = "BUILD";
+        public static String TYPE_DESTROY = "DESTROY";
+        public static String TYPE_SWITCH = "SWITCH";
+        public static String TYPE_ITEMUSE = "ITEM USE";
+        public static String TYPE_INTERACT = "INTERACT";
 	public static String VALUE_TRUE = "true";
 
 	public static String ERROR_NEGATIVEINTERVAL = "You can't input negative values for rent intervals!";
@@ -405,14 +418,15 @@ public class LanguageHandler
         public static String COST_MSG_EXTRAPRICE = "Price per extra chunk";
 	public static String INFO_PLOTFS = "{PLAYER} made plot {PLOT} not for sale";
 
-	private static File languageFile;
-	private static ConfigurationLoader<CommentedConfigurationNode> languageManager;
-	private static CommentedConfigurationNode language;
+        private static File languageFile;
+        private static ConfigurationLoader<CommentedConfigurationNode> languageManager;
+        private static CommentedConfigurationNode language;
 
-	public static void init(File rootDir)
-	{
-		languageFile = new File(rootDir, "TownsLanguage.conf");
-		languageManager = HoconConfigurationLoader.builder().setPath(languageFile.toPath()).build();
+        public static void init(File rootDir)
+        {
+                LanguageHandler.rootDir = rootDir;
+                languageFile = new File(rootDir, "TownsLanguage.conf");
+                languageManager = HoconConfigurationLoader.builder().setPath(languageFile.toPath()).build();
 
 		try
 		{
@@ -433,15 +447,21 @@ public class LanguageHandler
 
 	}
 
-	public static void load()
-	{
-		Field fields[] = LanguageHandler.class.getFields();
-		for (int i = 0; i < fields.length; ++i) {
-			if (fields[i].getType() != String.class)
-				continue ;
-			if (language.getNode(fields[i].getName()).getString() != null) {
-				try {
-					fields[i].set(String.class, language.getNode(fields[i].getName()).getString());
+        public static void load()
+        {
+                Field fields[] = LanguageHandler.class.getFields();
+                java.util.Map<String, String> defaults = new java.util.HashMap<>();
+                for (int i = 0; i < fields.length; ++i) {
+                        if (fields[i].getType() != String.class)
+                                continue ;
+                        try {
+                                defaults.put(fields[i].getName(), (String) fields[i].get(String.class));
+                        } catch (IllegalArgumentException | IllegalAccessException e) {
+                                TownyPlugin.getLogger().error("Error when reading default language string " + fields[i].getName());
+                        }
+                        if (language.getNode(fields[i].getName()).getString() != null) {
+                                try {
+                                        fields[i].set(String.class, language.getNode(fields[i].getName()).getString());
 				} catch (IllegalArgumentException|IllegalAccessException e) {
 					TownyPlugin.getLogger().error("Error whey loading language string " + fields[i].getName());
 					e.printStackTrace();
@@ -453,11 +473,32 @@ public class LanguageHandler
 					TownyPlugin.getLogger().error("Error whey saving language string " + fields[i].getName());
 					e.printStackTrace();
 				}
-			}
-		}
+                        }
+                }
 
-		save();
-	}
+                if (rootDir != null) {
+                        java.util.Map<String, String> overrides = SpigotLanguageImporter.load(rootDir, defaults);
+                        if (!overrides.isEmpty()) {
+                                for (int i = 0; i < fields.length; ++i) {
+                                        if (fields[i].getType() != String.class)
+                                                continue;
+                                        String override = overrides.get(fields[i].getName());
+                                        if (override == null)
+                                                continue;
+                                        try {
+                                                fields[i].set(String.class, override);
+                                                language.getNode(fields[i].getName()).setValue(override);
+                                        } catch (IllegalArgumentException | IllegalAccessException e) {
+                                                TownyPlugin.getLogger().error("Error when applying spigot language override for "
+                                                                + fields[i].getName());
+                                                e.printStackTrace();
+                                        }
+                                }
+                        }
+                }
+
+                save();
+        }
 
 	public static void save()
 	{
