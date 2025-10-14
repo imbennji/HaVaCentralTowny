@@ -47,6 +47,13 @@ public class Utils
         public static final int CLICKER_DEFAULT = 1;
         public static final int CLICKER_ADMIN = 2;
 
+        private static String quoteIfNeeded(String input) {
+                if (input == null) {
+                        return "";
+                }
+                return input.indexOf(' ') >= 0 ? '"' + input + '"' : input;
+        }
+
         private static final DateTimeFormatter RESIDENT_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
                         .withZone(ZoneId.systemDefault());
 
@@ -169,14 +176,27 @@ public class Utils
 			);
 
 			builder.append(Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_FLAGS + ":"));
-			for (Entry<String, Boolean> e : towny.getFlags().entrySet())
-			{
-				builder.append(Text.of(TextColors.GOLD, "\n    " + StringUtils.capitalize(e.getKey().toLowerCase()) + ": "));
-				builder.append(Text.builder(LanguageHandler.FLAG_ENABLED).color((e.getValue()) ? TextColors.YELLOW : TextColors.DARK_GRAY).onClick(TextActions.runCommand("/ta flag " + towny.getRealName() + " " + e.getKey() + " true")).build());
-				builder.append(Text.of(TextColors.GOLD, "/"));
-				builder.append(Text.builder(LanguageHandler.FLAG_DISABLED).color((e.getValue()) ? TextColors.DARK_GRAY : TextColors.YELLOW).onClick(TextActions.runCommand("/ta flag " + towny.getRealName() + " " + e.getKey() + " false")).build());
-				builder.append(Text.of(TextColors.DARK_GRAY, " <- " + LanguageHandler.CLICK));
-			}
+                        for (Entry<String, Boolean> e : towny.getFlags().entrySet())
+                        {
+                                String flagName = e.getKey();
+                                boolean enabled = e.getValue();
+                                String flagCommandPrefix = (clicker == CLICKER_ADMIN)
+                                                ? "/townyadmin flag " + quoteIfNeeded(towny.getRealName()) + " "
+                                                : "/town flag ";
+
+                                builder.append(Text.of(TextColors.GOLD,
+                                                "\n    " + StringUtils.capitalize(flagName.toLowerCase()) + ": "));
+                                builder.append(Text.builder(LanguageHandler.FLAG_ENABLED)
+                                                .color(enabled ? TextColors.YELLOW : TextColors.DARK_GRAY)
+                                                .onClick(TextActions.runCommand(flagCommandPrefix + flagName + " true"))
+                                                .build());
+                                builder.append(Text.of(TextColors.GOLD, "/"));
+                                builder.append(Text.builder(LanguageHandler.FLAG_DISABLED)
+                                                .color(enabled ? TextColors.DARK_GRAY : TextColors.YELLOW)
+                                                .onClick(TextActions.runCommand(flagCommandPrefix + flagName + " false"))
+                                                .build());
+                                builder.append(Text.of(TextColors.DARK_GRAY, " <- " + LanguageHandler.CLICK));
+                        }
 		}
 
 		return builder.build();
