@@ -64,11 +64,11 @@ public class TownyFlagExecutor implements CommandExecutor
 			boolean bool = (ctx.<Boolean>getOne("bool").isPresent()) ? ctx.<Boolean>getOne("bool").get() : !towny.getFlag(flag);
 			towny.setFlag(flag, bool);
 			DataHandler.saveTowny(towny.getUUID());
-			int clicker = Utils.CLICKER_DEFAULT;
-			if (src.hasPermission("towny.command.townyadmin"))
-			{
-				clicker = Utils.CLICKER_ADMIN;
-			}
+                        int clicker = Utils.CLICKER_DEFAULT;
+                        if (clicker != Utils.CLICKER_DEFAULT && src.hasPermission("towny.command.townyadmin"))
+                        {
+                                clicker = Utils.CLICKER_ADMIN;
+                        }
 			src.sendMessage(Utils.formatTownyDescription(towny, clicker));
 		}
 		else

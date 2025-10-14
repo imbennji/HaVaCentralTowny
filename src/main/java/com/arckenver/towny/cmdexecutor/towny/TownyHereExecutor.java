@@ -43,11 +43,11 @@ public class TownyHereExecutor implements CommandExecutor
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_HERE));
 				return CommandResult.success();
 			}
-			int clicker = (towny.isStaff(player.getUniqueId())) ? Utils.CLICKER_DEFAULT : Utils.CLICKER_NONE;
-			if (src.hasPermission("towny.command.townyadmin"))
-			{
-				clicker = Utils.CLICKER_ADMIN;
-			}
+                        int clicker = (towny.isStaff(player.getUniqueId())) ? Utils.CLICKER_DEFAULT : Utils.CLICKER_NONE;
+                        if (clicker != Utils.CLICKER_DEFAULT && src.hasPermission("towny.command.townyadmin"))
+                        {
+                                clicker = Utils.CLICKER_ADMIN;
+                        }
 			src.sendMessage(Utils.formatTownyDescription(towny, clicker));
 		}
 		else
