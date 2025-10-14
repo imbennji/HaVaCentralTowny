@@ -181,8 +181,8 @@ public class Utils
                                 String flagName = e.getKey();
                                 boolean enabled = e.getValue();
                                 String flagCommandPrefix = (clicker == CLICKER_ADMIN)
-                                                ? "/townyadmin flag " + quoteIfNeeded(towny.getRealName()) + " "
-                                                : "/town flag ";
+                                                ? "/ta flag " + towny.getRealName() + " "
+                                                : "/t flag ";
 
                                 builder.append(Text.of(TextColors.GOLD,
                                                 "\n    " + StringUtils.capitalize(flagName.toLowerCase()) + ": "));
