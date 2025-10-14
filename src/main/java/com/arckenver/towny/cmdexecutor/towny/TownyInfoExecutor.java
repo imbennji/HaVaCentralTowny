@@ -75,10 +75,10 @@ public class TownyInfoExecutor implements CommandExecutor
 			}
 		}
 
-		if (src.hasPermission("towny.command.townyadmin"))
-		{
-			clicker = Utils.CLICKER_ADMIN;
-		}
+                if (clicker != Utils.CLICKER_DEFAULT && src.hasPermission("towny.command.townyadmin"))
+                {
+                        clicker = Utils.CLICKER_ADMIN;
+                }
 
 		// Existing description
 		src.sendMessage(Utils.formatTownyDescription(towny, clicker));
