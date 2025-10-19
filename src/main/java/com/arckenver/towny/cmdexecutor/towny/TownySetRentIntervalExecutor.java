@@ -12,7 +12,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -37,27 +36,27 @@ public class TownySetRentIntervalExecutor implements CommandExecutor {
 			Player player = (Player) src;
 			Towny towny = DataHandler.getTownyOfPlayer(player.getUniqueId());
 			if (towny == null) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOTOWN));
 				return CommandResult.success();
 			}
 			if (!towny.isStaff(player.getUniqueId())) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_TOWNPRES));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_TOWNPRES));
 				return CommandResult.success();
 			}
 			if (!ctx.<String>getOne("interval").isPresent()) {
-				src.sendMessage(Text.of(TextColors.YELLOW, "/t setrentinterval <interval>"));
+				src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/t setrentinterval <interval>"));
 				return CommandResult.success();
 			}
 			int n = ctx.<Integer>getOne("interval").get();
 			if(n < 0) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEGATIVEINTERVAL));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEGATIVEINTERVAL));
 				return CommandResult.success();
 			}
 			towny.setRentInterval(n);
 			DataHandler.saveTowny(towny.getUUID());
-			src.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.INFO_RENTINTERVAL.replaceAll("\\{NUMBER\\}", n + "")));
+			src.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_RENTINTERVAL.replaceAll("\\{NUMBER\\}", n + "")));
 		} else {
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}

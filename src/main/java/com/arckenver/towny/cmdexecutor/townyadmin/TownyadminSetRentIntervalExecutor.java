@@ -14,7 +14,6 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -38,7 +37,7 @@ public class TownyadminSetRentIntervalExecutor implements CommandExecutor {
 	public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
 		Towny towny = DataHandler.getTowny(ctx.<String>getOne("towny").get());
 		if (towny == null) {
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDTOWNNAME));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDTOWNNAME));
 			return CommandResult.success();
 		}
 		int n = ConfigHandler.getNode("towny", "defaultRentInterval").getInt();
@@ -46,12 +45,12 @@ public class TownyadminSetRentIntervalExecutor implements CommandExecutor {
 			n = ctx.<Integer>getOne("interval").get();
 		}
 		if(n < 0) {
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEGATIVEINTERVAL));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEGATIVEINTERVAL));
 			return CommandResult.success();
 		}
 		towny.setRentInterval(n);
 		DataHandler.saveTowny(towny.getUUID());
-		src.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.INFO_RENTINTERVAL.replaceAll("\\{NUMBER\\}", n + "")));
+		src.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_RENTINTERVAL.replaceAll("\\{NUMBER\\}", n + "")));
 		return CommandResult.success();
 	}
 }

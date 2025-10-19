@@ -11,7 +11,6 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
@@ -36,31 +35,31 @@ public class TownyadminSetpresExecutor implements CommandExecutor
 	{
 		if (!ctx.<String>getOne("towny").isPresent() || !ctx.<String>getOne("mayor").isPresent())
 		{
-			src.sendMessage(Text.of(TextColors.YELLOW, "/ta setpres <towny> <mayor>"));
+			src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/ta setpres <towny> <mayor>"));
 			return CommandResult.success();
 		}
 		String townyName = ctx.<String>getOne("towny").get();
 		Towny towny = DataHandler.getTowny(townyName);
 		if (towny == null)
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADTOWNNNAME));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADTOWNNNAME));
 			return CommandResult.success();
 		}
 		String mayorName = ctx.<String>getOne("mayor").get();
 		UUID mayorUUID = DataHandler.getPlayerUUID(mayorName);
 		if (mayorUUID == null)
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADPLAYERNAME));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADPLAYERNAME));
 			return CommandResult.success();
 		}
 		if (towny.isPresident(mayorUUID))
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PLAYERALREADYPRES));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PLAYERALREADYPRES));
 			return CommandResult.success();
 		}
 		if (!towny.isCitizen(mayorUUID))
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PLAYERNOTPARTOFTOWN));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PLAYERNOTPARTOFTOWN));
 			return CommandResult.success();
 		}
 		UUID oldPresidentUUID = towny.getPresident();
@@ -71,7 +70,7 @@ public class TownyadminSetpresExecutor implements CommandExecutor
 		for (UUID citizen : towny.getCitizens())
 		{
 			Sponge.getServer().getPlayer(citizen).ifPresent(
-					p -> p.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.INFO_SUCCESSOR
+					p -> p.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_SUCCESSOR
 							.replaceAll("\\{SUCCESSOR\\}", mayorName)
 							.replaceAll("\\{PLAYER\\}", (oldPresidentName == null) ? LanguageHandler.FORMAT_UNKNOWN : oldPresidentName))));
 		}

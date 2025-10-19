@@ -11,7 +11,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.LanguageHandler;
 
@@ -30,31 +29,31 @@ public class TownyadminExecutor implements CommandExecutor
 	{
 		List<Text> contents = new ArrayList<>();
 
-		contents.add(Text.of(TextColors.GOLD, "/ta reload", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_TA_RELOAD));
-		contents.add(Text.of(TextColors.GOLD, "/ta forceupkeep", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_TA_FORCEKEEPUP));
-		contents.add(Text.of(TextColors.GOLD, "/ta create <name>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_TA_CREATE));
-		contents.add(Text.of(TextColors.GOLD, "/ta claim <towny>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_TA_CLAIM));
-		contents.add(Text.of(TextColors.GOLD, "/ta unclaim <towny>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_TA_UNCLAIM));
-		contents.add(Text.of(TextColors.GOLD, "/ta delete <towny>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_TA_DELETE));
-		contents.add(Text.of(TextColors.GOLD, "/ta setname <towny> <name>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_SETNAME));
-		contents.add(Text.of(TextColors.GOLD, "/ta settag <towny> <tag>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_SETTAG));
-		contents.add(Text.of(TextColors.GOLD, "/ta setpres <towny> <player>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_TA_SETPRES));
-		contents.add(Text.of(TextColors.GOLD, "/ta setspawn <towny> <name>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_SETSPAWN));
-		contents.add(Text.of(TextColors.GOLD, "/ta delspawn <towny> <name>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_DELSPAWN));
-		contents.add(Text.of(TextColors.GOLD, "/ta forcejoin <towny> <player>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_TA_FORCEJOIN));
-		contents.add(Text.of(TextColors.GOLD, "/ta forceleave <towny> <player>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_TA_FORCELEAVE));
-		contents.add(Text.of(TextColors.GOLD, "/ta eco <give|take|set> <towny> <amount>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_TA_ECO));
-		contents.add(Text.of(TextColors.GOLD, "/ta perm <towny> <type> <perm> [true|false]", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_TA_PERM));
-		contents.add(Text.of(TextColors.GOLD, "/ta flag <towny> <flag> [true|false]", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_TA_FLAG));
-		contents.add(Text.of(TextColors.GOLD, "/ta spy", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_TA_SPY));
-		contents.add(Text.of(TextColors.GOLD, "/ta extra <give|take|set> <towny> <amount>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_TA_EXTRA));
-		contents.add(Text.of(TextColors.GOLD, "/ta extraplayer <give|take|set> <player> <amount>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_TA_EXTRAPLAYER));
-		contents.add(Text.of(TextColors.GOLD, "/ta extraspawn <give|take|set> <towny> <amount>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_TA_EXTRASPAWN));
-		contents.add(Text.of(TextColors.GOLD, "/ta extraspawnplayer <give|take|set> <player> <amount>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_TA_EXTRASPAWNPLAYER));
+		contents.add(Text.of(LanguageHandler.colorGold(), "/ta reload", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_TA_RELOAD));
+		contents.add(Text.of(LanguageHandler.colorGold(), "/ta forceupkeep", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_TA_FORCEKEEPUP));
+		contents.add(Text.of(LanguageHandler.colorGold(), "/ta create <name>", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_TA_CREATE));
+		contents.add(Text.of(LanguageHandler.colorGold(), "/ta claim <towny>", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_TA_CLAIM));
+		contents.add(Text.of(LanguageHandler.colorGold(), "/ta unclaim <towny>", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_TA_UNCLAIM));
+		contents.add(Text.of(LanguageHandler.colorGold(), "/ta delete <towny>", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_TA_DELETE));
+		contents.add(Text.of(LanguageHandler.colorGold(), "/ta setname <towny> <name>", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_SETNAME));
+		contents.add(Text.of(LanguageHandler.colorGold(), "/ta settag <towny> <tag>", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_SETTAG));
+		contents.add(Text.of(LanguageHandler.colorGold(), "/ta setpres <towny> <player>", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_TA_SETPRES));
+		contents.add(Text.of(LanguageHandler.colorGold(), "/ta setspawn <towny> <name>", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_SETSPAWN));
+		contents.add(Text.of(LanguageHandler.colorGold(), "/ta delspawn <towny> <name>", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_DELSPAWN));
+		contents.add(Text.of(LanguageHandler.colorGold(), "/ta forcejoin <towny> <player>", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_TA_FORCEJOIN));
+		contents.add(Text.of(LanguageHandler.colorGold(), "/ta forceleave <towny> <player>", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_TA_FORCELEAVE));
+		contents.add(Text.of(LanguageHandler.colorGold(), "/ta eco <give|take|set> <towny> <amount>", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_TA_ECO));
+		contents.add(Text.of(LanguageHandler.colorGold(), "/ta perm <towny> <type> <perm> [true|false]", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_TA_PERM));
+		contents.add(Text.of(LanguageHandler.colorGold(), "/ta flag <towny> <flag> [true|false]", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_TA_FLAG));
+		contents.add(Text.of(LanguageHandler.colorGold(), "/ta spy", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_TA_SPY));
+		contents.add(Text.of(LanguageHandler.colorGold(), "/ta extra <give|take|set> <towny> <amount>", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_TA_EXTRA));
+		contents.add(Text.of(LanguageHandler.colorGold(), "/ta extraplayer <give|take|set> <player> <amount>", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_TA_EXTRAPLAYER));
+		contents.add(Text.of(LanguageHandler.colorGold(), "/ta extraspawn <give|take|set> <towny> <amount>", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_TA_EXTRASPAWN));
+		contents.add(Text.of(LanguageHandler.colorGold(), "/ta extraspawnplayer <give|take|set> <player> <amount>", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_TA_EXTRASPAWNPLAYER));
 
 		PaginationList
 .builder()
-		.title(Text.of(TextColors.GOLD, "{ ", TextColors.YELLOW, "/townyadmin", TextColors.GOLD, " }"))
+		.title(Text.of(LanguageHandler.colorGold(), "{ ", LanguageHandler.colorYellow(), "/townyadmin", LanguageHandler.colorGold(), " }"))
 		.contents(contents)
 		.padding(Text.of("-"))
 		.sendTo(src);

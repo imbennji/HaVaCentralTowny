@@ -11,7 +11,6 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
@@ -36,7 +35,7 @@ public class TownyadminForcejoinExecutor implements CommandExecutor
 	{
 		if (!ctx.<String>getOne("towny").isPresent() || !ctx.<String>getOne("player").isPresent())
 		{
-			src.sendMessage(Text.of(TextColors.YELLOW, "/ta forcejoin <towny> <player>"));
+			src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/ta forcejoin <towny> <player>"));
 			return CommandResult.success();
 		}
 		String townyName = ctx.<String>getOne("towny").get();
@@ -45,13 +44,13 @@ public class TownyadminForcejoinExecutor implements CommandExecutor
 		Towny towny = DataHandler.getTowny(townyName);
 		if (towny == null)
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADTOWNNNAME));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADTOWNNNAME));
 			return CommandResult.success();
 		}
 		UUID playerUUID = DataHandler.getPlayerUUID(playerName);
 		if (playerUUID == null)
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADPLAYERNAME));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADPLAYERNAME));
 			return CommandResult.success();
 		}
 		
@@ -62,20 +61,20 @@ public class TownyadminForcejoinExecutor implements CommandExecutor
 			for (UUID uuid : playerTowny.getCitizens())
 			{
 				Sponge.getServer().getPlayer(uuid).ifPresent(p -> 
-					p.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.INFO_LEAVETOWN.replaceAll("\\{PLAYER\\}", playerName))));
+					p.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_LEAVETOWN.replaceAll("\\{PLAYER\\}", playerName))));
 			}
 		}
 		
 		for (UUID uuid : towny.getCitizens())
 		{
 			Sponge.getServer().getPlayer(uuid).ifPresent(p -> 
-				p.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.INFO_JOINTOWNANNOUNCE.replaceAll("\\{PLAYER\\}", playerName))));
+				p.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_JOINTOWNANNOUNCE.replaceAll("\\{PLAYER\\}", playerName))));
 		}
 		towny.addCitizen(playerUUID);
 		DataHandler.saveTowny(towny.getUUID());
 		Sponge.getServer().getPlayer(playerUUID).ifPresent(p -> 
-			p.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.INFO_JOINTOWN.replaceAll("\\{TOWN\\}", townyName))));
-		src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.SUCCESS_GENERAL));
+			p.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_JOINTOWN.replaceAll("\\{TOWN\\}", townyName))));
+		src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.SUCCESS_GENERAL));
 		return CommandResult.success();
 	}
 }

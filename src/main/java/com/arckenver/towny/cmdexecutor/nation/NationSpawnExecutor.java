@@ -19,7 +19,6 @@ import org.spongepowered.api.service.economy.account.UniqueAccount;
 import org.spongepowered.api.service.economy.transaction.ResultType;
 import org.spongepowered.api.service.economy.transaction.TransactionResult;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -39,7 +38,7 @@ public class NationSpawnExecutor implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
         if (!(src instanceof Player)) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
             return CommandResult.success();
         }
 
@@ -50,24 +49,24 @@ public class NationSpawnExecutor implements CommandExecutor {
         if (ctx.<String>getOne("nation").isPresent()) {
             targetNation = DataHandler.getNation(ctx.<String>getOne("nation").get());
             if (targetNation == null) {
-                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_NOT_FOUND));
+                src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NATION_NOT_FOUND));
                 return CommandResult.success();
             }
         } else {
             if (playerTown == null || !playerTown.hasNation()) {
-                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NONATION));
+                src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NONATION));
                 return CommandResult.success();
             }
             targetNation = DataHandler.getNation(playerTown.getNationUUID());
             if (targetNation == null) {
-                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_NOT_FOUND));
+                src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NATION_NOT_FOUND));
                 return CommandResult.success();
             }
         }
 
         Location<World> spawn = targetNation.getSpawn();
         if (spawn == null) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_NO_SPAWN));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NATION_NO_SPAWN));
             return CommandResult.success();
         }
 
@@ -75,7 +74,7 @@ public class NationSpawnExecutor implements CommandExecutor {
                 && targetNation.getUUID().equals(playerTown.getNationUUID());
 
         if (!isMember && !targetNation.isPublic()) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_SPAWN_PRIVATE));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NATION_SPAWN_PRIVATE));
             return CommandResult.success();
         }
 
@@ -83,13 +82,13 @@ public class NationSpawnExecutor implements CommandExecutor {
 
         if (costValue > 0D) {
             if (TownyPlugin.getEcoService() == null) {
-                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOECO));
+                src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOECO));
                 return CommandResult.success();
             }
 
             Optional<UniqueAccount> optAccount = TownyPlugin.getOrCreateUniqueAccount(player.getUniqueId());
             if (!optAccount.isPresent()) {
-                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOACCOUNT));
+                src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECONOACCOUNT));
                 return CommandResult.success();
             }
 
@@ -97,10 +96,10 @@ public class NationSpawnExecutor implements CommandExecutor {
             TransactionResult result = optAccount.get().withdraw(TownyPlugin.getEcoService().getDefaultCurrency(), cost,
                     TownyPlugin.getCause());
             if (result.getResult() == ResultType.ACCOUNT_NO_FUNDS) {
-                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_BANK_PLAYER_FUNDS));
+                src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NATION_BANK_PLAYER_FUNDS));
                 return CommandResult.success();
             } else if (result.getResult() != ResultType.SUCCESS) {
-                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECOTRANSACTION));
+                src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECOTRANSACTION));
                 return CommandResult.success();
             }
 
@@ -110,7 +109,7 @@ public class NationSpawnExecutor implements CommandExecutor {
         }
 
         player.setLocation(spawn);
-        src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_NATION_SPAWN_TRAVEL));
+        src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.INFO_NATION_SPAWN_TRAVEL));
         return CommandResult.success();
     }
 }

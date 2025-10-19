@@ -8,7 +8,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
@@ -33,17 +32,17 @@ public class TownyadminSpyExecutor implements CommandExecutor
 			if (channel.getMembers().contains(src))
 			{
 				channel.removeMember(src);
-				src.sendMessage(Text.of(TextColors.YELLOW, LanguageHandler.INFO_TOWNSPY_OFF));
+				src.sendMessage(Text.of(LanguageHandler.colorYellow(), LanguageHandler.INFO_TOWNSPY_OFF));
 			}
 			else
 			{
 				channel.addMember(src);
-				src.sendMessage(Text.of(TextColors.YELLOW, LanguageHandler.INFO_TOWNSPY_ON));
+				src.sendMessage(Text.of(LanguageHandler.colorYellow(), LanguageHandler.INFO_TOWNSPY_ON));
 			}
 		}
 		else
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}

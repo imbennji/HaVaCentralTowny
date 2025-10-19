@@ -9,7 +9,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
@@ -31,18 +30,18 @@ public class TownyadminDeleteExecutor implements CommandExecutor
 	{
 		if (!ctx.<String>getOne("towny").isPresent())
 		{
-			src.sendMessage(Text.of(TextColors.YELLOW, "/ta delete <towny>"));
+			src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/ta delete <towny>"));
 			return CommandResult.success();
 		}
 		String townyName = ctx.<String>getOne("towny").get();
 		Towny towny = DataHandler.getTowny(townyName);
 		if (towny == null)
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADTOWNNNAME));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADTOWNNNAME));
 			return CommandResult.success();
 		}
 		DataHandler.removeTowny(towny.getUUID());
-		MessageChannel.TO_ALL.send(Text.of(TextColors.AQUA, LanguageHandler.INFO_TOWNFALL.replaceAll("\\{TOWN\\}", towny.getName())));
+		MessageChannel.TO_ALL.send(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_TOWNFALL.replaceAll("\\{TOWN\\}", towny.getName())));
 		return CommandResult.success();
 	}
 }

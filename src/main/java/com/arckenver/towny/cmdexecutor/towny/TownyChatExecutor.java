@@ -11,7 +11,6 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
 import com.arckenver.towny.ConfigHandler;
@@ -45,7 +44,7 @@ public class TownyChatExecutor implements CommandExecutor
 			if (towny == null)
 			{
 				player.setMessageChannel(MessageChannel.TO_ALL);
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOTOWN));
 				return CommandResult.success();
 			}
 			TownyMessageChannel channel = towny.getMessageChannel();
@@ -54,25 +53,25 @@ public class TownyChatExecutor implements CommandExecutor
 			{
 				if (player.getMessageChannel().equals(channel)) {
 					player.setMessageChannel(MessageChannel.TO_ALL);
-					src.sendMessage(Text.of(TextColors.YELLOW, LanguageHandler.INFO_TOWNCHAT_OFF));
+					src.sendMessage(Text.of(LanguageHandler.colorYellow(), LanguageHandler.INFO_TOWNCHAT_OFF));
 				} else {
 					player.setMessageChannel(channel);
-					src.sendMessage(Text.of(TextColors.YELLOW, LanguageHandler.INFO_TOWNCHATON_ON));
+					src.sendMessage(Text.of(LanguageHandler.colorYellow(), LanguageHandler.INFO_TOWNCHATON_ON));
 				}
 			}
 			else
 			{
 				Text header = TextSerializers.FORMATTING_CODE.deserialize(ConfigHandler.getNode("others", "townyChatFormat").getString().replaceAll("\\{TOWN\\}", towny.getTag()).replaceAll("\\{TITLE\\}", DataHandler.getCitizenTitle(player.getUniqueId())));
 				
-				Text msg = Text.of(header, TextColors.RESET, player.getName(), TextColors.WHITE, ": ", TextColors.YELLOW, ctx.<String>getOne("msg").get());
+				Text msg = Text.of(header, LanguageHandler.colorReset(), player.getName(), LanguageHandler.colorWhite(), ": ", LanguageHandler.colorYellow(), ctx.<String>getOne("msg").get());
 				channel.send(player, msg);
-				DataHandler.getSpyChannel().send(Text.of(TextSerializers.FORMATTING_CODE.deserialize(ConfigHandler.getNode("others", "townySpyChatTag").getString()), TextColors.RESET, msg));
+				DataHandler.getSpyChannel().send(Text.of(TextSerializers.FORMATTING_CODE.deserialize(ConfigHandler.getNode("others", "townySpyChatTag").getString()), LanguageHandler.colorReset(), msg));
 			}
 
 		}
 		else
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}

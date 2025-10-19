@@ -8,7 +8,6 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
@@ -39,7 +38,7 @@ public class TownyadminExtraspawnExecutor implements CommandExecutor
 	{
 		if (!ctx.<String>getOne("towny").isPresent() || !ctx.<String>getOne("give|take|set").isPresent() || !ctx.<String>getOne("amount").isPresent())
 		{
-			src.sendMessage(Text.of(TextColors.YELLOW, "/ta extraspawn <give|take|set> <towny> <amount>"));
+			src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/ta extraspawn <give|take|set> <towny> <amount>"));
 			return CommandResult.success();
 		}
 		String townyName = ctx.<String>getOne("towny").get();
@@ -49,7 +48,7 @@ public class TownyadminExtraspawnExecutor implements CommandExecutor
 		Towny towny = DataHandler.getTowny(townyName);
 		if (towny == null)
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADTOWNNNAME));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADTOWNNNAME));
 			return CommandResult.success();
 		}
 		if (operation.equalsIgnoreCase("give"))
@@ -66,11 +65,11 @@ public class TownyadminExtraspawnExecutor implements CommandExecutor
 		}
 		else
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADARG_GTS));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADARG_GTS));
 			return CommandResult.success();
 		}
 		DataHandler.saveTowny(towny.getUUID());
-		src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.SUCCESS_GENERAL));
+		src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.SUCCESS_GENERAL));
 		return CommandResult.success();
 	}
 }

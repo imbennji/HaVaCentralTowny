@@ -9,7 +9,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
@@ -38,7 +37,7 @@ public class PlotRenameExecutor implements CommandExecutor
 			}
 			if (plotName != null && !plotName.matches("[\\p{Alnum}\\p{IsIdeographic}\\p{IsLetter}\"_\"]*{1,30}"))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ALPHASPAWN
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ALPHASPAWN
 						.replaceAll("\\{MIN\\}", "1")
 						.replaceAll("\\{MAX\\}", "30")));
 				return CommandResult.success();
@@ -47,18 +46,18 @@ public class PlotRenameExecutor implements CommandExecutor
 			Towny towny = DataHandler.getTowny(player.getLocation());
 			if (towny == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDSTANDTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDSTANDTOWN));
 				return CommandResult.success();
 			}
 			Plot currentPlot = towny.getPlot(player.getLocation());
 			if (currentPlot == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDSTANDPLOTSELF));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDSTANDPLOTSELF));
 				return CommandResult.success();
 			}
 			if (!towny.isStaff(player.getUniqueId()))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOOWNER));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOOWNER));
 				return CommandResult.success();
 			}
 			if (plotName != null)
@@ -67,18 +66,18 @@ public class PlotRenameExecutor implements CommandExecutor
 				{
 					if (plot.isNamed() && plot.getRealName().equalsIgnoreCase(plotName))
 					{
-						src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PLOTNAME));
+						src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PLOTNAME));
 						return CommandResult.success();
 					}
 				}
 			}
 			currentPlot.setName(plotName);
 			DataHandler.saveTowny(towny.getUUID());
-			src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.SUCCESS_PLOTRENAME.replaceAll("\\{PLOT\\}", currentPlot.getName())));
+			src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.SUCCESS_PLOTRENAME.replaceAll("\\{PLOT\\}", currentPlot.getName())));
 		}
 		else
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}

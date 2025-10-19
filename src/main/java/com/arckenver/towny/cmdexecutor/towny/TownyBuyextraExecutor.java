@@ -15,7 +15,6 @@ import org.spongepowered.api.service.economy.account.Account;
 import org.spongepowered.api.service.economy.transaction.ResultType;
 import org.spongepowered.api.service.economy.transaction.TransactionResult;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.ConfigHandler;
 import com.arckenver.towny.DataHandler;
@@ -43,36 +42,36 @@ public class TownyBuyextraExecutor implements CommandExecutor
 			Towny towny = DataHandler.getTownyOfPlayer(player.getUniqueId());
 			if (towny == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOTOWN));
 				return CommandResult.success();
 			}
 			if (!towny.isStaff(player.getUniqueId()))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_TOWNPRES));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_TOWNPRES));
 				return CommandResult.success();
 			}
 			if (!ctx.<String>getOne("amount").isPresent())
 			{
-				src.sendMessage(Text.of(TextColors.YELLOW, "/t buyextra <amount>"));
+				src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/t buyextra <amount>"));
 				return CommandResult.success();
 			}
                         int n = ctx.<Integer>getOne("amount").get();
                         int maxToBuy = ConfigHandler.getNode("others", "maxExtraChunks").getInt() - towny.getExtras();
                         if (n > maxToBuy)
                         {
-                                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOMORECHUNKS.replaceAll("\\{NUM\\}", Integer.toString(maxToBuy))));
+                                src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOMORECHUNKS.replaceAll("\\{NUM\\}", Integer.toString(maxToBuy))));
 				return CommandResult.success();
 			}
 
 			if (TownyPlugin.getEcoService() == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOECO));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOECO));
 				return CommandResult.success();
 			}
                     Optional<Account> optAccount = TownyPlugin.getOrCreateAccount("towny-" + towny.getUUID().toString());
 			if (!optAccount.isPresent())
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECONOTOWN));
 				return CommandResult.success();
 			}
                         BigDecimal price = BigDecimal.valueOf(n * ConfigHandler.getNode("prices", "extraChunkPrice").getDouble());
@@ -81,14 +80,14 @@ public class TownyBuyextraExecutor implements CommandExecutor
 			{
 				String[] splited = LanguageHandler.ERROR_NEEDMONEY.split("\\{AMOUNT\\}");
 				src.sendMessage(Text.builder()
-						.append(Text.of(TextColors.RED, (splited.length > 0) ? splited[0] : ""))
-						.append(Utils.formatPrice(TextColors.RED, price))
-						.append(Text.of(TextColors.RED, (splited.length > 1) ? splited[1] : "")).build());
+						.append(Text.of(LanguageHandler.colorRed(), (splited.length > 0) ? splited[0] : ""))
+						.append(Utils.formatPrice(LanguageHandler.colorRed(), price))
+						.append(Text.of(LanguageHandler.colorRed(), (splited.length > 1) ? splited[1] : "")).build());
 				return CommandResult.success();
 			}
 			else if (result.getResult() != ResultType.SUCCESS)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECOTRANSACTION));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECOTRANSACTION));
 				return CommandResult.success();
 			}
 
@@ -96,13 +95,13 @@ public class TownyBuyextraExecutor implements CommandExecutor
 			DataHandler.saveTowny(towny.getUUID());
                         String[] splited2 = LanguageHandler.SUCCESS_ADDCHUNKS.replaceAll("\\{NUM\\}", Integer.toString(n)).split("\\{AMOUNT\\}");
 			src.sendMessage(Text.builder()
-					.append(Text.of(TextColors.AQUA, (splited2.length > 0) ? splited2[0] : ""))
-					.append(Utils.formatPrice(TextColors.AQUA, price))
-					.append(Text.of(TextColors.AQUA, (splited2.length > 1) ? splited2[1] : "")).build());
+					.append(Text.of(LanguageHandler.colorAqua(), (splited2.length > 0) ? splited2[0] : ""))
+					.append(Utils.formatPrice(LanguageHandler.colorAqua(), price))
+					.append(Text.of(LanguageHandler.colorAqua(), (splited2.length > 1) ? splited2[1] : "")).build());
 		}
 		else
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}

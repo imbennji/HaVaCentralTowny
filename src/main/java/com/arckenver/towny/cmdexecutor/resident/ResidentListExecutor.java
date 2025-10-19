@@ -7,7 +7,6 @@ import org.spongepowered.api.command.*;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.*;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -16,6 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.arckenver.towny.LanguageHandler;
 
 public class ResidentListExecutor implements CommandExecutor {
     public static void create(CommandSpec.Builder root) {
@@ -34,7 +34,7 @@ public class ResidentListExecutor implements CommandExecutor {
                 .sorted(String.CASE_INSENSITIVE_ORDER)
                 .collect(Collectors.joining(", "));
         if (online.isEmpty()) online = "(none)";
-        src.sendMessage(Text.of(TextColors.GOLD, "Online residents: ", TextColors.YELLOW, online));
+        src.sendMessage(Text.of(LanguageHandler.colorGold(), "Online residents: ", LanguageHandler.colorYellow(), online));
 
         List<Resident> residents = DataHandler.getResidents().stream()
                 .sorted(Comparator.comparingLong(Resident::getLastOnlineAt).reversed())
@@ -48,7 +48,7 @@ public class ResidentListExecutor implements CommandExecutor {
         if (recent.isEmpty()) {
             recent = "No recent activity";
         }
-        src.sendMessage(Text.of(TextColors.GOLD, "Recently active: ", TextColors.YELLOW, recent));
+        src.sendMessage(Text.of(LanguageHandler.colorGold(), "Recently active: ", LanguageHandler.colorYellow(), recent));
 
         long inactiveThreshold = Duration.ofDays(7).toMillis();
         long now = System.currentTimeMillis();
@@ -59,7 +59,7 @@ public class ResidentListExecutor implements CommandExecutor {
                 .map(ResidentListExecutor::formatResidentRecent)
                 .collect(Collectors.joining(", "));
         if (!inactive.isEmpty()) {
-            src.sendMessage(Text.of(TextColors.GOLD, "Inactive (7d+): ", TextColors.YELLOW, inactive));
+            src.sendMessage(Text.of(LanguageHandler.colorGold(), "Inactive (7d+): ", LanguageHandler.colorYellow(), inactive));
         }
         return CommandResult.success();
     }

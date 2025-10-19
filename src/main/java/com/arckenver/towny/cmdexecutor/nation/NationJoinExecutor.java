@@ -15,7 +15,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 public class NationJoinExecutor implements CommandExecutor {
     public static void create(CommandSpec.Builder cmd) {
@@ -30,37 +29,37 @@ public class NationJoinExecutor implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
         if (!(src instanceof Player)) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
             return CommandResult.success();
         }
 
         Player player = (Player) src;
         Towny town = DataHandler.getTownyOfPlayer(player.getUniqueId());
         if (town == null) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOTOWN));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOTOWN));
             return CommandResult.success();
         }
 
         if (!town.isPresident(player.getUniqueId())) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_TOWNPRES));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_TOWNPRES));
             return CommandResult.success();
         }
 
         if (town.hasNation()) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_TOWN_HAS_NATION));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_TOWN_HAS_NATION));
             return CommandResult.success();
         }
 
         String nationName = ctx.<String>getOne("nation").orElse("");
         Nation nation = DataHandler.getNation(nationName);
         if (nation == null) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_NOT_FOUND));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NATION_NOT_FOUND));
             return CommandResult.success();
         }
 
         NationRequest invite = DataHandler.getNationInviteRequest(nation.getUUID(), town.getUUID());
         if (!nation.isOpen() && invite == null) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_INVITE_REQUIRED));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NATION_INVITE_REQUIRED));
             return CommandResult.success();
         }
 
@@ -73,7 +72,7 @@ public class NationJoinExecutor implements CommandExecutor {
         town.setNationUUID(nation.getUUID());
         DataHandler.saveTowny(town.getUUID());
 
-        src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_NATION_JOINED.replace("{TOWN}", town.getName())));
+        src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.INFO_NATION_JOINED.replace("{TOWN}", town.getName())));
         return CommandResult.success();
     }
 }

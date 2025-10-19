@@ -18,7 +18,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -30,7 +29,7 @@ import com.arckenver.towny.object.Towny;
 import com.google.common.collect.ImmutableMap;
 
 public class TownyJailExecutor implements CommandExecutor {
-        private static final Text USAGE = Text.of(TextColors.YELLOW,
+        private static final Text USAGE = Text.of(LanguageHandler.colorYellow(),
                         "/t jail add <resident> [hours]\n",
                         "/t jail release <resident>\n",
                         "/t jail list");
@@ -51,19 +50,19 @@ public class TownyJailExecutor implements CommandExecutor {
         @Override
         public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
                 if (!(src instanceof Player)) {
-                        src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+                        src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
                         return CommandResult.success();
                 }
 
                 Player player = (Player) src;
                 Towny town = DataHandler.getTownyOfPlayer(player.getUniqueId());
                 if (town == null) {
-                        src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOTOWN));
+                        src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOTOWN));
                         return CommandResult.success();
                 }
 
                 if (!town.isStaff(player.getUniqueId())) {
-                        src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_TOWNSTAFF));
+                        src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_TOWNSTAFF));
                         return CommandResult.success();
                 }
 
@@ -97,29 +96,29 @@ public class TownyJailExecutor implements CommandExecutor {
                 String residentName = ctx.<String>getOne("resident").get();
                 UUID targetId = DataHandler.getPlayerUUID(residentName);
                 if (targetId == null) {
-                        actor.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADPLAYERNAME));
+                        actor.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADPLAYERNAME));
                         return;
                 }
                 if (!town.isCitizen(targetId)) {
-                        actor.sendMessage(Text.of(TextColors.RED,
+                        actor.sendMessage(Text.of(LanguageHandler.colorRed(),
                                         LanguageHandler.ERROR_JAIL_TARGET_NOT_CITIZEN.replace("{PLAYER}", residentName)));
                         return;
                 }
                 if (DataHandler.isResidentJailed(targetId)) {
-                        actor.sendMessage(Text.of(TextColors.RED,
+                        actor.sendMessage(Text.of(LanguageHandler.colorRed(),
                                         LanguageHandler.ERROR_JAIL_ALREADY.replace("{PLAYER}", residentName)));
                         return;
                 }
 
                 Optional<Plot> jailPlot = DataHandler.findPrimaryJailPlot(town);
                 if (!jailPlot.isPresent()) {
-                        actor.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_TOWN_NO_JAIL));
+                        actor.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_TOWN_NO_JAIL));
                         return;
                 }
 
                 Optional<Location<World>> jailLocation = DataHandler.getJailSpawn(town, jailPlot.get());
                 if (!jailLocation.isPresent()) {
-                        actor.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_TOWN_NO_JAIL));
+                        actor.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_TOWN_NO_JAIL));
                         return;
                 }
 
@@ -132,14 +131,14 @@ public class TownyJailExecutor implements CommandExecutor {
                 Sponge.getServer().getPlayer(targetId).ifPresent(target -> {
                         target.setLocation(jailLocation.get());
                         String townName = town.getDisplayName();
-                        target.sendMessage(Text.of(TextColors.RED,
+                        target.sendMessage(Text.of(LanguageHandler.colorRed(),
                                         LanguageHandler.INFO_JAIL_TELEPORT.replace("{TOWN}", townName)));
                 });
 
                 String duration = hours > 0
                                 ? LanguageHandler.INFO_JAIL_DURATION_HOURS.replace("{HOURS}", Integer.toString(hours))
                                 : LanguageHandler.INFO_JAIL_DURATION_PERM;
-                actor.sendMessage(Text.of(TextColors.GREEN,
+                actor.sendMessage(Text.of(LanguageHandler.colorGreen(),
                                 LanguageHandler.SUCCESS_JAIL_ADDED.replace("{PLAYER}", residentName)
                                                 .replace("{DURATION}", duration)));
         }
@@ -148,31 +147,31 @@ public class TownyJailExecutor implements CommandExecutor {
                 String residentName = ctx.<String>getOne("resident").get();
                 UUID targetId = DataHandler.getPlayerUUID(residentName);
                 if (targetId == null) {
-                        actor.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADPLAYERNAME));
+                        actor.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADPLAYERNAME));
                         return;
                 }
                 if (!DataHandler.isResidentJailed(targetId)) {
-                        actor.sendMessage(Text.of(TextColors.RED,
+                        actor.sendMessage(Text.of(LanguageHandler.colorRed(),
                                         LanguageHandler.ERROR_JAIL_NOT_JAILED.replace("{PLAYER}", residentName)));
                         return;
                 }
                 Optional<UUID> jailTown = DataHandler.getResidentJailTown(targetId);
                 if (!jailTown.isPresent() || !Objects.equals(jailTown.get(), town.getUUID())) {
-                        actor.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_TOWN_NO_JAIL));
+                        actor.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_TOWN_NO_JAIL));
                         return;
                 }
 
                 DataHandler.setResidentJailed(targetId, false, null, null, 0L);
                 Sponge.getServer().getPlayer(targetId)
-                                .ifPresent(p -> p.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_JAIL_RELEASE)));
-                actor.sendMessage(Text.of(TextColors.GREEN,
+                                .ifPresent(p -> p.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.INFO_JAIL_RELEASE)));
+                actor.sendMessage(Text.of(LanguageHandler.colorGreen(),
                                 LanguageHandler.SUCCESS_JAIL_RELEASED.replace("{PLAYER}", residentName)));
         }
 
         private void handleList(CommandSource src, Towny town) {
                 List<UUID> jailed = new ArrayList<>(DataHandler.getTownJailedResidents(town.getUUID()));
                 if (jailed.isEmpty()) {
-                        src.sendMessage(Text.of(TextColors.YELLOW, LanguageHandler.INFO_JAIL_LIST_EMPTY));
+                        src.sendMessage(Text.of(LanguageHandler.colorYellow(), LanguageHandler.INFO_JAIL_LIST_EMPTY));
                         return;
                 }
                 String list = jailed.stream()
@@ -182,7 +181,7 @@ public class TownyJailExecutor implements CommandExecutor {
                 if (list.isEmpty()) {
                         list = LanguageHandler.FORMAT_UNKNOWN;
                 }
-                src.sendMessage(Text.of(TextColors.AQUA,
+                src.sendMessage(Text.of(LanguageHandler.colorAqua(),
                                 LanguageHandler.INFO_JAIL_LIST.replace("{LIST}", list)));
         }
 }

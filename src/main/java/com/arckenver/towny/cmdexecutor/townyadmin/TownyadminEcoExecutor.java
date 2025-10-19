@@ -14,7 +14,6 @@ import org.spongepowered.api.service.economy.account.Account;
 import org.spongepowered.api.service.economy.transaction.ResultType;
 import org.spongepowered.api.service.economy.transaction.TransactionResult;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
@@ -46,7 +45,7 @@ public class TownyadminEcoExecutor implements CommandExecutor
 	{
 		if (!ctx.<String>getOne("towny").isPresent() || !ctx.<String>getOne("give|take|set").isPresent() || !ctx.<String>getOne("amount").isPresent())
 		{
-			src.sendMessage(Text.of(TextColors.YELLOW, "/ta eco <give|take|set> <towny> <amount>"));
+			src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/ta eco <give|take|set> <towny> <amount>"));
 			return CommandResult.success();
 		}
 		String townyName = ctx.<String>getOne("towny").get();
@@ -56,18 +55,18 @@ public class TownyadminEcoExecutor implements CommandExecutor
 		Towny towny = DataHandler.getTowny(townyName);
 		if (towny == null)
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADTOWNNNAME));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADTOWNNNAME));
 			return CommandResult.success();
 		}
 		if (TownyPlugin.getEcoService() == null)
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOECO));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOECO));
 			return CommandResult.success();
 		}
             Optional<Account> optAccount = TownyPlugin.getOrCreateAccount("towny-" + towny.getUUID().toString());
 		if (!optAccount.isPresent())
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOACCOUNT));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECONOACCOUNT));
 			return CommandResult.success();
 		}
 		TransactionResult result;
@@ -85,15 +84,15 @@ public class TownyadminEcoExecutor implements CommandExecutor
 		}
 		else
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADARG_GTS));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADARG_GTS));
 			return CommandResult.success();
 		}
 		if (result.getResult() != ResultType.SUCCESS)
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECOTRANSACTION));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECOTRANSACTION));
 			return CommandResult.success();
 		}
-		src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.SUCCESS_GENERAL));
+		src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.SUCCESS_GENERAL));
 		return CommandResult.success();
 	}
 }

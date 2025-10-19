@@ -12,7 +12,6 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
@@ -37,34 +36,34 @@ public class TownyLeaveExecutor implements CommandExecutor
 			Towny towny = DataHandler.getTownyOfPlayer(player.getUniqueId());
 			if (towny == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOTOWN));
 				return CommandResult.success();
 			}
 			if (towny.isPresident(player.getUniqueId()))
 			{
 				if (towny.getNumCitizens() > 1)
 				{
-					src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDRESIGN));
+					src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDRESIGN));
 					return CommandResult.success();
 				}
 				towny.removeCitizen(player.getUniqueId());
-				src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.SUCCESS_LEAVETOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.SUCCESS_LEAVETOWN));
 				DataHandler.removeTowny(towny.getUUID());
-				MessageChannel.TO_ALL.send(Text.of(TextColors.AQUA, LanguageHandler.INFO_TOWNFALL.replaceAll("\\{TOWN\\}", towny.getName())));
+				MessageChannel.TO_ALL.send(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_TOWNFALL.replaceAll("\\{TOWN\\}", towny.getName())));
 				return CommandResult.success();
 			}
 			towny.removeCitizen(player.getUniqueId());
 			DataHandler.saveTowny(towny.getUUID());
-			src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.SUCCESS_LEAVETOWN));
+			src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.SUCCESS_LEAVETOWN));
 			for (UUID citizen : towny.getCitizens())
 			{
 				Sponge.getServer().getPlayer(citizen).ifPresent(
-						p -> p.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.INFO_LEAVETOWN.replaceAll("\\{PLAYER\\}", player.getName()))));
+						p -> p.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_LEAVETOWN.replaceAll("\\{PLAYER\\}", player.getName()))));
 			}
 		}
 		else
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}

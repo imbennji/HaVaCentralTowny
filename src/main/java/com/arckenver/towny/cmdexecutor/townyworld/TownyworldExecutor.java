@@ -8,7 +8,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.LanguageHandler;
 
@@ -26,15 +25,15 @@ public class TownyworldExecutor implements CommandExecutor
 	public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException
 	{
 		src.sendMessage(Text.of(
-				TextColors.GOLD, ((src instanceof Player) ? "" : "\n") + "--------{ ",
-				TextColors.YELLOW, "/townyworld",
-				TextColors.GOLD, " }--------",
-				TextColors.GOLD, "\n/tw info [world]", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_TW_INFO,
-				TextColors.GOLD, "\n/tw list", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_TW_LIST,
-				TextColors.GOLD, "\n/tw enable <world>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_TW_ENABLE,
-				TextColors.GOLD, "\n/tw disable <world>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_TW_DISABLE,
-				TextColors.GOLD, "\n/tw perm <perm> [true|false]", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_TW_PERM,
-				TextColors.GOLD, "\n/tw flag <flag> <true|false>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_TW_FLAG
+				LanguageHandler.colorGold(), ((src instanceof Player) ? "" : "\n") + "--------{ ",
+				LanguageHandler.colorYellow(), "/townyworld",
+				LanguageHandler.colorGold(), " }--------",
+				LanguageHandler.colorGold(), "\n/tw info [world]", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_TW_INFO,
+				LanguageHandler.colorGold(), "\n/tw list", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_TW_LIST,
+				LanguageHandler.colorGold(), "\n/tw enable <world>", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_TW_ENABLE,
+				LanguageHandler.colorGold(), "\n/tw disable <world>", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_TW_DISABLE,
+				LanguageHandler.colorGold(), "\n/tw perm <perm> [true|false]", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_TW_PERM,
+				LanguageHandler.colorGold(), "\n/tw flag <flag> <true|false>", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_TW_FLAG
 		));
 		return CommandResult.success();
 	}

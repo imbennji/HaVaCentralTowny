@@ -10,7 +10,6 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.living.humanoid.player.RespawnPlayerEvent;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -26,7 +25,7 @@ public class JailListener {
                 UUID id = player.getUniqueId();
 
                 if (DataHandler.tryReleaseResidentFromJail(id)) {
-                        player.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_JAIL_RELEASE));
+                        player.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.INFO_JAIL_RELEASE));
                         return;
                 }
 
@@ -40,7 +39,7 @@ public class JailListener {
                                         .filter(Objects::nonNull)
                                         .map(Towny::getDisplayName)
                                         .orElse(LanguageHandler.FORMAT_UNKNOWN);
-                        player.sendMessage(Text.of(TextColors.RED,
+                        player.sendMessage(Text.of(LanguageHandler.colorRed(),
                                         LanguageHandler.INFO_JAIL_TELEPORT.replace("{TOWN}", townName)));
                         return;
                 }
@@ -51,7 +50,7 @@ public class JailListener {
                         Location<World> spawn = deathLocation.getExtent().getSpawnLocation();
                         event.setToTransform(event.getToTransform().setLocation(spawn));
                         scheduleTeleport(id, spawn);
-                        player.sendMessage(Text.of(TextColors.RED,
+                        player.sendMessage(Text.of(LanguageHandler.colorRed(),
                                         LanguageHandler.INFO_OUTLAW_RESPAWN.replace("{TOWN}", deathTown.getDisplayName())));
                 }
         }

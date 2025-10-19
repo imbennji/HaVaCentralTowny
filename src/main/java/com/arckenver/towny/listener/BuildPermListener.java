@@ -16,7 +16,6 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -54,7 +53,7 @@ public class BuildPermListener
 
 				trans.setValid(false);
                                 try {
-                                        player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_DESTROY));
+                                        player.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_DESTROY));
 				} catch (Exception e) {}
 			}
 		}));
@@ -77,7 +76,7 @@ public class BuildPermListener
 			{
 				event.setCancelled(true);
                                 try {
-                                        player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_DESTROY));
+                                        player.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_DESTROY));
 				} catch (Exception e) {}
 				return;
 			}
@@ -101,7 +100,7 @@ public class BuildPermListener
 			{
 				trans.setValid(false);
                                 try {
-                                        player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_BUILD));
+                                        player.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_BUILD));
 				} catch (Exception e) {}
 			}
 		}));
@@ -127,7 +126,7 @@ public class BuildPermListener
 					trans.setValid(false);
                                         if (user instanceof Player) {
                                                 try {
-                                                        ((Player) user).sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_DESTROY));
+                                                        ((Player) user).sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_DESTROY));
                                                 } catch (Exception e) {}
                                         }
 				}

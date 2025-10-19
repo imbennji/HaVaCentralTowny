@@ -9,7 +9,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.ConfigHandler;
 import com.arckenver.towny.DataHandler;
@@ -34,7 +33,7 @@ public class TownyadminSetnameExecutor implements CommandExecutor
 	{
 		if (!ctx.<String> getOne("oldname").isPresent() || !ctx.<String> getOne("newname").isPresent())
 		{
-			src.sendMessage(Text.of(TextColors.YELLOW, "/ta setname <oldname> <newname>"));
+			src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/ta setname <oldname> <newname>"));
 			return CommandResult.success();
 		}
 		String oldName = ctx.<String> getOne("oldname").get();
@@ -42,28 +41,28 @@ public class TownyadminSetnameExecutor implements CommandExecutor
 		Towny towny = DataHandler.getTowny(oldName);
 		if (towny == null)
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOTOWN));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOTOWN));
 			return CommandResult.success();
 		}
 		if (DataHandler.getTowny(newName) != null)
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NAMETAKEN));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NAMETAKEN));
 			return CommandResult.success();
 		}
 		if (DataHandler.getTownyByTag(newName) != null)
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_TAGTAKEN));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_TAGTAKEN));
 			return CommandResult.success();
 		}
 		if (!newName.matches("[\\p{Alnum}\\p{IsIdeographic}\\p{IsLetter}\"_\"]*"))
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NAMEALPHA));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NAMEALPHA));
 			return CommandResult.success();
 		}
 		if (newName.length() < ConfigHandler.getNode("others", "minTownyNameLength").getInt()
 				|| newName.length() > ConfigHandler.getNode("others", "maxTownyNameLength").getInt())
 		{
-			src.sendMessage(Text.of(TextColors.RED,
+			src.sendMessage(Text.of(LanguageHandler.colorRed(),
 					LanguageHandler.ERROR_NAMELENGTH
 							.replaceAll("\\{MIN\\}",
 									ConfigHandler.getNode("others", "minTownyNameLength").getString())
@@ -73,7 +72,7 @@ public class TownyadminSetnameExecutor implements CommandExecutor
 		}
 		towny.setName(newName);
 		DataHandler.saveTowny(towny.getUUID());
-		MessageChannel.TO_ALL.send(Text.of(TextColors.RED,
+		MessageChannel.TO_ALL.send(Text.of(LanguageHandler.colorRed(),
 				LanguageHandler.INFO_RENAME.replaceAll("\\{OLDNAME\\}", oldName).replaceAll("\\{NEWNAME\\}", towny.getName())));
 		return CommandResult.success();
 	}

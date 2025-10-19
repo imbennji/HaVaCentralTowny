@@ -15,7 +15,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -41,25 +40,25 @@ public class PlotPutRentExecutor implements CommandExecutor {
 			Player player = (Player) src;
 			Towny towny = DataHandler.getTowny(player.getLocation());
 			if (towny == null) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDSTANDTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDSTANDTOWN));
 				return CommandResult.success();
 			}
 			Plot plot = towny.getPlot(player.getLocation());
 			if (plot == null) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDSTANDPLOTSELF));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDSTANDPLOTSELF));
 				return CommandResult.success();
 			}
 			if ((!plot.isOwner(player.getUniqueId()) || towny.isAdmin()) && !towny.isStaff(player.getUniqueId())) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOOWNER));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOOWNER));
 				return CommandResult.success();
 			}
 			if (!ctx.<Double>getOne("price").isPresent()) {
-				src.sendMessage(Text.of(TextColors.YELLOW, "/z putrent <price>"));
+				src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/z putrent <price>"));
 				return CommandResult.success();
 			}
 			BigDecimal price = BigDecimal.valueOf(ctx.<Double>getOne("price").get());
 			if (price.compareTo(BigDecimal.ZERO) == -1) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADARG_P));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADARG_P));
 				return CommandResult.success();
 			}
 			plot.setRentalPrice(price);
@@ -73,12 +72,12 @@ public class PlotPutRentExecutor implements CommandExecutor {
 								String str = LanguageHandler.INFO_PLOTFORRENT.replaceAll("\\{PLOT\\}", plot.getDisplayName());
 								String[] splited = str.split("\\{AMOUNT\\}");
 								src.sendMessage(Text.builder()
-										.append(Text.of(TextColors.AQUA, (splited.length > 0) ? splited[0] : ""))
-										.append(Utils.formatPrice(TextColors.GREEN, price))
-										.append(Text.of(TextColors.AQUA, (splited.length > 1) ? splited[1] : "")).build());
+										.append(Text.of(LanguageHandler.colorAqua(), (splited.length > 0) ? splited[0] : ""))
+										.append(Utils.formatPrice(LanguageHandler.colorGreen(), price))
+										.append(Text.of(LanguageHandler.colorAqua(), (splited.length > 1) ? splited[1] : "")).build());
 							}));
 		} else {
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}

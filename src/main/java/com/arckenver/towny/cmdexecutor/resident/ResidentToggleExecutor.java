@@ -7,10 +7,10 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.*;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Locale;
 import java.util.UUID;
+import com.arckenver.towny.LanguageHandler;
 
 public class ResidentToggleExecutor implements CommandExecutor {
     public static void create(CommandSpec.Builder root) {
@@ -28,7 +28,7 @@ public class ResidentToggleExecutor implements CommandExecutor {
     }
 
     @Override public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
-        if (!(src instanceof Player)) throw new CommandException(Text.of(TextColors.RED, "Players only."));
+        if (!(src instanceof Player)) throw new CommandException(Text.of(LanguageHandler.colorRed(), "Players only."));
         Player p = (Player) src;
         UUID id = p.getUniqueId();
 
@@ -62,7 +62,7 @@ public class ResidentToggleExecutor implements CommandExecutor {
             case "infotool": setBool(src, "Info tool", value, DataHandler.getResidentInfoTool(id), v -> DataHandler.setResidentInfoTool(id, v)); break;
             case "adminbypass":
                 if (!src.hasPermission("towny.admin.bypass"))
-                    throw new CommandException(Text.of(TextColors.RED, "You lack towny.admin.bypass"));
+                    throw new CommandException(Text.of(LanguageHandler.colorRed(), "You lack towny.admin.bypass"));
                 setBool(src, "Admin bypass", value, DataHandler.getResidentAdminBypass(id), v -> DataHandler.setResidentAdminBypass(id, v));
                 break;
 
@@ -85,11 +85,11 @@ public class ResidentToggleExecutor implements CommandExecutor {
                 DataHandler.setResidentIgnorePlots(id, false);
                 DataHandler.setResidentInfoTool(id, false);
                 DataHandler.setResidentAdminBypass(id, false);
-                src.sendMessage(Text.of(TextColors.GREEN, "Resident toggles reset."));
+                src.sendMessage(Text.of(LanguageHandler.colorGreen(), "Resident toggles reset."));
                 break;
 
             default:
-                throw new CommandException(Text.of(TextColors.RED, "Unknown toggle: " + key));
+                throw new CommandException(Text.of(LanguageHandler.colorRed(), "Unknown toggle: " + key));
         }
         return CommandResult.success();
     }
@@ -98,6 +98,6 @@ public class ResidentToggleExecutor implements CommandExecutor {
     private void setBool(CommandSource src, String label, Boolean arg, boolean cur, Setter set) {
         boolean nv = (arg == null ? !cur : arg);
         set.set(nv);
-        src.sendMessage(Text.of(TextColors.GOLD, label, ": ", TextColors.YELLOW, nv ? "ON" : "OFF"));
+        src.sendMessage(Text.of(LanguageHandler.colorGold(), label, ": ", LanguageHandler.colorYellow(), nv ? "ON" : "OFF"));
     }
 }

@@ -11,7 +11,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -32,16 +31,16 @@ public class NationListExecutor implements CommandExecutor {
         List<Text> contents = new ArrayList<>();
         Iterator<Nation> iter = DataHandler.getNations().iterator();
         if (!iter.hasNext()) {
-            contents.add(Text.of(TextColors.YELLOW, LanguageHandler.ERROR_NONATIONYET));
+            contents.add(Text.of(LanguageHandler.colorYellow(), LanguageHandler.ERROR_NONATIONYET));
         } else {
             while (iter.hasNext()) {
                 Nation nation = iter.next();
-                contents.add(Text.of(TextColors.YELLOW, nation.getName(), TextColors.GOLD, " [" + nation.getTowns().size() + "]"));
+                contents.add(Text.of(LanguageHandler.colorYellow(), nation.getName(), LanguageHandler.colorGold(), " [" + nation.getTowns().size() + "]"));
             }
         }
 
         PaginationList.builder()
-                .title(Text.of(TextColors.GOLD, "{ ", TextColors.YELLOW, LanguageHandler.HEADER_NATIONLIST, TextColors.GOLD, " }"))
+                .title(Text.of(LanguageHandler.colorGold(), "{ ", LanguageHandler.colorYellow(), LanguageHandler.HEADER_NATIONLIST, LanguageHandler.colorGold(), " }"))
                 .contents(contents)
                 .padding(Text.of("-"))
                 .sendTo(src);

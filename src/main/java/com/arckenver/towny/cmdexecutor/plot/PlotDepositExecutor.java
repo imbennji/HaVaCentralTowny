@@ -20,7 +20,6 @@ import org.spongepowered.api.service.economy.account.UniqueAccount;
 import org.spongepowered.api.service.economy.transaction.ResultType;
 import org.spongepowered.api.service.economy.transaction.TransactionResult;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -44,80 +43,80 @@ public class PlotDepositExecutor implements CommandExecutor {
 	public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
 		if (src instanceof Player) {
 			if (!ctx.<Double>getOne("amount").isPresent()) {
-				src.sendMessage(Text.of(TextColors.YELLOW, "/z deposit <amount>"));
+				src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/z deposit <amount>"));
 				return CommandResult.success();
 			}
 			Player player = (Player) src;
 			BigDecimal amount = BigDecimal.valueOf(ctx.<Double>getOne("amount").get());
 			if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADARG_P));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADARG_P));
 				return CommandResult.success();
 			}
 			Towny towny = DataHandler.getTowny(player.getLocation());
 			if (towny == null) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDSTANDTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDSTANDTOWN));
 				return CommandResult.success();
 			}
 			Plot currentPlot = towny.getPlot(player.getLocation());
 			if (currentPlot == null) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDSTANDPLOTSELF));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDSTANDPLOTSELF));
 				return CommandResult.success();
 			}//if plot owner, co owner or rather towny staff
 			if (!currentPlot.isCoowner(player.getUniqueId()) && !currentPlot.isOwner(player.getUniqueId())) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOOWNER));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOOWNER));
 				return CommandResult.success();
 			}
 			if (!currentPlot.isForRent()) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOTRENTING));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOTRENTING));
 				return CommandResult.success();
 			}
 
 			if (TownyPlugin.getEcoService() == null) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOECO));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOECO));
 				return CommandResult.success();
 			}
                     Optional<UniqueAccount> ownerAccount = TownyPlugin.getOrCreateUniqueAccount(player.getUniqueId());
 			if (!ownerAccount.isPresent()) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOACCOUNT));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECONOACCOUNT));
 				return CommandResult.success();
 			}
                     Optional<Account> plotAccount = TownyPlugin.getOrCreateAccount("plot-" + currentPlot.getUUID());
 			if (!plotAccount.isPresent()) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOPLOT));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECONOPLOT));
 				return CommandResult.success();
 			}
 			TransactionResult result = ownerAccount.get().transfer(plotAccount.get(), TownyPlugin.getEcoService().getDefaultCurrency(), amount, TownyPlugin.getCause());
 			if (result.getResult() == ResultType.ACCOUNT_NO_FUNDS) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOENOUGHMONEY));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOENOUGHMONEY));
 				return CommandResult.success();
 			} else if (result.getResult() != ResultType.SUCCESS) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECOTRANSACTION));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECOTRANSACTION));
 				return CommandResult.success();
 			} else {
 				String[] s1 = LanguageHandler.SUCCESS_DEPOSIT_PLOT.split("\\{AMOUNT\\}");
 				Text.Builder builder = Text.builder();
 				if (s1[0].contains("{BALANCE}")) {
 					String[] split = s1[0].split("\\{BALANCE\\}");
-					builder.append(Text.of(TextColors.GREEN, (split.length > 0) ? split[0] : ""))
-							.append(Utils.formatPrice(TextColors.YELLOW, plotAccount.get().getBalance(TownyPlugin.getEcoService().getDefaultCurrency())))
-							.append(Text.of(TextColors.GREEN, (split.length > 1) ? split[1] : ""));
+					builder.append(Text.of(LanguageHandler.colorGreen(), (split.length > 0) ? split[0] : ""))
+							.append(Utils.formatPrice(LanguageHandler.colorYellow(), plotAccount.get().getBalance(TownyPlugin.getEcoService().getDefaultCurrency())))
+							.append(Text.of(LanguageHandler.colorGreen(), (split.length > 1) ? split[1] : ""));
 				} else {
-					builder.append(Text.of(TextColors.GREEN, s1[0]));
+					builder.append(Text.of(LanguageHandler.colorGreen(), s1[0]));
 				}
-				builder.append(Utils.formatPrice(TextColors.YELLOW, amount));
+				builder.append(Utils.formatPrice(LanguageHandler.colorYellow(), amount));
 				if (s1[1].contains("{BALANCE}")) {
 					String[] split = s1[1].split("\\{BALANCE\\}");
-					builder.append(Text.of(TextColors.GREEN, (split.length > 0) ? split[0] : ""))
-							.append(Utils.formatPrice(TextColors.YELLOW, plotAccount.get().getBalance(TownyPlugin.getEcoService().getDefaultCurrency())))
-							.append(Text.of(TextColors.GREEN, (split.length > 1) ? split[1] : ""));
+					builder.append(Text.of(LanguageHandler.colorGreen(), (split.length > 0) ? split[0] : ""))
+							.append(Utils.formatPrice(LanguageHandler.colorYellow(), plotAccount.get().getBalance(TownyPlugin.getEcoService().getDefaultCurrency())))
+							.append(Text.of(LanguageHandler.colorGreen(), (split.length > 1) ? split[1] : ""));
 				} else {
-					builder.append(Text.of(TextColors.GREEN, s1[1]));
+					builder.append(Text.of(LanguageHandler.colorGreen(), s1[1]));
 				}
 				src.sendMessage(builder.build());
 				return CommandResult.success();
 			}
 		} else {
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}

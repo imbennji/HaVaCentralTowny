@@ -17,11 +17,11 @@ import org.spongepowered.api.service.economy.transaction.ResultType;
 import org.spongepowered.api.service.economy.transaction.TransactionResult;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
+import com.arckenver.towny.LanguageHandler;
 
 public class TownyCreateExecutor implements CommandExecutor {
 	public static void create(CommandSpec.Builder cmd) {
@@ -35,12 +35,12 @@ public class TownyCreateExecutor implements CommandExecutor {
 
 	public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
 		if (!ctx.<String>getOne("name").isPresent()) {
-			src.sendMessage(Text.of(TextColors.YELLOW, "/t create <name>"));
+			src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/t create <name>"));
 			return CommandResult.success();
 		}
 
 		if (!src.hasPermission("towny.command.town.create")) {
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NO_PERMISSION));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NO_PERMISSION));
 			return CommandResult.success();
 		}
 
@@ -48,24 +48,24 @@ public class TownyCreateExecutor implements CommandExecutor {
 			Player player = (Player) src;
 
 			if (!ConfigHandler.getNode("worlds").getNode(player.getWorld().getName()).getNode("enabled").getBoolean()) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PLUGINDISABLEDINWORLD));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PLUGINDISABLEDINWORLD));
 				return CommandResult.success();
 			}
 
 			if (DataHandler.getTownyOfPlayer(player.getUniqueId()) != null) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDLEAVE));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDLEAVE));
 				return CommandResult.success();
 			}
 
 			String townyName = ctx.<String>getOne("name").get();
 
 			if (DataHandler.getTowny(townyName) != null) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NAMETAKEN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NAMETAKEN));
 				return CommandResult.success();
 			}
 
 			if (!townyName.matches("[\\p{Alnum}\\p{IsIdeographic}\\p{IsLetter}\"_\"]*")) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NAMEALPHA));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NAMEALPHA));
 				return CommandResult.success();
 			}
 
@@ -73,21 +73,21 @@ public class TownyCreateExecutor implements CommandExecutor {
 			int maxNameLength = ConfigHandler.getNode("others", "maxTownyNameLength").getInt();
 
 			if (townyName.length() < minNameLength || townyName.length() > maxNameLength) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NAMELENGTH
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NAMELENGTH
 						.replaceAll("\\{MIN\\}", String.valueOf(minNameLength))
 						.replaceAll("\\{MAX\\}", String.valueOf(maxNameLength))));
 				return CommandResult.success();
 			}
 
 			if (TownyPlugin.getEcoService() == null) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOECO));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOECO));
 				return CommandResult.success();
 			}
 
                         Optional<UniqueAccount> optAccount = TownyPlugin.getOrCreateUniqueAccount(player.getUniqueId());
 
 			if (!optAccount.isPresent()) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOACCOUNT));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECONOACCOUNT));
 				return CommandResult.success();
 			}
 
@@ -95,9 +95,9 @@ public class TownyCreateExecutor implements CommandExecutor {
 
 			if (optAccount.get().getBalance(TownyPlugin.getEcoService().getDefaultCurrency()).compareTo(creationPrice) < 0) {
 				src.sendMessage(Text.builder()
-						.append(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDMONEY.split("\\{AMOUNT\\}")[0]))
-						.append(Utils.formatPrice(TextColors.RED, creationPrice))
-						.append(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDMONEY.split("\\{AMOUNT\\}")[1])).build());
+						.append(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDMONEY.split("\\{AMOUNT\\}")[0]))
+						.append(Utils.formatPrice(LanguageHandler.colorRed(), creationPrice))
+						.append(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDMONEY.split("\\{AMOUNT\\}")[1])).build());
 				return CommandResult.success();
 			}
 
@@ -105,12 +105,12 @@ public class TownyCreateExecutor implements CommandExecutor {
 
 			if (result.getResult() == ResultType.ACCOUNT_NO_FUNDS) {
 				src.sendMessage(Text.builder()
-						.append(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDMONEY.split("\\{AMOUNT\\}")[0]))
-						.append(Utils.formatPrice(TextColors.RED, creationPrice))
-						.append(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDMONEY.split("\\{AMOUNT\\}")[1])).build());
+						.append(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDMONEY.split("\\{AMOUNT\\}")[0]))
+						.append(Utils.formatPrice(LanguageHandler.colorRed(), creationPrice))
+						.append(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDMONEY.split("\\{AMOUNT\\}")[1])).build());
 				return CommandResult.success();
 			} else if (result.getResult() != ResultType.SUCCESS) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECOTRANSACTION));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECOTRANSACTION));
 				return CommandResult.success();
 			}
 
@@ -121,13 +121,13 @@ public class TownyCreateExecutor implements CommandExecutor {
                         Optional<Account> optTownyAccount = TownyPlugin.getOrCreateAccount("towny-" + towny.getUUID().toString());
 
 			if (!optTownyAccount.isPresent()) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_CREATEECOTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_CREATEECOTOWN));
 				TownyPlugin.getLogger().error("Could not create towny's account on the economy service !");
 				return CommandResult.success();
 			}
 
 			if (optTownyAccount.get().setBalance(TownyPlugin.getEcoService().getDefaultCurrency(), BigDecimal.ZERO, TownyPlugin.getCause()).getResult() != ResultType.SUCCESS) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_CREATEECOTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_CREATEECOTOWN));
 				TownyPlugin.getLogger().error("Could not fund towny's account on the economy service !");
 				return CommandResult.success();
 			}
@@ -157,7 +157,7 @@ public class TownyCreateExecutor implements CommandExecutor {
 							Sponge.getCommandManager().process(src, "cc");
 							Sponge.getCommandManager().process(src, "cc");
 							// The claim failed
-							player.sendMessage(Text.of(TextColors.RED, claimReason));
+							player.sendMessage(Text.of(LanguageHandler.colorRed(), claimReason));
 						})
 						.submit(TownyPlugin.getInstance());
 
@@ -167,13 +167,13 @@ public class TownyCreateExecutor implements CommandExecutor {
 
 			}
 
-			MessageChannel.TO_ALL.send(Text.of(TextColors.AQUA, LanguageHandler.INFO_NEWTOWNANNOUNCE
+			MessageChannel.TO_ALL.send(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_NEWTOWNANNOUNCE
 					.replaceAll("\\{PLAYER\\}", player.getName())
 					.replaceAll("\\{TOWN\\}", towny.getName())));
 
-			src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_NEWTOWN.replaceAll("\\{TOWN\\}", towny.getName())));
+			src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.INFO_NEWTOWN.replaceAll("\\{TOWN\\}", towny.getName())));
 		} else {
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 
 		return CommandResult.success();

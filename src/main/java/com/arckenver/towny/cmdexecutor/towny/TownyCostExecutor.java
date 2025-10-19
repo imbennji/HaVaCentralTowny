@@ -8,7 +8,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.ConfigHandler;
 import com.arckenver.towny.LanguageHandler;
@@ -27,14 +26,14 @@ public class TownyCostExecutor implements CommandExecutor
 	public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException
 	{
 		src.sendMessage(Text.of(
-				TextColors.GOLD, ((src instanceof Player) ? "" : "\n") + "--------{ ",
-				TextColors.YELLOW, LanguageHandler.HEADER_TOWNCOST,
-				TextColors.GOLD, " }--------",
-				TextColors.GOLD, "\n", LanguageHandler.COST_MSG_TOWNCREATE, TextColors.GRAY, " - ", TextColors.YELLOW, ConfigHandler.getNode("prices", "townyCreationPrice").getDouble(),
-				TextColors.GOLD, "\n", LanguageHandler.COST_MSG_OUTPOSTCREATE, TextColors.GRAY, " - ", TextColors.YELLOW, ConfigHandler.getNode("prices", "outpostCreationPrice").getDouble(),
-				TextColors.GOLD, "\n", LanguageHandler.COST_MSG_UPKEEP, TextColors.GRAY, " - ", TextColors.YELLOW, ConfigHandler.getNode("prices", "upkeepPerCitizen").getDouble(),
-                                TextColors.GOLD, "\n", LanguageHandler.COST_MSG_CLAIMPRICE, TextColors.GRAY, " - ", TextColors.YELLOW, ConfigHandler.getNode("prices", "chunkClaimPrice").getDouble(),
-                                TextColors.GOLD, "\n", LanguageHandler.COST_MSG_EXTRAPRICE, TextColors.GRAY, " - ", TextColors.YELLOW, ConfigHandler.getNode("prices", "extraChunkPrice").getDouble()));
+				LanguageHandler.colorGold(), ((src instanceof Player) ? "" : "\n") + "--------{ ",
+				LanguageHandler.colorYellow(), LanguageHandler.HEADER_TOWNCOST,
+				LanguageHandler.colorGold(), " }--------",
+				LanguageHandler.colorGold(), "\n", LanguageHandler.COST_MSG_TOWNCREATE, LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), ConfigHandler.getNode("prices", "townyCreationPrice").getDouble(),
+				LanguageHandler.colorGold(), "\n", LanguageHandler.COST_MSG_OUTPOSTCREATE, LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), ConfigHandler.getNode("prices", "outpostCreationPrice").getDouble(),
+				LanguageHandler.colorGold(), "\n", LanguageHandler.COST_MSG_UPKEEP, LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), ConfigHandler.getNode("prices", "upkeepPerCitizen").getDouble(),
+                                LanguageHandler.colorGold(), "\n", LanguageHandler.COST_MSG_CLAIMPRICE, LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), ConfigHandler.getNode("prices", "chunkClaimPrice").getDouble(),
+                                LanguageHandler.colorGold(), "\n", LanguageHandler.COST_MSG_EXTRAPRICE, LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), ConfigHandler.getNode("prices", "extraChunkPrice").getDouble()));
 		return CommandResult.success();
 	}
 }

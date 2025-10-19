@@ -9,7 +9,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.ConfigHandler;
 import com.arckenver.towny.DataHandler;
@@ -34,7 +33,7 @@ public class TownyadminSettagExecutor implements CommandExecutor
 	{
 		if (!ctx.<String> getOne("towny").isPresent())
 		{
-			src.sendMessage(Text.of(TextColors.YELLOW, "/ta settag <towny> [tag]"));
+			src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/ta settag <towny> [tag]"));
 			return CommandResult.success();
 		}
 		String newTag = null;
@@ -43,28 +42,28 @@ public class TownyadminSettagExecutor implements CommandExecutor
 		Towny towny = DataHandler.getTowny(ctx.<String> getOne("towny").get());
 		if (towny == null)
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOTOWN));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOTOWN));
 			return CommandResult.success();
 		}
 		if (newTag != null && DataHandler.getTowny(newTag) != null)
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NAMETAKEN));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NAMETAKEN));
 			return CommandResult.success();
 		}
 		if (newTag != null && DataHandler.getTownyByTag(newTag) != null)
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_TAGTAKEN));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_TAGTAKEN));
 			return CommandResult.success();
 		}
 		if (newTag != null && !newTag.matches("[\\p{Alnum}\\p{IsIdeographic}\\p{IsLetter}\"_\"]*"))
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_TAGALPHA));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_TAGALPHA));
 			return CommandResult.success();
 		}
 		if (newTag != null && (newTag.length() < ConfigHandler.getNode("others", "minTownyTagLength").getInt()
 				|| newTag.length() > ConfigHandler.getNode("others", "maxTownyTagLength").getInt()))
 		{
-			src.sendMessage(Text.of(TextColors.RED,
+			src.sendMessage(Text.of(LanguageHandler.colorRed(),
 					LanguageHandler.ERROR_TAGLENGTH
 							.replaceAll("\\{MIN\\}",
 									ConfigHandler.getNode("others", "minTownyTagLength").getString())
@@ -75,7 +74,7 @@ public class TownyadminSettagExecutor implements CommandExecutor
 		String oldTag = towny.getTag();
 		towny.setTag(newTag);
 		DataHandler.saveTowny(towny.getUUID());
-		MessageChannel.TO_ALL.send(Text.of(TextColors.RED,
+		MessageChannel.TO_ALL.send(Text.of(LanguageHandler.colorRed(),
 				LanguageHandler.INFO_TAG.replaceAll("\\{NAME\\}", towny.getName()).replaceAll("\\{OLDTAG\\}", oldTag).replaceAll("\\{NEWTAG\\}", towny.getTag())));
 		return CommandResult.success();
 	}

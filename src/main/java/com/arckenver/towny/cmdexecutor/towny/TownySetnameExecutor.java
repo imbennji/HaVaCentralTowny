@@ -10,7 +10,6 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.ConfigHandler;
 import com.arckenver.towny.DataHandler;
@@ -34,40 +33,40 @@ public class TownySetnameExecutor implements CommandExecutor
 		{
 			if (!ctx.<String>getOne("name").isPresent())
 			{
-				src.sendMessage(Text.of(TextColors.YELLOW, "/t setname <name>"));
+				src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/t setname <name>"));
 				return CommandResult.success();
 			}
 			Player player = (Player) src;
 			Towny towny = DataHandler.getTownyOfPlayer(player.getUniqueId());
 			if (towny == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOTOWN));
 				return CommandResult.success();
 			}
 			if (!towny.isStaff(player.getUniqueId()))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_TOWNSTAFF));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_TOWNSTAFF));
 				return CommandResult.success();
 			}
 			String newName = ctx.<String>getOne("name").get();
 			if (DataHandler.getTowny(newName) != null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NAMETAKEN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NAMETAKEN));
 				return CommandResult.success();
 			}
 			if (DataHandler.getTownyByTag(newName) != null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_TAGTAKEN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_TAGTAKEN));
 				return CommandResult.success();
 			}
 			if (!newName.matches("[\\p{Alnum}\\p{IsIdeographic}\\p{IsLetter}\"_\"]*"))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NAMEALPHA));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NAMEALPHA));
 				return CommandResult.success();
 			}
 			if (newName.length() < ConfigHandler.getNode("others", "minTownyNameLength").getInt() || newName.length() > ConfigHandler.getNode("others", "maxTownyNameLength").getInt())
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NAMELENGTH
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NAMELENGTH
 						.replaceAll("\\{MIN\\}", ConfigHandler.getNode("others", "minTownyNameLength").getString())
 						.replaceAll("\\{MAX\\}", ConfigHandler.getNode("others", "maxTownyNameLength").getString())));
 				return CommandResult.success();
@@ -75,13 +74,13 @@ public class TownySetnameExecutor implements CommandExecutor
 			String oldName = towny.getName();
 			towny.setName(newName);
 			DataHandler.saveTowny(towny.getUUID());
-			MessageChannel.TO_ALL.send(Text.of(TextColors.AQUA, LanguageHandler.INFO_RENAME
+			MessageChannel.TO_ALL.send(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_RENAME
 					.replaceAll("\\{OLDNAME\\}", oldName)
 					.replaceAll("\\{NEWNAME\\}", towny.getName())));
 		}
 		else
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}

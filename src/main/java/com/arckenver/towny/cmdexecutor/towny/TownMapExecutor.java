@@ -14,7 +14,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -48,7 +47,7 @@ public final class TownMapExecutor implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
         if (!(src instanceof Player)) {
-            throw new CommandException(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+            throw new CommandException(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
         }
         Player p = (Player) src;
 
@@ -73,10 +72,10 @@ public final class TownMapExecutor implements CommandExecutor {
         List<Text> lines = new ArrayList<>();
         // Header
         lines.add(Text.of(
-                TextColors.GRAY, "Map ",
-                TextColors.WHITE, "(", cc.getX(), ",", cc.getZ(), ") ",
-                TextColors.DARK_GRAY, "[r=", r, "]  ",
-                TextColors.GRAY, "N↑"
+                LanguageHandler.colorGray(), "Map ",
+                LanguageHandler.colorWhite(), "(", cc.getX(), ",", cc.getZ(), ") ",
+                LanguageHandler.colorDarkGray(), "[r=", r, "]  ",
+                LanguageHandler.colorGray(), "N↑"
         ));
 
         // Grid: north (top) to south (bottom)
@@ -86,14 +85,14 @@ public final class TownMapExecutor implements CommandExecutor {
 
         // Compact legend
         lines.add(Text.of(
-                TextColors.DARK_GRAY, "Legend: ",
-                TextColors.GOLD, "@", TextColors.GRAY, "=You  ",
-                TextColors.GREEN, "H", TextColors.GRAY, "=Home  ",
-                TextColors.GREEN, "■", TextColors.GRAY, "=YourTown  ",
-                TextColors.BLUE, "■", TextColors.GRAY, "=OtherTown  ",
-                TextColors.YELLOW, "◆", TextColors.GRAY, "=YourPlot  ",
-                TextColors.AQUA, "◆", TextColors.GRAY, "=OtherPlot  ",
-                TextColors.DARK_GRAY, "·", TextColors.GRAY, "=Wild"
+                LanguageHandler.colorDarkGray(), "Legend: ",
+                LanguageHandler.colorGold(), "@", LanguageHandler.colorGray(), "=You  ",
+                LanguageHandler.colorGreen(), "H", LanguageHandler.colorGray(), "=Home  ",
+                LanguageHandler.colorGreen(), "■", LanguageHandler.colorGray(), "=YourTown  ",
+                LanguageHandler.colorBlue(), "■", LanguageHandler.colorGray(), "=OtherTown  ",
+                LanguageHandler.colorYellow(), "◆", LanguageHandler.colorGray(), "=YourPlot  ",
+                LanguageHandler.colorAqua(), "◆", LanguageHandler.colorGray(), "=OtherPlot  ",
+                LanguageHandler.colorDarkGray(), "·", LanguageHandler.colorGray(), "=Wild"
         ));
 
         return Text.joinWith(Text.NEW_LINE, lines);
@@ -128,12 +127,12 @@ public final class TownMapExecutor implements CommandExecutor {
     private static Text symbolFor(Player viewer, Location<World> tile, int cx, int cz, Vector3i center) {
         // You
         if (cx == center.getX() && cz == center.getZ()) {
-            return Text.of(TextColors.GOLD, "@");
+            return Text.of(LanguageHandler.colorGold(), "@");
         }
 
         Towny t = DataHandler.getTowny(tile);
         if (t == null) {
-            return Text.of(TextColors.DARK_GRAY, "·"); // wilderness
+            return Text.of(LanguageHandler.colorDarkGray(), "·"); // wilderness
         }
 
         boolean ownTown = t.isCitizen(viewer.getUniqueId());
@@ -141,16 +140,16 @@ public final class TownMapExecutor implements CommandExecutor {
 
         // Plot marker
         if (plot != null) {
-            return Text.of(ownTown ? TextColors.YELLOW : TextColors.AQUA, "◆");
+            return Text.of(ownTown ? LanguageHandler.colorYellow() : LanguageHandler.colorAqua(), "◆");
         }
 
         // Home marker if present in this chunk
         if (homeInChunk(t, tile.getExtent(), cx, cz)) {
-            return Text.of(TextColors.GREEN, "H");
+            return Text.of(LanguageHandler.colorGreen(), "H");
         }
 
         // Regular town claim
-        return Text.of(ownTown ? TextColors.GREEN : TextColors.BLUE, "■");
+        return Text.of(ownTown ? LanguageHandler.colorGreen() : LanguageHandler.colorBlue(), "■");
     }
 
     private static boolean homeInChunk(Towny towny, World world, int cx, int cz) {

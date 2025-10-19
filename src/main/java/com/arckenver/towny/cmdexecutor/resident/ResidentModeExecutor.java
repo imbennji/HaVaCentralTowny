@@ -8,12 +8,12 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
+import com.arckenver.towny.LanguageHandler;
 
 public class ResidentModeExecutor implements CommandExecutor {
 
@@ -32,7 +32,7 @@ public class ResidentModeExecutor implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
         if (!(src instanceof Player)) {
-            throw new CommandException(Text.of(TextColors.RED, "Players only."));
+            throw new CommandException(Text.of(LanguageHandler.colorRed(), "Players only."));
         }
         Player player = (Player) src;
         UUID id = player.getUniqueId();
@@ -41,9 +41,9 @@ public class ResidentModeExecutor implements CommandExecutor {
         if (modesArg.isEmpty()) {
             Set<String> active = DataHandler.getResidentModes(id);
             if (active.isEmpty()) {
-                player.sendMessage(Text.of(TextColors.GOLD, "Active modes: ", TextColors.GRAY, "(none)"));
+                player.sendMessage(Text.of(LanguageHandler.colorGold(), "Active modes: ", LanguageHandler.colorGray(), "(none)"));
             } else {
-                player.sendMessage(Text.of(TextColors.GOLD, "Active modes: ", TextColors.YELLOW, String.join(", ", active)));
+                player.sendMessage(Text.of(LanguageHandler.colorGold(), "Active modes: ", LanguageHandler.colorYellow(), String.join(", ", active)));
             }
             return CommandResult.success();
         }
@@ -63,13 +63,13 @@ public class ResidentModeExecutor implements CommandExecutor {
                 });
 
         if (toggled.isEmpty()) {
-            player.sendMessage(Text.of(TextColors.YELLOW, "No modes toggled."));
+            player.sendMessage(Text.of(LanguageHandler.colorYellow(), "No modes toggled."));
         } else {
             if (!enabled.isEmpty()) {
-                player.sendMessage(Text.of(TextColors.GREEN, "Enabled: ", TextColors.YELLOW, String.join(", ", enabled)));
+                player.sendMessage(Text.of(LanguageHandler.colorGreen(), "Enabled: ", LanguageHandler.colorYellow(), String.join(", ", enabled)));
             }
             if (!disabled.isEmpty()) {
-                player.sendMessage(Text.of(TextColors.RED, "Disabled: ", TextColors.YELLOW, String.join(", ", disabled)));
+                player.sendMessage(Text.of(LanguageHandler.colorRed(), "Disabled: ", LanguageHandler.colorYellow(), String.join(", ", disabled)));
             }
         }
         return CommandResult.success();

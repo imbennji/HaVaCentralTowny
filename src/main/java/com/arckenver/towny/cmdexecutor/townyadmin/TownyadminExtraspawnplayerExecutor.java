@@ -10,7 +10,6 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
@@ -41,7 +40,7 @@ public class TownyadminExtraspawnplayerExecutor implements CommandExecutor
 	{
 		if (!ctx.<String>getOne("player").isPresent() || !ctx.<String>getOne("give|take|set").isPresent() || !ctx.<String>getOne("amount").isPresent())
 		{
-			src.sendMessage(Text.of(TextColors.YELLOW, "/ta extraspawnplayer <give|take|set> <player> <amount>"));
+			src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/ta extraspawnplayer <give|take|set> <player> <amount>"));
 			return CommandResult.success();
 		}
 		String playerName = ctx.<String>getOne("player").get();
@@ -51,14 +50,14 @@ public class TownyadminExtraspawnplayerExecutor implements CommandExecutor
 		UUID playerUUID = DataHandler.getPlayerUUID(playerName);
 		if (playerUUID == null)
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADPLAYERNAME));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADPLAYERNAME));
 			return CommandResult.success();
 		}
 		
 		Towny towny = DataHandler.getTownyOfPlayer(playerUUID);
 		if (towny == null)
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PLAYERNOTINTOWN));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PLAYERNOTINTOWN));
 			return CommandResult.success();
 		}
 		if (operation.equalsIgnoreCase("give"))
@@ -75,11 +74,11 @@ public class TownyadminExtraspawnplayerExecutor implements CommandExecutor
 		}
 		else
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADARG_GTS));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADARG_GTS));
 			return CommandResult.success();
 		}
 		DataHandler.saveTowny(towny.getUUID());
-		src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.SUCCESS_GENERAL));
+		src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.SUCCESS_GENERAL));
 		return CommandResult.success();
 	}
 }

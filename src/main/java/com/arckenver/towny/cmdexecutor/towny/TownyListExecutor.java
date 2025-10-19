@@ -12,7 +12,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
@@ -36,7 +35,7 @@ public class TownyListExecutor implements CommandExecutor
 		Iterator<Towny> iter = DataHandler.getTowny().values().iterator();
 		if (!iter.hasNext())
 		{
-			contents.add(Text.of(TextColors.YELLOW, LanguageHandler.ERROR_NOTOWNYET));
+			contents.add(Text.of(LanguageHandler.colorYellow(), LanguageHandler.ERROR_NOTOWNYET));
 		}
 		else
 		{
@@ -45,12 +44,12 @@ public class TownyListExecutor implements CommandExecutor
 				Towny towny = iter.next();
 				if (!towny.isAdmin() || src.hasPermission("towny.admin.towny.listall"))
 				{
-					contents.add(Text.of(Utils.townyClickable(TextColors.YELLOW, towny.getRealName()), TextColors.GOLD, " [" + towny.getNumCitizens() + "]"));
+					contents.add(Text.of(Utils.townyClickable(LanguageHandler.colorYellow(), towny.getRealName()), LanguageHandler.colorGold(), " [" + towny.getNumCitizens() + "]"));
 				}
 			}
 		}
 		PaginationList.builder()
-		.title(Text.of(TextColors.GOLD, "{ ", TextColors.YELLOW, LanguageHandler.HEADER_TOWNLIST, TextColors.GOLD, " }"))
+		.title(Text.of(LanguageHandler.colorGold(), "{ ", LanguageHandler.colorYellow(), LanguageHandler.HEADER_TOWNLIST, LanguageHandler.colorGold(), " }"))
 		.contents(contents)
 		.padding(Text.of("-"))
 		.sendTo(src);

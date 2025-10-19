@@ -8,7 +8,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.LanguageHandler;
 
@@ -26,22 +25,22 @@ public class PlotExecutor implements CommandExecutor
 	public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException
 	{
 		src.sendMessage(Text.of(
-				TextColors.GOLD, ((src instanceof Player) ? "" : "\n") + "--------{ ",
-				TextColors.YELLOW, "/plot",
-				TextColors.GOLD, " }--------",
-				TextColors.GOLD, "\n/z info [plot]", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_P_INFO,
-				TextColors.GOLD, "\n/z list", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_P_LIST,
-				TextColors.GOLD, "\n/z create <name> [owner]", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_P_CREATE,
-				TextColors.GOLD, "\n/z delete [plot]", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_P_DELETE,
-				TextColors.GOLD, "\n/z coowner <add/remove> <player>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_P_COOWNER,
-                                TextColors.GOLD, "\n/z setowner <player>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_P_SETOWNER,
-                                TextColors.GOLD, "\n/z delowner", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_P_DELOWNER,
-                                TextColors.GOLD, "\n/z rename", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_P_RENAME,
-                                TextColors.GOLD, "\n/z set <type>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_P_SETTYPE,
-                                TextColors.GOLD, "\n/z perm <type> <perm> [true/false]", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_P_PERM,
-                                TextColors.GOLD, "\n/z flag <flag> [true/false]", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_P_FLAG,
-				TextColors.GOLD, "\n/z sell <price>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_P_SELL,
-				TextColors.GOLD, "\n/z buy", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_P_BUY));
+				LanguageHandler.colorGold(), ((src instanceof Player) ? "" : "\n") + "--------{ ",
+				LanguageHandler.colorYellow(), "/plot",
+				LanguageHandler.colorGold(), " }--------",
+				LanguageHandler.colorGold(), "\n/z info [plot]", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_P_INFO,
+				LanguageHandler.colorGold(), "\n/z list", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_P_LIST,
+				LanguageHandler.colorGold(), "\n/z create <name> [owner]", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_P_CREATE,
+				LanguageHandler.colorGold(), "\n/z delete [plot]", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_P_DELETE,
+				LanguageHandler.colorGold(), "\n/z coowner <add/remove> <player>", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_P_COOWNER,
+                                LanguageHandler.colorGold(), "\n/z setowner <player>", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_P_SETOWNER,
+                                LanguageHandler.colorGold(), "\n/z delowner", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_P_DELOWNER,
+                                LanguageHandler.colorGold(), "\n/z rename", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_P_RENAME,
+                                LanguageHandler.colorGold(), "\n/z set <type>", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_P_SETTYPE,
+                                LanguageHandler.colorGold(), "\n/z perm <type> <perm> [true/false]", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_P_PERM,
+                                LanguageHandler.colorGold(), "\n/z flag <flag> [true/false]", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_P_FLAG,
+				LanguageHandler.colorGold(), "\n/z sell <price>", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_P_SELL,
+				LanguageHandler.colorGold(), "\n/z buy", LanguageHandler.colorGray(), " - ", LanguageHandler.colorYellow(), LanguageHandler.HELP_DESC_CMD_P_BUY));
 		return CommandResult.success();
 	}
 }

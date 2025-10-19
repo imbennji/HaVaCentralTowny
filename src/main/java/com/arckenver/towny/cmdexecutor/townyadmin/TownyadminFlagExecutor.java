@@ -10,7 +10,6 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.ConfigHandler;
 import com.arckenver.towny.DataHandler;
@@ -42,14 +41,14 @@ public class TownyadminFlagExecutor implements CommandExecutor
 	{
 		if (!ctx.<String>getOne("towny").isPresent() || !ctx.<String>getOne("flag").isPresent())
 		{
-			src.sendMessage(Text.of(TextColors.YELLOW, "/ta flag <towny> <flag> [true|false]"));
+			src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/ta flag <towny> <flag> [true|false]"));
 			return CommandResult.success();
 		}
 		String townyName = ctx.<String>getOne("towny").get();
 		Towny towny = DataHandler.getTowny(townyName);
 		if (towny == null)
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADTOWNNNAME));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADTOWNNNAME));
 			return CommandResult.success();
 		}
 		String flag = ctx.<String>getOne("flag").get();

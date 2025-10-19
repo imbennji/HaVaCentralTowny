@@ -7,7 +7,6 @@ import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.chat.ChatTypes;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -146,9 +145,9 @@ public class PlayerMoveListener
 			if (board != null && !board.trim().isEmpty()) {
 				// support & color codes
 				player.sendMessage(Text.of(
-						TextColors.AQUA, "Board [",
-						TextColors.YELLOW, towny.getDisplayName(),
-						TextColors.AQUA, "]: ",
+						LanguageHandler.colorAqua(), "Board [",
+						LanguageHandler.colorYellow(), towny.getDisplayName(),
+						LanguageHandler.colorAqua(), "]: ",
 						TextSerializers.FORMATTING_CODE.deserialize(board)
 				));
 			}

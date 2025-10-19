@@ -8,12 +8,12 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.*;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import com.arckenver.towny.LanguageHandler;
 
 public class ResidentFriendExecutor implements CommandExecutor {
 
@@ -39,7 +39,7 @@ public class ResidentFriendExecutor implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
         if (!(src instanceof Player)) {
-            throw new CommandException(Text.of(TextColors.RED, "Players only."));
+            throw new CommandException(Text.of(LanguageHandler.colorRed(), "Players only."));
         }
         Player p = (Player) src;
 
@@ -54,30 +54,30 @@ public class ResidentFriendExecutor implements CommandExecutor {
                     .sorted(String.CASE_INSENSITIVE_ORDER)
                     .collect(Collectors.joining(", "));
             if (names.isEmpty()) names = "(none)";
-            p.sendMessage(Text.of(TextColors.GOLD, "Friends: ", TextColors.YELLOW, names));
+            p.sendMessage(Text.of(LanguageHandler.colorGold(), "Friends: ", LanguageHandler.colorYellow(), names));
             return CommandResult.success();
         }
 
         String targetName = ctx.<String>getOne("player").orElse(null);
         if (targetName == null) {
-            throw new CommandException(Text.of(TextColors.RED, "Usage: /res friend " + action + " <player>"));
+            throw new CommandException(Text.of(LanguageHandler.colorRed(), "Usage: /res friend " + action + " <player>"));
         }
         UUID target = DataHandler.getPlayerUUID(targetName);
         if (target == null) {
-            throw new CommandException(Text.of(TextColors.RED, "Unknown player."));
+            throw new CommandException(Text.of(LanguageHandler.colorRed(), "Unknown player."));
         }
 
         if (action.equalsIgnoreCase("add")) {
             boolean ok = DataHandler.addResidentFriend(p.getUniqueId(), target);
-            p.sendMessage(Text.of(ok ? TextColors.GREEN : TextColors.YELLOW, ok ? "Added." : "Already a friend."));
+            p.sendMessage(Text.of(ok ? LanguageHandler.colorGreen() : LanguageHandler.colorYellow(), ok ? "Added." : "Already a friend."));
             return CommandResult.success();
         }
         if (action.equalsIgnoreCase("remove")) {
             boolean ok = DataHandler.removeResidentFriend(p.getUniqueId(), target);
-            p.sendMessage(Text.of(ok ? TextColors.GREEN : TextColors.YELLOW, ok ? "Removed." : "Not in your list."));
+            p.sendMessage(Text.of(ok ? LanguageHandler.colorGreen() : LanguageHandler.colorYellow(), ok ? "Removed." : "Not in your list."));
             return CommandResult.success();
         }
 
-        throw new CommandException(Text.of(TextColors.RED, "Unknown action."));
+        throw new CommandException(Text.of(LanguageHandler.colorRed(), "Unknown action."));
     }
 }

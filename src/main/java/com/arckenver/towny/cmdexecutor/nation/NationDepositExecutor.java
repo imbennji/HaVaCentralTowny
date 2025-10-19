@@ -19,7 +19,6 @@ import org.spongepowered.api.service.economy.account.UniqueAccount;
 import org.spongepowered.api.service.economy.transaction.ResultType;
 import org.spongepowered.api.service.economy.transaction.TransactionResult;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -37,53 +36,53 @@ public class NationDepositExecutor implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
         if (!(src instanceof Player)) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
             return CommandResult.success();
         }
 
         if (!ctx.<Double>getOne("amount").isPresent()) {
-            src.sendMessage(Text.of(TextColors.YELLOW, "/nation deposit <amount>"));
+            src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/nation deposit <amount>"));
             return CommandResult.success();
         }
 
         Player player = (Player) src;
         Towny town = DataHandler.getTownyOfPlayer(player.getUniqueId());
         if (town == null || !town.hasNation()) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NONATION));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NONATION));
             return CommandResult.success();
         }
 
         Nation nation = DataHandler.getNation(town.getNationUUID());
         if (nation == null) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_NOT_FOUND));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NATION_NOT_FOUND));
             return CommandResult.success();
         }
 
         if (!(nation.isKing(player.getUniqueId()) || nation.isAssistant(player.getUniqueId()))) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_NATIONSTAFF));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_NATIONSTAFF));
             return CommandResult.success();
         }
 
         if (TownyPlugin.getEcoService() == null) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOECO));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOECO));
             return CommandResult.success();
         }
 
         Optional<UniqueAccount> optPlayerAccount = TownyPlugin.getOrCreateUniqueAccount(player.getUniqueId());
         if (!optPlayerAccount.isPresent()) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOACCOUNT));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECONOACCOUNT));
             return CommandResult.success();
         }
 
         Optional<Account> optNationAccount = TownyPlugin.getOrCreateAccount("nation-" + nation.getUUID());
         if (!optNationAccount.isPresent()) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_BANK));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NATION_BANK));
             return CommandResult.success();
         }
 
         BigDecimal amount = BigDecimal.valueOf(ctx.<Double>getOne("amount").get());
         if (amount.doubleValue() <= 0) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADARG_P));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADARG_P));
             return CommandResult.success();
         }
 
@@ -91,18 +90,18 @@ public class NationDepositExecutor implements CommandExecutor {
                 TownyPlugin.getEcoService().getDefaultCurrency(), amount, TownyPlugin.getCause());
 
         if (result.getResult() == ResultType.ACCOUNT_NO_FUNDS) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_BANK_PLAYER_FUNDS));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NATION_BANK_PLAYER_FUNDS));
             return CommandResult.success();
         } else if (result.getResult() != ResultType.SUCCESS) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECOTRANSACTION));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECOTRANSACTION));
             return CommandResult.success();
         }
 
         String[] parts = LanguageHandler.INFO_NATION_DEPOSIT.split("\\{AMOUNT\\}");
         Text message = Text.builder()
-                .append(Text.of(TextColors.GREEN, parts.length > 0 ? parts[0] : ""))
-                .append(Utils.formatPrice(TextColors.GREEN, amount))
-                .append(Text.of(TextColors.GREEN, parts.length > 1 ? parts[1] : ""))
+                .append(Text.of(LanguageHandler.colorGreen(), parts.length > 0 ? parts[0] : ""))
+                .append(Utils.formatPrice(LanguageHandler.colorGreen(), amount))
+                .append(Text.of(LanguageHandler.colorGreen(), parts.length > 1 ? parts[1] : ""))
                 .build();
         src.sendMessage(message);
         return CommandResult.success();

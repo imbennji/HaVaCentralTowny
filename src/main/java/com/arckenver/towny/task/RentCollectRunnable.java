@@ -16,7 +16,6 @@ import org.spongepowered.api.service.economy.transaction.ResultType;
 import org.spongepowered.api.service.economy.transaction.TransactionResult;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -44,11 +43,11 @@ public class RentCollectRunnable implements Runnable {
 				.append(TownyPlugin.getInstance())
 				.build(context);
 
-		Text rentTimeMessage = Text.of(TextColors.AQUA, LanguageHandler.INFO_RENTTIME);
+		Text rentTimeMessage = Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_RENTTIME);
 
-			MessageChannel.TO_CONSOLE.send(Text.of(TextColors.AQUA, LanguageHandler.INFO_RENTTIME));
+			MessageChannel.TO_CONSOLE.send(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_RENTTIME));
 		if (TownyPlugin.getEcoService() == null) {
-			MessageChannel.TO_CONSOLE.send(Text.of(TextColors.RED, LanguageHandler.ERROR_NOECO));
+			MessageChannel.TO_CONSOLE.send(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOECO));
 			return;
 		}
 
@@ -67,7 +66,7 @@ public class RentCollectRunnable implements Runnable {
 
                             Optional<Account> townyAccount = TownyPlugin.getOrCreateAccount("towny-" + towny.getUUID());
 				if (!townyAccount.isPresent()) {
-					MessageChannel.TO_CONSOLE.send(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOTOWN));
+					MessageChannel.TO_CONSOLE.send(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECONOTOWN));
 					continue;
 				}
 
@@ -85,7 +84,7 @@ public class RentCollectRunnable implements Runnable {
 					if (plotAccount.isPresent()) {
 						plotBalance = plotAccount.get().getBalance(TownyPlugin.getEcoService().getDefaultCurrency());
 					} else {
-						MessageChannel.TO_CONSOLE.send(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOPLOT));
+						MessageChannel.TO_CONSOLE.send(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECONOPLOT));
 						continue;
 					}
 
@@ -94,49 +93,49 @@ public class RentCollectRunnable implements Runnable {
 					if (ownerAccount.isPresent()) {
 						ownerBalance = ownerAccount.get().getBalance(TownyPlugin.getEcoService().getDefaultCurrency());
 					} else {
-						MessageChannel.TO_CONSOLE.send(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOACCOUNT));
+						MessageChannel.TO_CONSOLE.send(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECONOACCOUNT));
 						continue;
 					}
 					if (plotBalance.compareTo(rentPrice) >= 0) { //y didn't java devs just make actual operators for big decimals
 						TransactionResult result = plotAccount.get().transfer(townyAccount.get(), TownyPlugin.getEcoService().getDefaultCurrency(), rentPrice, cause);
 						if (result.getResult() != ResultType.SUCCESS) {
-							MessageChannel.TO_CONSOLE.send(Text.of(TextColors.RED, LanguageHandler.ERROR_ECOTRANSACTION));
+							MessageChannel.TO_CONSOLE.send(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECOTRANSACTION));
 						} else {
 							String str = LanguageHandler.INFO_PAYRENTPLOTBALANCE.replaceAll("\\{PLOT\\}", plot.getDisplayName());
 							String split[] = str.split("\\{VALUE\\}");
-							owner.get().sendMessage(Text.of(TextColors.AQUA, split[0], Utils.formatPrice(TextColors.YELLOW, rentPrice),split[1]));
+							owner.get().sendMessage(Text.of(LanguageHandler.colorAqua(), split[0], Utils.formatPrice(LanguageHandler.colorYellow(), rentPrice),split[1]));
 						}
 					} else if (plotBalance.add(ownerBalance).compareTo(rentPrice) >= 0) {
 						TransactionResult result = plotAccount.get().transfer(townyAccount.get(), TownyPlugin.getEcoService().getDefaultCurrency(), plotBalance, cause);
 						if (result.getResult() != ResultType.SUCCESS) {
-							MessageChannel.TO_CONSOLE.send(Text.of(TextColors.RED, LanguageHandler.ERROR_ECOTRANSACTION));
+							MessageChannel.TO_CONSOLE.send(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECOTRANSACTION));
 						} else if(plotBalance.compareTo(BigDecimal.ZERO) > 0){ //only shows if it really paid with it, so it won't flood chat
 							String str = LanguageHandler.INFO_PAYRENTPLOTBALANCE.replaceAll("\\{PLOT\\}", plot.getDisplayName());
 							String split[] = str.split("\\{VALUE\\}");
-							owner.get().sendMessage(Text.of(TextColors.AQUA, split[0], Utils.formatPrice(TextColors.YELLOW, plotBalance),split[1]));
+							owner.get().sendMessage(Text.of(LanguageHandler.colorAqua(), split[0], Utils.formatPrice(LanguageHandler.colorYellow(), plotBalance),split[1]));
 						}
 						result = ownerAccount.get().transfer(townyAccount.get(), TownyPlugin.getEcoService().getDefaultCurrency(), rentPrice.subtract(plotBalance), cause);
 						if (result.getResult() != ResultType.SUCCESS) {
-							MessageChannel.TO_CONSOLE.send(Text.of(TextColors.RED, LanguageHandler.ERROR_ECOTRANSACTION));
+							MessageChannel.TO_CONSOLE.send(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECOTRANSACTION));
 						} else {
 							String str = LanguageHandler.INFO_PAYRENTPLOTPLAYER.replaceAll("\\{PLOT\\}", plot.getDisplayName());
 							String split[] = str.split("\\{VALUE\\}");
-							owner.get().sendMessage(Text.of(TextColors.AQUA, split[0], Utils.formatPrice(TextColors.YELLOW, rentPrice.subtract(plotBalance)),split[1]));
+							owner.get().sendMessage(Text.of(LanguageHandler.colorAqua(), split[0], Utils.formatPrice(LanguageHandler.colorYellow(), rentPrice.subtract(plotBalance)),split[1]));
 						}
 					} else { //return plot: make plot bal go to owner and make ownerless
 						TransactionResult result = plotAccount.get().transfer(ownerAccount.get(), TownyPlugin.getEcoService().getDefaultCurrency(), plotBalance, cause);
 						if (result.getResult() != ResultType.SUCCESS) {
-							MessageChannel.TO_CONSOLE.send(Text.of(TextColors.RED, LanguageHandler.ERROR_ECOTRANSACTION));
+							MessageChannel.TO_CONSOLE.send(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECOTRANSACTION));
 						}
 						String oldName = plot.getDisplayName();
 						plot.resetCoowners();
 						plot.setOwner(null);
 						plot.setDisplayName(null);
-						owner.get().sendMessage(Text.of(TextColors.RED, LanguageHandler.INFO_FAILEDRENT.replaceAll("\\{PLOT\\}}", oldName)));
+						owner.get().sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.INFO_FAILEDRENT.replaceAll("\\{PLOT\\}}", oldName)));
 						for (UUID player : towny.getCitizens()) {
 							if (player != owner.get().getUniqueId()) {
 								Sponge.getServer().getPlayer(player).ifPresent(p -> {
-									p.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.INFO_RETURNRENT
+									p.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_RETURNRENT
 											.replaceAll("\\{PLAYER\\}", owner.get().getName())
 											.replaceAll("\\{PLOT\\}", oldName)));
 								});

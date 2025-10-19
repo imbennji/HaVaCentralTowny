@@ -11,7 +11,6 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
@@ -33,7 +32,7 @@ public class TownyadminForceleaveExecutor implements CommandExecutor
 	{
 		if (!ctx.<String>getOne("player").isPresent())
 		{
-			src.sendMessage(Text.of(TextColors.YELLOW, "/ta forceleave <player>"));
+			src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/ta forceleave <player>"));
 			return CommandResult.success();
 		}
 		String playerName = ctx.<String>getOne("player").get();
@@ -41,25 +40,25 @@ public class TownyadminForceleaveExecutor implements CommandExecutor
 		UUID uuid = DataHandler.getPlayerUUID(playerName);
 		if (uuid == null)
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADPLAYERNAME));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADPLAYERNAME));
 			return CommandResult.success();
 		}
 		Towny towny = DataHandler.getTownyOfPlayer(uuid);
 		if (towny == null)
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PLAYERNOTINTOWN));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PLAYERNOTINTOWN));
 			return CommandResult.success();
 		}
 		if (towny.isPresident(uuid))
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PLAYERISPRES));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PLAYERISPRES));
 			return CommandResult.success();
 		}
 		towny.removeCitizen(uuid);
 		DataHandler.saveTowny(towny.getUUID());
 		Sponge.getServer().getPlayer(uuid).ifPresent(p -> 
-			p.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.SUCCESS_LEAVETOWN)));
-		src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.SUCCESS_GENERAL));
+			p.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.SUCCESS_LEAVETOWN)));
+		src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.SUCCESS_GENERAL));
 		return CommandResult.success();
 	}
 }

@@ -14,7 +14,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -43,14 +42,14 @@ public class TownyHomeExecutor implements CommandExecutor
 			Towny towny = DataHandler.getTownyOfPlayer(player.getUniqueId());
 			if (towny == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOTOWN));
 				return CommandResult.success();
 			}
 
 			Location<World> spawn = towny.getSpawn("home");
 			if (spawn == null)
 			{
-				src.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.ERROR_NOHOME));
+				src.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.ERROR_NOHOME));
 				return CommandResult.success();
 			}
 			if (player.hasPermission("towny.bypass.teleport.warmup")) {
@@ -59,12 +58,12 @@ public class TownyHomeExecutor implements CommandExecutor
 				if (!event.isCancelled())
 				{
 					player.setLocation(spawn);
-					src.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.INFO_TELEPORTED));
+					src.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_TELEPORTED));
 				}
 				return CommandResult.success();
 			}
 			
-			src.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.INFO_TELEPORTCOOLDOWN));
+			src.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_TELEPORTCOOLDOWN));
 			
 			Scheduler scheduler = Sponge.getScheduler();
 			Task.Builder taskBuilder = scheduler.createTaskBuilder();
@@ -78,14 +77,14 @@ public class TownyHomeExecutor implements CommandExecutor
 					if (!event.isCancelled())
 					{
 						player.setLocation(spawn);
-						src.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.INFO_TELEPORTED));
+						src.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_TELEPORTED));
 					}
 				}
 			}).delay(10, TimeUnit.SECONDS).submit(TownyPlugin.getInstance());
 		}
 		else
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}

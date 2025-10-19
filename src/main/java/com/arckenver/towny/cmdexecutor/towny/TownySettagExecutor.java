@@ -10,7 +10,6 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.ConfigHandler;
 import com.arckenver.towny.DataHandler;
@@ -36,12 +35,12 @@ public class TownySettagExecutor implements CommandExecutor
 			Towny towny = DataHandler.getTownyOfPlayer(player.getUniqueId());
 			if (towny == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOTOWN));
 				return CommandResult.success();
 			}
 			if (!towny.isStaff(player.getUniqueId()))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_TOWNSTAFF));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_TOWNSTAFF));
 				return CommandResult.success();
 			}
 			String newTag = null;
@@ -49,22 +48,22 @@ public class TownySettagExecutor implements CommandExecutor
 				newTag = ctx.<String>getOne("tag").get();
 			if (newTag != null && DataHandler.getTowny(newTag) != null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NAMETAKEN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NAMETAKEN));
 				return CommandResult.success();
 			}
 			if (newTag != null && DataHandler.getTownyByTag(newTag) != null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_TAGTAKEN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_TAGTAKEN));
 				return CommandResult.success();
 			}
 			if (newTag != null && !newTag.matches("[\\p{Alnum}\\p{IsIdeographic}\\p{IsLetter}\"_\"]*"))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_TAGALPHA));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_TAGALPHA));
 				return CommandResult.success();
 			}
 			if (newTag != null && (newTag.length() < ConfigHandler.getNode("others", "minTownyTagLength").getInt() || newTag.length() > ConfigHandler.getNode("others", "maxTownyTagLength").getInt()))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_TAGLENGTH
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_TAGLENGTH
 						.replaceAll("\\{MIN\\}", ConfigHandler.getNode("others", "minTownyTagLength").getString())
 						.replaceAll("\\{MAX\\}", ConfigHandler.getNode("others", "maxTownyTagLength").getString())));
 				return CommandResult.success();
@@ -72,14 +71,14 @@ public class TownySettagExecutor implements CommandExecutor
 			String oldName = towny.getTag();
 			towny.setTag(newTag);
 			DataHandler.saveTowny(towny.getUUID());
-			MessageChannel.TO_ALL.send(Text.of(TextColors.AQUA, LanguageHandler.INFO_TAG
+			MessageChannel.TO_ALL.send(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_TAG
 					.replaceAll("\\{NAME\\}", towny.getName())
 					.replaceAll("\\{OLDTAG\\}", oldName)
 					.replaceAll("\\{NEWTAG\\}", towny.getTag())));
 		}
 		else
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}

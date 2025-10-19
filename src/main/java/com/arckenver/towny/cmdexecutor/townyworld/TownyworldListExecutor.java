@@ -11,7 +11,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Text.Builder;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.World;
 
 import com.arckenver.towny.LanguageHandler;
@@ -32,19 +31,19 @@ public class TownyworldListExecutor implements CommandExecutor
 	{
 		Builder builder = Text.builder();
 		Iterator<World> iter = Sponge.getServer().getWorlds().iterator();
-		builder.append(Text.of(TextColors.GOLD, "--------{ ", TextColors.YELLOW, LanguageHandler.HEADER_WORLDLIST, TextColors.GOLD, " }--------\n"));
+		builder.append(Text.of(LanguageHandler.colorGold(), "--------{ ", LanguageHandler.colorYellow(), LanguageHandler.HEADER_WORLDLIST, LanguageHandler.colorGold(), " }--------\n"));
 		while (iter.hasNext())
 		{
 			World world = iter.next();
-			builder.append(Utils.worldClickable(TextColors.YELLOW, world.getName()));
+			builder.append(Utils.worldClickable(LanguageHandler.colorYellow(), world.getName()));
 			if (iter.hasNext())
 			{
-				builder.append(Text.of(TextColors.YELLOW, ", "));
+				builder.append(Text.of(LanguageHandler.colorYellow(), ", "));
 			}
 		}
 		if (src.hasPermission("towny.command.townyworld.info"))
 		{
-			builder.append(Text.of(TextColors.DARK_GRAY, " <- click"));
+			builder.append(Text.of(LanguageHandler.colorDarkGray(), " <- click"));
 		}
 		src.sendMessage(builder.build());
 		return CommandResult.success();

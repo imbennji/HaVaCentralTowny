@@ -14,7 +14,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 public class NationToggleExecutor implements CommandExecutor {
     public static void create(CommandSpec.Builder cmd) {
@@ -38,25 +37,25 @@ public class NationToggleExecutor implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
         if (!(src instanceof Player)) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
             return CommandResult.success();
         }
 
         Player player = (Player) src;
         Towny town = DataHandler.getTownyOfPlayer(player.getUniqueId());
         if (town == null || !town.hasNation()) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NONATION));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NONATION));
             return CommandResult.success();
         }
 
         Nation nation = DataHandler.getNation(town.getNationUUID());
         if (nation == null) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_NOT_FOUND));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NATION_NOT_FOUND));
             return CommandResult.success();
         }
 
         if (!nation.isStaff(player.getUniqueId())) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_NATIONSTAFF));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_NATIONSTAFF));
             return CommandResult.success();
         }
 
@@ -68,22 +67,22 @@ public class NationToggleExecutor implements CommandExecutor {
                 newValue = ctx.<Boolean>getOne("value").orElse(!nation.isOpen());
                 nation.setOpen(newValue);
                 DataHandler.saveNation(nation.getUUID());
-                src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_NATION_OPEN));
+                src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.INFO_NATION_OPEN));
                 break;
             case "public":
                 newValue = ctx.<Boolean>getOne("value").orElse(!nation.isPublic());
                 nation.setPublic(newValue);
                 DataHandler.saveNation(nation.getUUID());
-                src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_NATION_PUBLIC));
+                src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.INFO_NATION_PUBLIC));
                 break;
             case "neutral":
                 newValue = ctx.<Boolean>getOne("value").orElse(!nation.isNeutral());
                 nation.setNeutral(newValue);
                 DataHandler.saveNation(nation.getUUID());
-                src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_NATION_NEUTRAL));
+                src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.INFO_NATION_NEUTRAL));
                 break;
             default:
-                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADARG_AR));
+                src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADARG_AR));
                 return CommandResult.success();
         }
 

@@ -15,7 +15,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColor;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -53,7 +52,7 @@ public final class ResidentExecutor implements CommandExecutor {
 
         if (!optName.isPresent()) {
             if (!(src instanceof Player)) {
-                throw new CommandException(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+                throw new CommandException(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
             }
             Player p = (Player) src;
             targetId = p.getUniqueId();
@@ -62,7 +61,7 @@ public final class ResidentExecutor implements CommandExecutor {
             String name = optName.get();
             UUID id = DataHandler.getPlayerUUID(name);
             if (id == null) {
-                throw new CommandException(Text.of(TextColors.RED, LanguageHandler.ERROR_BADPLAYERNAME));
+                throw new CommandException(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADPLAYERNAME));
             }
             targetId = id;
             String n = DataHandler.getPlayerName(id);
@@ -82,64 +81,64 @@ public final class ResidentExecutor implements CommandExecutor {
         OwnedRented or = findOwnedAndRentedPlots(uuid, town);
 
         List<Text> lines = new ArrayList<>();
-        lines.add(Text.of(TextColors.GOLD, "Resident: ",
-                TextColors.YELLOW, name,
-                TextColors.DARK_GRAY, "  (", title, ")"));
+        lines.add(Text.of(LanguageHandler.colorGold(), "Resident: ",
+                LanguageHandler.colorYellow(), name,
+                LanguageHandler.colorDarkGray(), "  (", title, ")"));
 
         if (town != null) {
             Text.Builder townLine = Text.builder()
-                    .append(Text.of(TextColors.GRAY, "Town: ", TextColors.WHITE, town.getName()))
+                    .append(Text.of(LanguageHandler.colorGray(), "Town: ", LanguageHandler.colorWhite(), town.getName()))
                     .onClick(TextActions.runCommand("/town info " + town.getName()))
-                    .onHover(TextActions.showText(Text.of(TextColors.YELLOW, "Click for town info")));
+                    .onHover(TextActions.showText(Text.of(LanguageHandler.colorYellow(), "Click for town info")));
             lines.add(townLine.build());
         } else {
-            lines.add(Text.of(TextColors.GRAY, "Town: ", TextColors.DARK_GRAY, "None"));
+            lines.add(Text.of(LanguageHandler.colorGray(), "Town: ", LanguageHandler.colorDarkGray(), "None"));
         }
 
-        lines.add(Text.of(TextColors.GRAY, "Taxes Owed: ",
-                TextColors.WHITE, taxes, TextColors.GRAY, " / day"));
+        lines.add(Text.of(LanguageHandler.colorGray(), "Taxes Owed: ",
+                LanguageHandler.colorWhite(), taxes, LanguageHandler.colorGray(), " / day"));
 
         BigDecimal balance = DataHandler.getResidentBalance(uuid);
         if (balance != null) {
-            lines.add(Text.of(TextColors.GRAY, "Balance: ", TextColors.WHITE, balance));
+            lines.add(Text.of(LanguageHandler.colorGray(), "Balance: ", LanguageHandler.colorWhite(), balance));
         }
 
         long registered = DataHandler.getResidentRegisteredAt(uuid);
         if (registered > 0) {
-            lines.add(Text.of(TextColors.GRAY, "Registered: ", TextColors.WHITE, formatInstant(registered)));
+            lines.add(Text.of(LanguageHandler.colorGray(), "Registered: ", LanguageHandler.colorWhite(), formatInstant(registered)));
         }
 
         long lastOnline = DataHandler.getResidentLastOnline(uuid);
         if (lastOnline > 0) {
-            lines.add(Text.of(TextColors.GRAY, "Last Online: ", TextColors.WHITE, formatInstant(lastOnline)));
+            lines.add(Text.of(LanguageHandler.colorGray(), "Last Online: ", LanguageHandler.colorWhite(), formatInstant(lastOnline)));
         }
 
         long exempt = DataHandler.getResidentTaxExemptUntil(uuid);
         if (exempt > System.currentTimeMillis()) {
-            lines.add(Text.of(TextColors.GRAY, "Tax Exempt Until: ", TextColors.WHITE, formatInstant(exempt)));
+            lines.add(Text.of(LanguageHandler.colorGray(), "Tax Exempt Until: ", LanguageHandler.colorWhite(), formatInstant(exempt)));
         }
 
         if (DataHandler.isResidentJailed(uuid)) {
             long release = DataHandler.getResidentJailRelease(uuid);
             String releaseText = (release > 0) ? formatInstant(release) : "Indefinite";
-            lines.add(Text.of(TextColors.RED, "Jailed", TextColors.GRAY, " – release at ", TextColors.WHITE, releaseText));
+            lines.add(Text.of(LanguageHandler.colorRed(), "Jailed", LanguageHandler.colorGray(), " – release at ", LanguageHandler.colorWhite(), releaseText));
         }
 
         Set<String> modes = DataHandler.getResidentModes(uuid);
         if (!modes.isEmpty()) {
-            lines.add(Text.of(TextColors.GRAY, "Modes: ", TextColors.WHITE, String.join(", ", modes)));
+            lines.add(Text.of(LanguageHandler.colorGray(), "Modes: ", LanguageHandler.colorWhite(), String.join(", ", modes)));
         }
 
         lines.add(compactListLine(
-                Text.of(TextColors.GRAY, "Owned Plots: "),
-                or.ownedNames, or.ownedCount, TextColors.YELLOW, "/plot info"));
+                Text.of(LanguageHandler.colorGray(), "Owned Plots: "),
+                or.ownedNames, or.ownedCount, LanguageHandler.colorYellow(), "/plot info"));
 
         if (or.rentedCount > 0) {
             lines.add(compactListLine(
-                    Text.of(TextColors.GRAY, "Rented Plots: "),
-                    or.rentedNames, or.rentedCount, TextColors.AQUA, "/plot info"));
+                    Text.of(LanguageHandler.colorGray(), "Rented Plots: "),
+                    or.rentedNames, or.rentedCount, LanguageHandler.colorAqua(), "/plot info"));
         } else {
-            lines.add(Text.of(TextColors.GRAY, "Rented Plots: ", TextColors.DARK_GRAY, "None"));
+            lines.add(Text.of(LanguageHandler.colorGray(), "Rented Plots: ", LanguageHandler.colorDarkGray(), "None"));
         }
 
         return Text.joinWith(Text.NEW_LINE, lines);
@@ -225,7 +224,7 @@ public final class ResidentExecutor implements CommandExecutor {
     // >>> FIXED: accept TextColor (interface), not TextColors (constants class)
     private Text compactListLine(Text label, List<String> names, int total, TextColor color, String clickCmdHint) {
         if (total == 0) {
-            return Text.of(label, TextColors.DARK_GRAY, "None");
+            return Text.of(label, LanguageHandler.colorDarkGray(), "None");
         }
 
         Text.Builder b = Text.builder().append(label);
@@ -236,12 +235,12 @@ public final class ResidentExecutor implements CommandExecutor {
         b.append(
                 namesText
                         .toBuilder()
-                        .onHover(TextActions.showText(Text.of(TextColors.YELLOW, "Click to run ", clickCmdHint)))
+                        .onHover(TextActions.showText(Text.of(LanguageHandler.colorYellow(), "Click to run ", clickCmdHint)))
                         .onClick(TextActions.runCommand(clickCmdHint))
                         .build()
         );
 
-        b.append(Text.of(TextColors.GRAY, "  [total: ", total, "]"));
+        b.append(Text.of(LanguageHandler.colorGray(), "  [total: ", total, "]"));
         return b.build();
     }
 }

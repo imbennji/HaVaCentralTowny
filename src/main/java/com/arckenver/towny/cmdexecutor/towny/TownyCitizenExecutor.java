@@ -8,7 +8,6 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.LanguageHandler;
 import com.arckenver.towny.Utils;
@@ -29,7 +28,7 @@ public class TownyCitizenExecutor implements CommandExecutor
 	{
 		if (!ctx.<String>getOne("player").isPresent())
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDPLAYERNAME));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDPLAYERNAME));
 			return CommandResult.success();
 		}
 		String name = ctx.<String>getOne("player").get();

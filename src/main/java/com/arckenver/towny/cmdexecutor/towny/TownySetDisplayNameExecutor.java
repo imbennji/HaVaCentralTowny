@@ -14,7 +14,6 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.format.TextColors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -40,12 +39,12 @@ public class TownySetDisplayNameExecutor implements CommandExecutor
 			Towny towny = DataHandler.getTownyOfPlayer(player.getUniqueId());
 			if (towny == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOTOWN));
 				return CommandResult.success();
 			}
 			if (!towny.isStaff(player.getUniqueId()))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_TOWNSTAFF));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_TOWNSTAFF));
 				return CommandResult.success();
 			}
 			String newDisplayName = null;
@@ -53,7 +52,7 @@ public class TownySetDisplayNameExecutor implements CommandExecutor
 				newDisplayName = ctx.<String>getOne("displayName").get();
 			if (newDisplayName != null && (newDisplayName.length() < ConfigHandler.getNode("others", "minTownyTagLength").getInt() || newDisplayName.length() > ConfigHandler.getNode("others", "maxTownyTagLength").getInt()))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_DISPLAYLENGTH
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_DISPLAYLENGTH
 						.replaceAll("\\{MIN\\}", ConfigHandler.getNode("others", "minTownyDisplayLength").getString())
 						.replaceAll("\\{MAX\\}", ConfigHandler.getNode("others", "maxTownyDisplayLength").getString())));
 				return CommandResult.success();
@@ -61,14 +60,14 @@ public class TownySetDisplayNameExecutor implements CommandExecutor
 			String oldName = towny.getDisplayName();
 			towny.setDisplayName(newDisplayName);
 			DataHandler.saveTowny(towny.getUUID());
-			MessageChannel.TO_ALL.send(Text.of(TextColors.AQUA, LanguageHandler.INFO_DISPLAY
+			MessageChannel.TO_ALL.send(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_DISPLAY
 					.replaceAll("\\{NAME\\}", towny.getName())
 					.replaceAll("\\{OLDTAG\\}", oldName)
 					.replaceAll("\\{NEWTAG\\}", towny.getDisplayName())));
 		}
 		else
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}

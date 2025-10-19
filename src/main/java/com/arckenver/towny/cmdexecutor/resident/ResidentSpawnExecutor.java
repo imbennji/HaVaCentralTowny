@@ -11,7 +11,6 @@ import org.spongepowered.api.command.spec.*;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -22,6 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import com.arckenver.towny.LanguageHandler;
 
 public class ResidentSpawnExecutor implements CommandExecutor {
     public static void create(CommandSpec.Builder root) {
@@ -35,18 +35,18 @@ public class ResidentSpawnExecutor implements CommandExecutor {
     }
 
     @Override public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
-        if (!(src instanceof Player)) throw new CommandException(Text.of(TextColors.RED, "Players only."));
+        if (!(src instanceof Player)) throw new CommandException(Text.of(LanguageHandler.colorRed(), "Players only."));
         Player p = (Player) src;
         UUID id = p.getUniqueId();
 
         Towny t = DataHandler.getTownyOfPlayer(id);
-        if (t == null) throw new CommandException(Text.of(TextColors.RED, "You’re not in a town."));
+        if (t == null) throw new CommandException(Text.of(LanguageHandler.colorRed(), "You’re not in a town."));
 
         long now = System.currentTimeMillis();
         long cooldownEnds = DataHandler.getResidentSpawnCooldown(id);
         if (cooldownEnds > now) {
             long remaining = cooldownEnds - now;
-            throw new CommandException(Text.of(TextColors.RED, "Spawn on cooldown for ", TextColors.GOLD, formatDuration(remaining)));
+            throw new CommandException(Text.of(LanguageHandler.colorRed(), "Spawn on cooldown for ", LanguageHandler.colorGold(), formatDuration(remaining)));
         }
 
         boolean preferBed = DataHandler.getResidentPreferBedSpawn(id);
@@ -61,7 +61,7 @@ public class ResidentSpawnExecutor implements CommandExecutor {
             if (dest == null && !t.getSpawns().isEmpty()) {
                 for (Map.Entry<String, Location<World>> e : t.getSpawns().entrySet()) { dest = e.getValue(); break; }
             }
-            if (dest == null) throw new CommandException(Text.of(TextColors.RED, "Your town has no spawn set."));
+            if (dest == null) throw new CommandException(Text.of(LanguageHandler.colorRed(), "Your town has no spawn set."));
         }
 
         long warmupSeconds = ConfigHandler.getNode("others", "residentSpawnWarmupSeconds").getLong(5L);
@@ -70,13 +70,13 @@ public class ResidentSpawnExecutor implements CommandExecutor {
         long warmupEnd = DataHandler.getResidentBedSpawnWarmup(id);
         if (warmupEnd > now) {
             long remaining = warmupEnd - now;
-            throw new CommandException(Text.of(TextColors.RED, "Spawn warmup in progress: ", TextColors.GOLD, formatDuration(remaining)));
+            throw new CommandException(Text.of(LanguageHandler.colorRed(), "Spawn warmup in progress: ", LanguageHandler.colorGold(), formatDuration(remaining)));
         }
 
         if (warmupSeconds > 0) {
             long warmupTarget = now + TimeUnit.SECONDS.toMillis(warmupSeconds);
             DataHandler.setResidentBedSpawnWarmup(id, warmupTarget);
-            p.sendMessage(Text.of(TextColors.AQUA, "Preparing to teleport in ", TextColors.YELLOW, warmupSeconds, TextColors.AQUA, "s..."));
+            p.sendMessage(Text.of(LanguageHandler.colorAqua(), "Preparing to teleport in ", LanguageHandler.colorYellow(), warmupSeconds, LanguageHandler.colorAqua(), "s..."));
             Location<World> finalDest = dest;
             boolean finalUsingBed = usingBed;
             Towny finalTown = t;
@@ -100,8 +100,8 @@ public class ResidentSpawnExecutor implements CommandExecutor {
         DataHandler.setResidentBedSpawnWarmup(id, 0L);
         DataHandler.markResidentSpawn(id, town != null ? town.getUUID() : null, TimeUnit.SECONDS.toMillis(cooldownSeconds));
         Text message = usingBed
-                ? Text.of(TextColors.GREEN, "Teleported to bed spawn.")
-                : Text.of(TextColors.GREEN, "Teleported to town spawn.");
+                ? Text.of(LanguageHandler.colorGreen(), "Teleported to bed spawn.")
+                : Text.of(LanguageHandler.colorGreen(), "Teleported to town spawn.");
         target.sendMessage(message);
     }
 
