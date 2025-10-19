@@ -72,10 +72,17 @@ public class PlotPermExecutor implements CommandExecutor
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOOWNER));
 				return CommandResult.success();
 			}
-			String type = ctx.<String>getOne("type").get();
-			String perm = ctx.<String>getOne("perm").get();
-			boolean bool = (ctx.<Boolean>getOne("bool").isPresent()) ? ctx.<Boolean>getOne("bool").get() : !plot.getPerm(type, perm);
-			plot.setPerm(type, perm, bool);
+                        String type = ctx.<String>getOne("type").get();
+                        String perm = ctx.<String>getOne("perm").get();
+                        if (!plot.canSetPerm(type, perm)) {
+                                src.sendMessage(Text.of(TextColors.RED,
+                                                LanguageHandler.ERROR_PLOT_TYPE_PERM_LOCKED
+                                                                .replace("{PERM}", perm)
+                                                                .replace("{TYPE}", plot.getType().getDisplayName())));
+                                return CommandResult.success();
+                        }
+                        boolean bool = (ctx.<Boolean>getOne("bool").isPresent()) ? ctx.<Boolean>getOne("bool").get() : !plot.getPerm(type, perm);
+                        plot.setPerm(type, perm, bool);
 			DataHandler.saveTowny(towny.getUUID());
 			src.sendMessage(Utils.formatPlotDescription(plot, towny, Utils.CLICKER_DEFAULT));
 		}

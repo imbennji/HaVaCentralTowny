@@ -15,6 +15,7 @@ import com.arckenver.towny.object.Towny;
 import com.arckenver.towny.object.Rect;
 import com.arckenver.towny.object.Region;
 import com.arckenver.towny.object.Plot;
+import com.arckenver.towny.object.PlotType;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -108,8 +109,8 @@ public class TownyDeserializer implements JsonDeserializer<Towny> {
 						rectObj.get("minY").getAsInt(),
 						rectObj.get("maxY").getAsInt());
 
-				Plot plot = new Plot(plotUUID, plotName, rect);
-				plot.setDisplayName(plotDisplayName);
+                                Plot plot = new Plot(plotUUID, plotName, rect);
+                                plot.setDisplayName(plotDisplayName);
 
 				if (plotObj.has("owner")) {
 					plot.setOwner(UUID.fromString(plotObj.get("owner").getAsString()));
@@ -135,15 +136,19 @@ public class TownyDeserializer implements JsonDeserializer<Towny> {
 					}
 				}
 
-				if (plotObj.has("price")) {
-					plot.setPrice(plotObj.get("price").getAsBigDecimal());
-				}
-				if (plotObj.has("rentalPrice")) {
-					plot.setRentalPrice(plotObj.get("rentalPrice").getAsBigDecimal());
-				}
+                                if (plotObj.has("price")) {
+                                        plot.setPrice(plotObj.get("price").getAsBigDecimal());
+                                }
+                                if (plotObj.has("rentalPrice")) {
+                                        plot.setRentalPrice(plotObj.get("rentalPrice").getAsBigDecimal());
+                                }
 
-				towny.addPlot(plot);
-			}
+                                PlotType plotType = PlotType.fromString(plotObj.has("type") ? plotObj.get("type").getAsString() : null);
+                                plot.setType(plotType, false);
+                                plot.enforceTypeRules();
+
+                                towny.addPlot(plot);
+                        }
 		}
 
 		// --- spawns ---

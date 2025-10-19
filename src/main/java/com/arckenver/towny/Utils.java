@@ -469,13 +469,15 @@ public class Utils
 				Text.of(TextColors.GOLD, "----------{ "),
 				Text.of(TextColors.YELLOW, "" + LanguageHandler.FORMAT_PLOT + " - " + plot.getDisplayName()),
 				Text.of(TextColors.GOLD, " }----------"),
-				Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_TOWN + ": "),
-				Text.of(TextColors.YELLOW, towny.getDisplayName()),
-				Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_PLOT_ID + ": "),
-				Text.of(TextColors.YELLOW, plot.getName()),
-				Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_OWNER + ": "),
-				(owner == null) ? Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE) : citizenClickable(TextColors.YELLOW, DataHandler.getPlayerName(owner)),
-						Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_COOWNER + ": ")
+                                Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_TOWN + ": "),
+                                Text.of(TextColors.YELLOW, towny.getDisplayName()),
+                                Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_PLOT_ID + ": "),
+                                Text.of(TextColors.YELLOW, plot.getName()),
+                                Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_PLOT_TYPE + ": "),
+                                Text.of(TextColors.YELLOW, plot.getType().getDisplayName()),
+                                Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_OWNER + ": "),
+                                (owner == null) ? Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE) : citizenClickable(TextColors.YELLOW, DataHandler.getPlayerName(owner)),
+                                                Text.of(TextColors.GOLD, "\n" + LanguageHandler.FORMAT_COOWNER + ": ")
 				);
 		structureX(
 				plot.getCoowners().iterator(),
