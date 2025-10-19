@@ -100,12 +100,19 @@ public class TownyClaimOutpostExecutor implements CommandExecutor
 			}
 			
                         towny.getRegion().addRect(new Rect(firstPoint, secondPoint));
-			DataHandler.addToWorldChunks(towny);
-			DataHandler.saveTowny(towny.getUUID());
-			src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.SUCCESS_OUTPOST));
-		}
-		else
-		{
+
+                        int outpostIndex = towny.getNextOutpostIndex();
+                        towny.addExtraSpawns(1);
+                        towny.setOutpostSpawn(outpostIndex, player.getLocation());
+
+                        DataHandler.addToWorldChunks(towny);
+                        DataHandler.saveTowny(towny.getUUID());
+                        src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.SUCCESS_OUTPOST));
+                        src.sendMessage(Text.of(TextColors.AQUA,
+                                        LanguageHandler.INFO_OUTPOST_SPAWN_SET.replace("{NUMBER}", String.valueOf(outpostIndex))));
+                }
+                else
+                {
 			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();

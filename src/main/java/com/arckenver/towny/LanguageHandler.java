@@ -35,7 +35,8 @@ public class LanguageHandler
 	public static String HELP_DESC_CMD_T_MINISTER = "manage comayors";
 	public static String HELP_DESC_CMD_T_PERM = "set town perm";
 	public static String HELP_DESC_CMD_T_FLAG = "set town flag";
-	public static String HELP_DESC_CMD_T_SPAWN = "teleport to spawn with the given name";
+        public static String HELP_DESC_CMD_T_SPAWN = "teleport to spawn with the given name";
+        public static String HELP_DESC_CMD_T_OUTPOST = "teleport to one of your outpost spawns";
         public static String HELP_DESC_CMD_T_BUYEXTRA = "buy extra claimable chunks";
 	public static String HELP_DESC_CMD_T_CITIZEN = "get player details";
 	public static String HELP_DESC_CMD_T_TAXES = "set town taxes";
@@ -246,7 +247,11 @@ public class LanguageHandler
         public static String ERROR_NOENOUGHCHUNKS = "Your town doesn't have enough chunks, you can buy extra ones with /town buyextra";
 	public static String SUCCESS_CLAIM = "You successfully claimed this area";
 	public static String ERROR_TOOCLOSE = "Too close to another town";
-	public static String SUCCESS_OUTPOST = "You successfully created an outpost here";
+        public static String SUCCESS_OUTPOST = "You successfully created an outpost here";
+        public static String INFO_OUTPOST_SPAWN_SET = "Outpost spawn {NUMBER} saved. Use /t outpost {NUMBER} to travel there.";
+        public static String ERROR_NO_OUTPOST_SPAWNS = "Your town has no outpost spawns.";
+        public static String INFO_OUTPOST_LIST = "You can teleport to outpost {OUTPOSTLIST} ";
+        public static String ERROR_OUTPOST_NUMBER = "Invalid outpost number, choose between {OUTPOSTLIST} ";
 	public static String ERROR_NEEDLEAVE = "You must leave your town to perform that command";
 	public static String ERROR_NAMETAKEN = "That name is already taken";
 	public static String ERROR_TAGTAKEN = "That tag is already taken";

@@ -51,7 +51,8 @@ public class TownyHelpExecutor implements CommandExecutor
 		contents.add(Text.of(TextColors.GOLD, "/t perm <type> <perm> [true|false]", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_T_PERM));
 		contents.add(Text.of(TextColors.GOLD, "/t flag <flag> <true|false>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_T_FLAG));
 		contents.add(Text.of(TextColors.GOLD, "/t taxes <amount>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_T_TAXES));
-		contents.add(Text.of(TextColors.GOLD, "/t spawn [name]", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_T_SPAWN));
+                contents.add(Text.of(TextColors.GOLD, "/t spawn [name]", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_T_SPAWN));
+                contents.add(Text.of(TextColors.GOLD, "/t outpost [number]", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_T_OUTPOST));
 		contents.add(Text.of(TextColors.GOLD, "/t home", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_T_HOME));
 		contents.add(Text.of(TextColors.GOLD, "/t setname <name>", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_SETNAME));
 		contents.add(Text.of(TextColors.GOLD, "/t settag [tag]", TextColors.GRAY, " - ", TextColors.YELLOW, LanguageHandler.HELP_DESC_CMD_SETTAG));
