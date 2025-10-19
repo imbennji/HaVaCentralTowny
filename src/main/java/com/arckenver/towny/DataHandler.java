@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import com.arckenver.towny.channel.AdminSpyMessageChannel;
 import com.arckenver.towny.channel.TownyMessageChannel;
+import com.arckenver.towny.LanguageHandler;
 import com.arckenver.towny.claim.ChunkClaimUtils;
 import com.arckenver.towny.object.*;
 import com.arckenver.towny.serializer.NationDeserializer;
@@ -243,6 +244,51 @@ public class DataHandler
 			}
 		}
 		return null;
+	}
+
+	public static Set<UUID> getTownOutlaws(UUID townId) {
+		Towny town = getTowny(townId);
+		if (town == null) {
+			return Collections.emptySet();
+		}
+		return new LinkedHashSet<>(town.getOutlaws());
+	}
+
+	public static boolean isTownOutlaw(UUID townId, UUID playerId) {
+		Towny town = getTowny(townId);
+		return town != null && town.isOutlaw(playerId);
+	}
+
+	public static boolean addTownOutlaw(UUID townId, UUID playerId) {
+		Towny town = getTowny(townId);
+		if (town == null || playerId == null) {
+			return false;
+		}
+		if (!town.addOutlaw(playerId)) {
+			return false;
+		}
+		saveTowny(townId);
+		Sponge.getServer().getPlayer(playerId).ifPresent(player -> {
+			String townName = town.getDisplayName();
+			player.sendMessage(Text.of(LanguageHandler.INFO_OUTLAW_NOTIFY_ADD.replace("{TOWN}", townName)));
+		});
+		return true;
+	}
+
+	public static boolean removeTownOutlaw(UUID townId, UUID playerId) {
+		Towny town = getTowny(townId);
+		if (town == null || playerId == null) {
+			return false;
+		}
+		if (!town.removeOutlaw(playerId)) {
+			return false;
+		}
+		saveTowny(townId);
+		Sponge.getServer().getPlayer(playerId).ifPresent(player -> {
+			String townName = town.getDisplayName();
+			player.sendMessage(Text.of(LanguageHandler.INFO_OUTLAW_NOTIFY_REMOVE.replace("{TOWN}", townName)));
+		});
+		return true;
 	}
 
         public static void removeTowny(UUID uuid)
@@ -1211,6 +1257,217 @@ public class DataHandler
                 Resident r = ensureResident(id);
                 r.addJailRequest(request);
                 saveResidents();
+        }
+
+        public static boolean tryReleaseResidentFromJail(UUID id) {
+                Resident resident = ensureResident(id);
+                if (!resident.isJailed()) {
+                        return false;
+                }
+                boolean shouldRelease = false;
+                long releaseAt = resident.getJailReleaseAt();
+                if (releaseAt > 0 && releaseAt <= System.currentTimeMillis()) {
+                        shouldRelease = true;
+                } else {
+                        UUID townId = resident.getJailTownId();
+                        UUID plotId = resident.getJailPlotId();
+                        if (townId == null || plotId == null) {
+                                shouldRelease = true;
+                        } else {
+                                Towny town = getTowny(townId);
+                                if (town == null) {
+                                        shouldRelease = true;
+                                } else {
+                                        Plot plot = town.getPlots().get(plotId);
+                                        if (plot == null || plot.getType() != PlotType.JAIL) {
+                                                shouldRelease = true;
+                                        }
+                                }
+                        }
+                }
+                if (shouldRelease) {
+                        setResidentJailed(id, false, null, null, 0L);
+                        return true;
+                }
+                return false;
+        }
+
+        public static Optional<Location<World>> getResidentJailLocation(UUID id) {
+                if (tryReleaseResidentFromJail(id)) {
+                        return Optional.empty();
+                }
+                Resident resident = ensureResident(id);
+                if (!resident.isJailed()) {
+                        return Optional.empty();
+                }
+                UUID townId = resident.getJailTownId();
+                UUID plotId = resident.getJailPlotId();
+                if (townId == null || plotId == null) {
+                        return Optional.empty();
+                }
+                Towny town = getTowny(townId);
+                if (town == null) {
+                        return Optional.empty();
+                }
+                Plot plot = town.getPlots().get(plotId);
+                if (plot == null || plot.getType() != PlotType.JAIL) {
+                        return Optional.empty();
+                }
+                return getJailSpawn(town, plot);
+        }
+
+        public static Optional<Plot> findPrimaryJailPlot(Towny town) {
+                if (town == null) {
+                        return Optional.empty();
+                }
+                return town.getPlotsOfType(PlotType.JAIL).stream().findFirst();
+        }
+
+        public static Optional<Location<World>> getJailSpawn(Towny town, Plot plot) {
+                if (town == null || plot == null || plot.getType() != PlotType.JAIL) {
+                        return Optional.empty();
+                }
+                Rect rect = plot.getRect();
+                Optional<World> worldOpt = Sponge.getServer().getWorld(rect.getWorld());
+                if (!worldOpt.isPresent()) {
+                        return Optional.empty();
+                }
+                World world = worldOpt.get();
+                int centerX = (rect.getMinX() + rect.getMaxX()) / 2;
+                int centerZ = (rect.getMinY() + rect.getMaxY()) / 2;
+                Vector3i highest = world.getHighestPositionAt(centerX, centerZ);
+                double y = highest.getY() + 1;
+                Location<World> location = world.getLocation(centerX + 0.5, y, centerZ + 0.5);
+                return Optional.of(location);
+        }
+
+        public static List<UUID> getTownJailedResidents(UUID townId) {
+                List<UUID> jailed = new ArrayList<>();
+                if (townId == null) {
+                        return jailed;
+                }
+                for (Resident resident : RESIDENTS.values()) {
+                        if (!resident.isJailed()) {
+                                continue;
+                        }
+                        if (!townId.equals(resident.getJailTownId())) {
+                                continue;
+                        }
+                        if (tryReleaseResidentFromJail(resident.getId())) {
+                                continue;
+                        }
+                        jailed.add(resident.getId());
+                }
+                return jailed;
+        }
+
+        public static void releaseResidentsInJailPlot(UUID townId, UUID plotId) {
+                if (townId == null || plotId == null) {
+                        return;
+                }
+                for (Resident resident : RESIDENTS.values()) {
+                        if (!resident.isJailed()) {
+                                continue;
+                        }
+                        if (!townId.equals(resident.getJailTownId())) {
+                                continue;
+                        }
+                        if (!plotId.equals(resident.getJailPlotId())) {
+                                continue;
+                        }
+                        setResidentJailed(resident.getId(), false, null, null, 0L);
+                        Sponge.getServer().getPlayer(resident.getId()).ifPresent(player ->
+                                player.sendMessage(Text.of(LanguageHandler.INFO_JAIL_RELEASE)));
+                }
+        }
+
+        public static Optional<Location<World>> getResidentJailLocation(UUID id) {
+                if (tryReleaseResidentFromJail(id)) {
+                        return Optional.empty();
+                }
+                Resident resident = ensureResident(id);
+                if (!resident.isJailed()) {
+                        return Optional.empty();
+                }
+                UUID townId = resident.getJailTownId();
+                UUID plotId = resident.getJailPlotId();
+                if (townId == null || plotId == null) {
+                        return Optional.empty();
+                }
+                Towny town = getTowny(townId);
+                if (town == null) {
+                        return Optional.empty();
+                }
+                Plot plot = town.getPlots().get(plotId);
+                if (plot == null || plot.getType() != PlotType.JAIL) {
+                        return Optional.empty();
+                }
+                return getJailSpawn(town, plot);
+        }
+
+        public static Optional<Plot> findPrimaryJailPlot(Towny town) {
+                if (town == null) {
+                        return Optional.empty();
+                }
+                return town.getPlotsOfType(PlotType.JAIL).stream().findFirst();
+        }
+
+        public static Optional<Location<World>> getJailSpawn(Towny town, Plot plot) {
+                if (town == null || plot == null || plot.getType() != PlotType.JAIL) {
+                        return Optional.empty();
+                }
+                Rect rect = plot.getRect();
+                Optional<World> worldOpt = Sponge.getServer().getWorld(rect.getWorld());
+                if (!worldOpt.isPresent()) {
+                        return Optional.empty();
+                }
+                World world = worldOpt.get();
+                int centerX = (rect.getMinX() + rect.getMaxX()) / 2;
+                int centerZ = (rect.getMinY() + rect.getMaxY()) / 2;
+                Vector3i highest = world.getHighestPositionAt(centerX, centerZ);
+                double y = highest.getY() + 1;
+                Location<World> location = world.getLocation(centerX + 0.5, y, centerZ + 0.5);
+                return Optional.of(location);
+        }
+
+        public static List<UUID> getTownJailedResidents(UUID townId) {
+                List<UUID> jailed = new ArrayList<>();
+                if (townId == null) {
+                        return jailed;
+                }
+                for (Resident resident : RESIDENTS.values()) {
+                        if (!resident.isJailed()) {
+                                continue;
+                        }
+                        if (!townId.equals(resident.getJailTownId())) {
+                                continue;
+                        }
+                        if (tryReleaseResidentFromJail(resident.getId())) {
+                                continue;
+                        }
+                        jailed.add(resident.getId());
+                }
+                return jailed;
+        }
+
+        public static void releaseResidentsInJailPlot(UUID townId, UUID plotId) {
+                if (townId == null || plotId == null) {
+                        return;
+                }
+                for (Resident resident : RESIDENTS.values()) {
+                        if (!resident.isJailed()) {
+                                continue;
+                        }
+                        if (!townId.equals(resident.getJailTownId())) {
+                                continue;
+                        }
+                        if (!plotId.equals(resident.getJailPlotId())) {
+                                continue;
+                        }
+                        setResidentJailed(resident.getId(), false, null, null, 0L);
+                        Sponge.getServer().getPlayer(resident.getId()).ifPresent(player ->
+                                player.sendMessage(Text.of(LanguageHandler.INFO_JAIL_RELEASE)));
+                }
         }
 
         public static void clearResidentJailRequests(UUID id) {

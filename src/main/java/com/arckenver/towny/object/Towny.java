@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
@@ -188,6 +189,7 @@ public class Towny {
         private Hashtable<String, Hashtable<String, Boolean>> perms;
         private Hashtable<String, Boolean> flags;
         private Hashtable<UUID, Plot> plots;
+        private LinkedHashSet<UUID> outlaws;
         private UUID nationUUID;
 	private int extras;
 	private int extraspawns;
@@ -226,6 +228,7 @@ public class Towny {
                 ensureTownPermContainer(TYPE_NATION);
                 ensureTownPermContainer(TYPE_OUTSIDER);
 		this.plots = new Hashtable<>();
+		this.outlaws = new LinkedHashSet<>();
 		this.extras = 0;
 		this.extraspawns = 0;
                 this.taxes = ConfigHandler.getNode("towny", "defaultTaxes").getDouble();
@@ -499,6 +502,38 @@ public class Towny {
 
 	public void removePlot(UUID uuid) {
 		plots.remove(uuid);
+	}
+
+	public List<Plot> getPlotsOfType(PlotType type) {
+		if (type == null) {
+			return Collections.emptyList();
+		}
+		return plots.values().stream()
+			.filter(plot -> plot.getType() == type)
+			.collect(Collectors.toList());
+	}
+
+	public boolean hasPlotOfType(PlotType type) {
+		if (type == null) {
+			return false;
+		}
+		return plots.values().stream().anyMatch(plot -> plot.getType() == type);
+	}
+
+	public Set<UUID> getOutlaws() {
+		return Collections.unmodifiableSet(outlaws);
+	}
+
+	public boolean isOutlaw(UUID uuid) {
+		return uuid != null && outlaws.contains(uuid);
+	}
+
+	public boolean addOutlaw(UUID uuid) {
+		return uuid != null && outlaws.add(uuid);
+	}
+
+	public boolean removeOutlaw(UUID uuid) {
+		return uuid != null && outlaws.remove(uuid);
 	}
 
         public int getExtras() {

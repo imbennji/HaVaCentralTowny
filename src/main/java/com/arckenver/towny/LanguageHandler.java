@@ -434,6 +434,29 @@ public class LanguageHandler
         public static String COST_MSG_EXTRAPRICE = "Price per extra chunk";
 	public static String INFO_PLOTFS = "{PLAYER} made plot {PLOT} not for sale";
 
+        public static String ERROR_TOWN_NO_JAIL = "Your town does not have an active jail plot.";
+        public static String ERROR_JAIL_TARGET_NOT_CITIZEN = "{PLAYER} is not a resident of your town.";
+        public static String ERROR_JAIL_ALREADY = "{PLAYER} is already jailed.";
+        public static String ERROR_JAIL_NOT_JAILED = "{PLAYER} is not jailed.";
+        public static String SUCCESS_JAIL_ADDED = "{PLAYER} was jailed for {DURATION}.";
+        public static String SUCCESS_JAIL_RELEASED = "{PLAYER} was released from jail.";
+        public static String INFO_JAIL_TELEPORT = "You have been jailed in {TOWN}.";
+        public static String INFO_JAIL_RELEASE = "You have been released from jail.";
+        public static String INFO_JAIL_LIST = "Jailed residents: {LIST}";
+        public static String INFO_JAIL_LIST_EMPTY = "No residents are currently jailed.";
+        public static String INFO_JAIL_DURATION_PERM = "permanently";
+        public static String INFO_JAIL_DURATION_HOURS = "{HOURS}h";
+        public static String ERROR_OUTLAW_SELF = "You cannot mark yourself as an outlaw.";
+        public static String ERROR_OUTLAW_ALREADY = "{PLAYER} is already marked as an outlaw.";
+        public static String ERROR_OUTLAW_NOT_LISTED = "{PLAYER} is not marked as an outlaw.";
+        public static String SUCCESS_OUTLAW_ADDED = "{PLAYER} was marked as an outlaw.";
+        public static String SUCCESS_OUTLAW_REMOVED = "{PLAYER} is no longer an outlaw.";
+        public static String INFO_OUTLAW_NOTIFY_ADD = "You have been marked as an outlaw in {TOWN}.";
+        public static String INFO_OUTLAW_NOTIFY_REMOVE = "You are no longer an outlaw in {TOWN}.";
+        public static String INFO_OUTLAW_LIST = "Outlaws: {LIST}";
+        public static String INFO_OUTLAW_LIST_EMPTY = "No outlaws are registered.";
+        public static String INFO_OUTLAW_RESPAWN = "You cannot respawn inside {TOWN} while outlawed.";
+
         private static File languageFile;
         private static ConfigurationLoader<CommentedConfigurationNode> languageManager;
         private static CommentedConfigurationNode language;

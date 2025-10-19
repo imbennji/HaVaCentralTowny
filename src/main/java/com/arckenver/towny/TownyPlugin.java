@@ -86,6 +86,7 @@ public class TownyPlugin {
 		Sponge.getEventManager().registerListeners(this, new BuildPermListener());
 		Sponge.getEventManager().registerListeners(this, new InteractPermListener());
 		Sponge.getEventManager().registerListeners(this, new ChatListener());
+		Sponge.getEventManager().registerListeners(this, new JailListener());
 
 		LocalDateTime localNow = LocalDateTime.now();
 		ZonedDateTime zonedNow = ZonedDateTime.of(localNow, ZoneId.systemDefault());

@@ -160,6 +160,12 @@ public class TownySerializer implements JsonSerializer<Towny> {
                 }
                 json.add("citizens", citizensArray);
 
+		JsonArray outlawsArray = new JsonArray();
+                for (UUID outlaw : towny.getOutlaws()) {
+                        outlawsArray.add(new JsonPrimitive(outlaw.toString()));
+                }
+                json.add("outlaws", outlawsArray);
+
                 if (towny.hasNation()) {
                         json.add("nation", new JsonPrimitive(towny.getNationUUID().toString()));
                 }
