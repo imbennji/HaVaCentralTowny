@@ -31,6 +31,7 @@ public class PlotPermExecutor implements CommandExecutor
                                                                                 .put("coowner", Towny.TYPE_FRIEND)
                                                                                 .put("resident", Towny.TYPE_RESIDENT)
                                                                                 .put("citizen", Towny.TYPE_RESIDENT)
+                                                                                .put("nation", Towny.TYPE_NATION)
                                                                                 .put("ally", Towny.TYPE_ALLY)
                                                                                 .put("outsider", Towny.TYPE_OUTSIDER)
                                                                                 .build()),

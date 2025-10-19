@@ -201,6 +201,11 @@ public class ConfigHandler
                 ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_RESIDENT, Towny.PERM_SWITCH), legacyCitizenPlot.getNode(Towny.PERM_INTERACT).getBoolean(true));
                 ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_RESIDENT, Towny.PERM_ITEM_USE), legacyCitizenPlot.getNode(Towny.PERM_INTERACT).getBoolean(true));
 
+                ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_NATION, Towny.PERM_BUILD), false);
+                ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_NATION, Towny.PERM_DESTROY), false);
+                ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_NATION, Towny.PERM_SWITCH), false);
+                ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_NATION, Towny.PERM_ITEM_USE), false);
+
                 ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_ALLY, Towny.PERM_BUILD), false);
                 ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_ALLY, Towny.PERM_DESTROY), false);
                 ensureTownPermNode(plotPermRoot.getNode(Towny.TYPE_ALLY, Towny.PERM_SWITCH), false);
