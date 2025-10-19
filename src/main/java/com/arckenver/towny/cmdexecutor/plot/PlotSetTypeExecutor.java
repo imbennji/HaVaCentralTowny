@@ -66,9 +66,13 @@ public class PlotSetTypeExecutor implements CommandExecutor {
                         return CommandResult.success();
                 }
 
+                PlotType oldType = plot.getType();
                 plot.setType(newType);
                 plot.enforceTypeRules();
                 DataHandler.saveTowny(towny.getUUID());
+                if (oldType == PlotType.JAIL && newType != PlotType.JAIL) {
+                        DataHandler.releaseResidentsInJailPlot(towny.getUUID(), plot.getUUID());
+                }
                 src.sendMessage(Text.of(TextColors.GREEN,
                                 LanguageHandler.SUCCESS_PLOT_TYPE_SET.replace("{TYPE}", newType.getDisplayName())));
                 src.sendMessage(Utils.formatPlotDescription(plot, towny, Utils.CLICKER_DEFAULT));

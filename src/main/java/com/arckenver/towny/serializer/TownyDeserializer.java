@@ -182,6 +182,12 @@ public class TownyDeserializer implements JsonDeserializer<Towny> {
 				}
 			}
 
+			if (obj.has("outlaws")) {
+				for (JsonElement element : obj.get("outlaws").getAsJsonArray()) {
+					towny.addOutlaw(UUID.fromString(element.getAsString()));
+				}
+			}
+
 			if (obj.has("taxes"))
 				towny.setTaxes(obj.get("taxes").getAsDouble());
                         if (obj.has("extras"))

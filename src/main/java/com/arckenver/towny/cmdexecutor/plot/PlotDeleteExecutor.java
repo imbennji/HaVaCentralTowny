@@ -15,6 +15,7 @@ import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
 import com.arckenver.towny.object.Towny;
 import com.arckenver.towny.object.Plot;
+import com.arckenver.towny.object.PlotType;
 
 public class PlotDeleteExecutor implements CommandExecutor
 {
@@ -45,6 +46,7 @@ public class PlotDeleteExecutor implements CommandExecutor
 				return CommandResult.success();
 			}
 			String plotName = plot.getName();
+			boolean wasJail = plot.getType() == PlotType.JAIL;
 			if (!towny.isStaff(player.getUniqueId()))
 			{
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_TOWNSTAFF));
@@ -52,6 +54,9 @@ public class PlotDeleteExecutor implements CommandExecutor
 			}
 			towny.removePlot(plot.getUUID());
 			DataHandler.saveTowny(towny.getUUID());
+			if (wasJail) {
+				DataHandler.releaseResidentsInJailPlot(towny.getUUID(), plot.getUUID());
+			}
 			src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.SUCCESS_DELPLOT.replaceAll("\\{PLOT\\}", plotName)));
 			MessageChannel.TO_CONSOLE.send(Text.of(player.getName(), " > ", towny.getName(), ": ", LanguageHandler.SUCCESS_DELPLOT.replaceAll("\\{PLOT\\}", plotName)));
 		}

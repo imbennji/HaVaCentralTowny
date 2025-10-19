@@ -5,10 +5,16 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 import com.arckenver.towny.DataHandler;
+import com.arckenver.towny.LanguageHandler;
 import com.arckenver.towny.object.Towny;
 import org.spongepowered.api.text.format.TextColors;
+
+import java.util.Objects;
+import java.util.Optional;
 
 public class PlayerConnectionListener
 {
@@ -21,6 +27,21 @@ public class PlayerConnectionListener
                 Towny towny = DataHandler.getTownyOfPlayer(player.getUniqueId());
                 if (towny != null)
                         towny.getMessageChannel().addMember(player);
+
+                if (DataHandler.tryReleaseResidentFromJail(player.getUniqueId())) {
+                        player.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_JAIL_RELEASE));
+                }
+                Optional<Location<World>> jailLocation = DataHandler.getResidentJailLocation(player.getUniqueId());
+                if (jailLocation.isPresent()) {
+                        player.setLocation(jailLocation.get());
+                        String townName = DataHandler.getResidentJailTown(player.getUniqueId())
+                                        .map(DataHandler::getTowny)
+                                        .filter(Objects::nonNull)
+                                        .map(Towny::getDisplayName)
+                                        .orElse(LanguageHandler.FORMAT_UNKNOWN);
+                        player.sendMessage(Text.of(TextColors.RED, LanguageHandler.INFO_JAIL_TELEPORT.replace("{TOWN}", townName)));
+                }
+
                 player.setMessageChannel(MessageChannel.TO_ALL);
                 if (player.hasPermission("towny.admin.spychat"))
 			DataHandler.getSpyChannel().addMember(player);
