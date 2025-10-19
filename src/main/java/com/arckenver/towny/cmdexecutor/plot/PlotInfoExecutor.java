@@ -9,7 +9,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
@@ -36,7 +35,7 @@ public class PlotInfoExecutor implements CommandExecutor
 			Towny towny = DataHandler.getTowny(player.getLocation());
 			if (towny == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDSTANDTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDSTANDTOWN));
 				return CommandResult.success();
 			}
 			Plot plot = null;
@@ -45,7 +44,7 @@ public class PlotInfoExecutor implements CommandExecutor
 				plot = towny.getPlot(player.getLocation());
 				if (plot == null)
 				{
-					src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDPLOT));
+					src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDPLOT));
 					return CommandResult.success();
 				}
 			}
@@ -61,7 +60,7 @@ public class PlotInfoExecutor implements CommandExecutor
 				}
 				if (plot == null)
 				{
-					src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADPLOTNNAME));
+					src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADPLOTNNAME));
 					return CommandResult.success();
 				}
 			}
@@ -74,7 +73,7 @@ public class PlotInfoExecutor implements CommandExecutor
 		}
 		else
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}

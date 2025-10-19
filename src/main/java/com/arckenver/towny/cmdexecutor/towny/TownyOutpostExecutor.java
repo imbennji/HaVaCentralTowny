@@ -16,7 +16,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -40,14 +39,14 @@ public class TownyOutpostExecutor implements CommandExecutor {
         @Override
         public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
                 if (!(src instanceof Player)) {
-                        src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+                        src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
                         return CommandResult.success();
                 }
 
                 Player player = (Player) src;
                 Towny towny = DataHandler.getTownyOfPlayer(player.getUniqueId());
                 if (towny == null) {
-                        src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOTOWN));
+                        src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOTOWN));
                         return CommandResult.success();
                 }
 
@@ -73,7 +72,7 @@ public class TownyOutpostExecutor implements CommandExecutor {
                         return CommandResult.success();
                 }
 
-                src.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.INFO_TELEPORTCOOLDOWN));
+                src.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_TELEPORTCOOLDOWN));
 
                 Scheduler scheduler = Sponge.getScheduler();
                 Task.Builder taskBuilder = scheduler.createTaskBuilder();
@@ -92,32 +91,32 @@ public class TownyOutpostExecutor implements CommandExecutor {
         private static void sendOutpostList(CommandSource src, Towny towny) {
                 List<Integer> indices = towny.getOutpostIndices();
                 if (indices.isEmpty()) {
-                        src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NO_OUTPOST_SPAWNS));
+                        src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NO_OUTPOST_SPAWNS));
                         return;
                 }
 
                 src.sendMessage(Text.builder()
-                                .append(Text.of(TextColors.AQUA,
+                                .append(Text.of(LanguageHandler.colorAqua(),
                                                 LanguageHandler.INFO_OUTPOST_LIST.split("\\{OUTPOSTLIST\\}")[0]))
-                                .append(Utils.formatTownyOutpostSpawns(towny, TextColors.YELLOW))
-                                .append(Text.of(TextColors.AQUA,
+                                .append(Utils.formatTownyOutpostSpawns(towny, LanguageHandler.colorYellow()))
+                                .append(Text.of(LanguageHandler.colorAqua(),
                                                 LanguageHandler.INFO_OUTPOST_LIST.split("\\{OUTPOSTLIST\\}")[1]))
-                                .append(Text.of(TextColors.DARK_GRAY, " <- " + LanguageHandler.CLICK)).build());
+                                .append(Text.of(LanguageHandler.colorDarkGray(), " <- " + LanguageHandler.CLICK)).build());
         }
 
         private static void sendInvalidIndexMessage(CommandSource src, Towny towny) {
                 if (!towny.hasOutpostSpawns()) {
-                        src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NO_OUTPOST_SPAWNS));
+                        src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NO_OUTPOST_SPAWNS));
                         return;
                 }
 
                 src.sendMessage(Text.builder()
-                                .append(Text.of(TextColors.RED,
+                                .append(Text.of(LanguageHandler.colorRed(),
                                                 LanguageHandler.ERROR_OUTPOST_NUMBER.split("\\{OUTPOSTLIST\\}")[0]))
-                                .append(Utils.formatTownyOutpostSpawns(towny, TextColors.YELLOW))
-                                .append(Text.of(TextColors.RED,
+                                .append(Utils.formatTownyOutpostSpawns(towny, LanguageHandler.colorYellow()))
+                                .append(Text.of(LanguageHandler.colorRed(),
                                                 LanguageHandler.ERROR_OUTPOST_NUMBER.split("\\{OUTPOSTLIST\\}")[1]))
-                                .append(Text.of(TextColors.DARK_GRAY, " <- " + LanguageHandler.CLICK)).build());
+                                .append(Text.of(LanguageHandler.colorDarkGray(), " <- " + LanguageHandler.CLICK)).build());
         }
 
         private static void teleportPlayer(Player player, Location<World> spawn, CommandSource src) {
@@ -128,6 +127,6 @@ public class TownyOutpostExecutor implements CommandExecutor {
                 }
 
                 player.setLocation(spawn);
-                src.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.INFO_TELEPORTED));
+                src.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_TELEPORTED));
         }
 }

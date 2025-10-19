@@ -9,13 +9,13 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.*;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
+import com.arckenver.towny.LanguageHandler;
 
 public class ResidentTaxExecutor implements CommandExecutor {
     public static void create(CommandSpec.Builder root) {
@@ -29,12 +29,12 @@ public class ResidentTaxExecutor implements CommandExecutor {
     }
 
     @Override public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
-        if (!(src instanceof Player)) throw new CommandException(Text.of(TextColors.RED, "Players only."));
+        if (!(src instanceof Player)) throw new CommandException(Text.of(LanguageHandler.colorRed(), "Players only."));
         Player p = (Player) src;
         UUID id = p.getUniqueId();
 
         Towny t = DataHandler.getTownyOfPlayer(id);
-        if (t == null) throw new CommandException(Text.of(TextColors.RED, "You’re not in a town."));
+        if (t == null) throw new CommandException(Text.of(LanguageHandler.colorRed(), "You’re not in a town."));
 
         double townTax = t.getTaxes();
         int owned = (int) t.getPlots().values().stream().filter(pl -> id.equals(pl.getOwner())).count();
@@ -46,23 +46,23 @@ public class ResidentTaxExecutor implements CommandExecutor {
         long lastPaid = DataHandler.getResidentLastTaxPaidAt(id);
 
         src.sendMessage(Text.of(
-                TextColors.GOLD, "Town tax: ", TextColors.YELLOW, townTax,
-                TextColors.GOLD, " | Plot tax: ", TextColors.YELLOW, perPlot, " x ", owned,
-                TextColors.GOLD, " = ", TextColors.YELLOW, BigDecimal.valueOf(total)
+                LanguageHandler.colorGold(), "Town tax: ", LanguageHandler.colorYellow(), townTax,
+                LanguageHandler.colorGold(), " | Plot tax: ", LanguageHandler.colorYellow(), perPlot, " x ", owned,
+                LanguageHandler.colorGold(), " = ", LanguageHandler.colorYellow(), BigDecimal.valueOf(total)
         ));
 
         if (currentBalance != null) {
-            src.sendMessage(Text.of(TextColors.GOLD, "Account balance: ", TextColors.YELLOW, currentBalance));
+            src.sendMessage(Text.of(LanguageHandler.colorGold(), "Account balance: ", LanguageHandler.colorYellow(), currentBalance));
         }
 
         if (exemptUntil > System.currentTimeMillis()) {
-            src.sendMessage(Text.of(TextColors.GREEN, "You are tax exempt until ", TextColors.YELLOW, formatInstant(exemptUntil)));
+            src.sendMessage(Text.of(LanguageHandler.colorGreen(), "You are tax exempt until ", LanguageHandler.colorYellow(), formatInstant(exemptUntil)));
         } else if (DataHandler.isResidentBankrupt(id)) {
-            src.sendMessage(Text.of(TextColors.RED, "You are currently bankrupt. Taxes will be withheld until cleared."));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), "You are currently bankrupt. Taxes will be withheld until cleared."));
         }
 
         if (lastPaid > 0) {
-            src.sendMessage(Text.of(TextColors.GOLD, "Last tax payment: ", TextColors.YELLOW, formatInstant(lastPaid)));
+            src.sendMessage(Text.of(LanguageHandler.colorGold(), "Last tax payment: ", LanguageHandler.colorYellow(), formatInstant(lastPaid)));
         }
         return CommandResult.success();
     }

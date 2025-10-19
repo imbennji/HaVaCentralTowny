@@ -7,7 +7,6 @@ import java.util.Comparator;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.World;
 
 import com.arckenver.towny.claim.ChunkClaimUtils;
@@ -16,6 +15,7 @@ import com.arckenver.towny.object.Towny;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import com.arckenver.towny.LanguageHandler;
 
 public class ConfigHandler
 {
@@ -58,7 +58,7 @@ public class ConfigHandler
 			e.printStackTrace();
 			if (src != null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_CONFIGFILE));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_CONFIGFILE));
 			}
                 }
 
@@ -312,7 +312,7 @@ public class ConfigHandler
                 save();
                 if (src != null)
                 {
-                        src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_CONFIGRELOADED));
+                        src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.INFO_CONFIGRELOADED));
                 }
         }
 

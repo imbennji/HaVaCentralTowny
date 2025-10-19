@@ -10,7 +10,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.ConfigHandler;
 import com.arckenver.towny.DataHandler;
@@ -34,7 +33,7 @@ public class TownyadminClaimExecutor implements CommandExecutor
 	{
 		if (!ctx.<String>getOne("towny").isPresent())
 		{
-			src.sendMessage(Text.of(TextColors.YELLOW, "/ta claim <towny>"));
+			src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/ta claim <towny>"));
 			return CommandResult.success();
 		}
 		if (src instanceof Player)
@@ -46,37 +45,37 @@ public class TownyadminClaimExecutor implements CommandExecutor
 			Towny towny = DataHandler.getTowny(townyName);
 			if (towny == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADTOWNNNAME));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADTOWNNNAME));
 				return CommandResult.success();
 			}
                         Point a = DataHandler.getFirstPoint(player.getUniqueId());
                         Point b = DataHandler.getSecondPoint(player.getUniqueId());
                         if (a == null || b == null)
                         {
-                                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDCHUNKSELECT));
+                                src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDCHUNKSELECT));
 				return CommandResult.success();
 			}
 			if (!ConfigHandler.getNode("worlds").getNode(a.getWorld().getName()).getNode("enabled").getBoolean())
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PLUGINDISABLEDINWORLD));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PLUGINDISABLEDINWORLD));
 				return CommandResult.success();
 			}
 			Rect rect = new Rect(a, b);
 
 			if (!DataHandler.canClaim(rect, true, towny.getUUID()))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_TOOCLOSE));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_TOOCLOSE));
 				return CommandResult.success();
 			}
 
 			towny.getRegion().addRect(rect);
 			DataHandler.addToWorldChunks(towny);
 			DataHandler.saveTowny(towny.getUUID());
-			src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.SUCCESS_GENERAL));
+			src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.SUCCESS_GENERAL));
 		}
 		else
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}
@@ -87,7 +86,7 @@ public class TownyadminClaimExecutor implements CommandExecutor
 
 		Towny towny = DataHandler.getTowny(townyName);
 		if (towny == null) {
-			player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADTOWNNNAME));
+			player.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADTOWNNNAME));
 			return CommandResult.success();
 		}
 
@@ -95,26 +94,26 @@ public class TownyadminClaimExecutor implements CommandExecutor
 		Point b = DataHandler.getSecondPoint(player.getUniqueId());
 
                 if (a == null || b == null) {
-                        player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDCHUNKSELECT));
+                        player.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDCHUNKSELECT));
 			return CommandResult.success();
 		}
 
 		if (!ConfigHandler.getNode("worlds").getNode(a.getWorld().getName()).getNode("enabled").getBoolean()) {
-			player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PLUGINDISABLEDINWORLD));
+			player.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PLUGINDISABLEDINWORLD));
 			return CommandResult.success();
 		}
 
 		Rect rect = new Rect(a, b);
 
 		if (!DataHandler.canClaim(rect, true, towny.getUUID())) {
-			player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_TOOCLOSE));
+			player.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_TOOCLOSE));
 			return CommandResult.success();
 		}
 
 		towny.getRegion().addRect(rect);
 		DataHandler.addToWorldChunks(towny);
 		DataHandler.saveTowny(towny.getUUID());
-		player.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.SUCCESS_GENERAL));
+		player.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.SUCCESS_GENERAL));
 
 		return CommandResult.success();
 	}

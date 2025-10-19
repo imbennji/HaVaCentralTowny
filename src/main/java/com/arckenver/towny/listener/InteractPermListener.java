@@ -17,7 +17,6 @@ import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.ConfigHandler;
 import com.arckenver.towny.DataHandler;
@@ -61,7 +60,7 @@ public class InteractPermListener
                         {
                                 event.setCancelled(true);
                                 if (loc.getBlockType() != BlockTypes.STANDING_SIGN && loc.getBlockType() != BlockTypes.WALL_SIGN)
-                                        player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_SWITCH));
+                                        player.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_SWITCH));
                         }
                 });
 	}
@@ -91,14 +90,14 @@ public class InteractPermListener
                         if (!DataHandler.getPerm(Towny.PERM_DESTROY, player.getUniqueId(), event.getTargetEntity().getLocation()))
                         {
                                 event.setCancelled(true);
-                                player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_DESTROY));
+                                player.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_DESTROY));
                         }
                         return;
                 }
                 if (!DataHandler.getPerm(Towny.PERM_ITEM_USE, player.getUniqueId(), event.getTargetEntity().getLocation()))
                 {
                         event.setCancelled(true);
-                        player.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_ITEMUSE));
+                        player.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_ITEMUSE));
                 }
         }
 }

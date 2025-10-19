@@ -10,7 +10,6 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
@@ -36,13 +35,13 @@ public class PlotListExecutor implements CommandExecutor
 		{
 			if (!src.hasPermission("towny.admin.plot.listall"))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_LISTPLOTS));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_LISTPLOTS));
 				return CommandResult.success();
 			}
 			towny = DataHandler.getTowny(ctx.<String>getOne("towny").get());
 			if (towny == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADTOWNNNAME));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADTOWNNNAME));
 				return CommandResult.success();
 			}
 		}
@@ -54,13 +53,13 @@ public class PlotListExecutor implements CommandExecutor
 				towny = DataHandler.getTowny(player.getLocation());
 				if (towny == null)
 				{
-					src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDTOWNNAME));
+					src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDTOWNNAME));
 					return CommandResult.success();
 				}
 			}
 			else
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDTOWNNAME));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDTOWNNAME));
 				return CommandResult.success();
 			}
 		}
@@ -69,10 +68,10 @@ public class PlotListExecutor implements CommandExecutor
 		String[] splited = str.split("\\{PLOTLIST\\}");
 		src.sendMessage(Utils.structureX(
 				towny.getPlots().values().iterator(),
-				Text.builder(splited[0]).color(TextColors.AQUA), 
-				(b) -> b.append(Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE)),
-				(b, plot) -> b.append(Text.builder(plot.getName()).color(TextColors.YELLOW).onClick(TextActions.runCommand("/z info " + plot.getRealName())).build()),
-				(b) -> b.append(Text.of(TextColors.AQUA, ", "))).append(Text.of(TextColors.AQUA, (splited.length > 1) ? splited[1] : "")).build());
+				Text.builder(splited[0]).color(LanguageHandler.colorAqua()), 
+				(b) -> b.append(Text.of(LanguageHandler.colorGray(), LanguageHandler.FORMAT_NONE)),
+				(b, plot) -> b.append(Text.builder(plot.getName()).color(LanguageHandler.colorYellow()).onClick(TextActions.runCommand("/z info " + plot.getRealName())).build()),
+				(b) -> b.append(Text.of(LanguageHandler.colorAqua(), ", "))).append(Text.of(LanguageHandler.colorAqua(), (splited.length > 1) ? splited[1] : "")).build());
 		
 		return CommandResult.success();
 	}

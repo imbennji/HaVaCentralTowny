@@ -14,7 +14,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.format.TextColors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -38,7 +37,7 @@ public class TownyadminSetDisplayNameExecutor implements CommandExecutor
 	{
 		if (!ctx.<String> getOne("towny").isPresent())
 		{
-			src.sendMessage(Text.of(TextColors.YELLOW, "/ta setdisplayname <towny> [tag]"));
+			src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/ta setdisplayname <towny> [tag]"));
 			return CommandResult.success();
 		}
 		String newDisplayName = null;
@@ -47,13 +46,13 @@ public class TownyadminSetDisplayNameExecutor implements CommandExecutor
 		Towny towny = DataHandler.getTowny(ctx.<String> getOne("towny").get());
 		if (towny == null)
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOTOWN));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOTOWN));
 			return CommandResult.success();
 		}
 		if (newDisplayName != null && (newDisplayName.length() < ConfigHandler.getNode("others", "minTownyDisplayLength").getInt()
 				|| newDisplayName.length() > ConfigHandler.getNode("others", "maxTownyDisplayLength").getInt()))
 		{
-			src.sendMessage(Text.of(TextColors.RED,
+			src.sendMessage(Text.of(LanguageHandler.colorRed(),
 					LanguageHandler.ERROR_DISPLAYLENGTH
 							.replaceAll("\\{MIN\\}",
 									ConfigHandler.getNode("others", "minTownyDisplayLength").getString())
@@ -64,7 +63,7 @@ public class TownyadminSetDisplayNameExecutor implements CommandExecutor
 		String oldName = towny.getDisplayName();
 		towny.setDisplayName(newDisplayName);
 		DataHandler.saveTowny(towny.getUUID());
-		MessageChannel.TO_ALL.send(Text.of(TextColors.AQUA,
+		MessageChannel.TO_ALL.send(Text.of(LanguageHandler.colorAqua(),
 				LanguageHandler.INFO_DISPLAY.replaceAll("\\{NAME\\}", towny.getName()).replaceAll("\\{OLDNAME\\}", oldName).replaceAll("\\{NEWNAME\\}", towny.getDisplayName())));
 		return CommandResult.success();
 	}

@@ -17,7 +17,6 @@ import org.spongepowered.api.service.economy.transaction.TransactionResult;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.ConfigHandler;
 import com.arckenver.towny.DataHandler;
@@ -52,7 +51,7 @@ public class TaxesCollectRunnable implements Runnable
 				.append(TownyPlugin.getInstance())
 				.build(context);
 
-		Text upkeepAnnounceMassage = Text.of(TextColors.AQUA, LanguageHandler.INFO_UPKEEPANNOUNCE);
+		Text upkeepAnnounceMassage = Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_UPKEEPANNOUNCE);
 
 		ArrayList<UUID> townyToRemove = new ArrayList<>();
 
@@ -99,7 +98,7 @@ public class TaxesCollectRunnable implements Runnable
 				{
 					citizensToRemove.add(uuid);
 					Sponge.getServer().getPlayer(uuid).ifPresent(p ->
-							p.sendMessage(Text.of(TextColors.RED, LanguageHandler.INFO_KICKUPKEEP)));
+							p.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.INFO_KICKUPKEEP)));
 				}
 				else if (result.getResult() != ResultType.SUCCESS)
 				{
@@ -146,7 +145,7 @@ public class TaxesCollectRunnable implements Runnable
 
 						// Tell online owner about the plot tax payment
 						Sponge.getServer().getPlayer(owner).ifPresent(p ->
-								p.sendMessage(Text.of(TextColors.GREEN,
+								p.sendMessage(Text.of(LanguageHandler.colorGreen(),
 										LanguageHandler.INFO_PLOT_TAX_PAID
 												.replace("{AMOUNT}", Utils.formatPricePlain(perPlotTax))
 												.replace("{PLOT}", plot.getDisplayName())
@@ -157,7 +156,7 @@ public class TaxesCollectRunnable implements Runnable
 
 						// Owner failed to pay: notify if online
 						Sponge.getServer().getPlayer(owner).ifPresent(p ->
-								p.sendMessage(Text.of(TextColors.RED,
+								p.sendMessage(Text.of(LanguageHandler.colorRed(),
 										LanguageHandler.INFO_PLOTTAX_FAIL
 												.replace("{PLOT}", plot.getDisplayName())
 								)));
@@ -183,11 +182,11 @@ public class TaxesCollectRunnable implements Runnable
 					// Mayor
 					UUID mayor = towny.getPresident();
 					if (mayor != null) {
-						Sponge.getServer().getPlayer(mayor).ifPresent(p -> p.sendMessage(Text.of(TextColors.AQUA, sum)));
+						Sponge.getServer().getPlayer(mayor).ifPresent(p -> p.sendMessage(Text.of(LanguageHandler.colorAqua(), sum)));
 					}
 					// Ministers
 					for (UUID m : towny.getMinisters()) {
-						Sponge.getServer().getPlayer(m).ifPresent(p -> p.sendMessage(Text.of(TextColors.AQUA, sum)));
+						Sponge.getServer().getPlayer(m).ifPresent(p -> p.sendMessage(Text.of(LanguageHandler.colorAqua(), sum)));
 					}
 				}
 			}
@@ -214,7 +213,7 @@ public class TaxesCollectRunnable implements Runnable
 		{
 			String name = DataHandler.getTowny(uuid).getName();
 			DataHandler.removeTowny(uuid);
-			MessageChannel.TO_ALL.send(Text.of(TextColors.RED, LanguageHandler.INFO_TOWNFAILUPKEEP.replace("{TOWN}", name)));
+			MessageChannel.TO_ALL.send(Text.of(LanguageHandler.colorRed(), LanguageHandler.INFO_TOWNFAILUPKEEP.replace("{TOWN}", name)));
 		}
 	}
 }

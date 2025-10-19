@@ -11,7 +11,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
@@ -58,12 +57,12 @@ public class TownyPermExecutor implements CommandExecutor
 			Towny towny = DataHandler.getTownyOfPlayer(player.getUniqueId());
 			if (towny == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOTOWN));
 				return CommandResult.success();
 			}
 			if (!towny.isStaff(player.getUniqueId()))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_TOWNSTAFF));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_TOWNSTAFF));
 				return CommandResult.success();
 			}
 			String type = ctx.<String>getOne("type").get();
@@ -85,7 +84,7 @@ public class TownyPermExecutor implements CommandExecutor
 		}
 		else
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}

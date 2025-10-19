@@ -9,7 +9,6 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.*;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -36,18 +35,18 @@ public class ResidentInfoExecutor implements CommandExecutor {
     @Override public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
         String who = args.<String>getOne("player").orElse(null);
         if (who == null) {
-            if (!(src instanceof Player)) throw new CommandException(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+            if (!(src instanceof Player)) throw new CommandException(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
             who = ((Player) src).getName();
         }
         UUID id = DataHandler.getPlayerUUID(who);
-        if (id == null) throw new CommandException(Text.of(TextColors.RED, LanguageHandler.FORMAT_UNKNOWN));
+        if (id == null) throw new CommandException(Text.of(LanguageHandler.colorRed(), LanguageHandler.FORMAT_UNKNOWN));
 
         Text base = Utils.formatCitizenDescription(who);
         Text details = buildResidentDetails(id);
         String about = DataHandler.getResidentAbout(id);
         Text aboutLine = Text.EMPTY;
         if (about != null && !about.trim().isEmpty()) {
-            aboutLine = Text.of(Text.NEW_LINE, TextColors.GOLD, "About: ", TextColors.YELLOW, about);
+            aboutLine = Text.of(Text.NEW_LINE, LanguageHandler.colorGold(), "About: ", LanguageHandler.colorYellow(), about);
         }
         src.sendMessage(Text.of(base, details, aboutLine));
         return CommandResult.success();
@@ -61,60 +60,60 @@ public class ResidentInfoExecutor implements CommandExecutor {
         List<Text> lines = new java.util.ArrayList<>();
 
         if (registered > 0) {
-            lines.add(Text.of(Text.NEW_LINE, TextColors.GRAY, "Registered: ", TextColors.YELLOW, formatInstant(registered)));
+            lines.add(Text.of(Text.NEW_LINE, LanguageHandler.colorGray(), "Registered: ", LanguageHandler.colorYellow(), formatInstant(registered)));
         }
 
         if (lastOnline > 0) {
             String ago = formatAgo(lastOnline);
-            lines.add(Text.of(Text.NEW_LINE, TextColors.GRAY, "Last Online: ", TextColors.YELLOW, formatInstant(lastOnline),
-                    TextColors.DARK_GRAY, " (", ago, ")"));
+            lines.add(Text.of(Text.NEW_LINE, LanguageHandler.colorGray(), "Last Online: ", LanguageHandler.colorYellow(), formatInstant(lastOnline),
+                    LanguageHandler.colorDarkGray(), " (", ago, ")"));
         }
 
         if (lastLogout > 0 && lastLogout != lastOnline) {
-            lines.add(Text.of(Text.NEW_LINE, TextColors.GRAY, "Last Logout: ", TextColors.YELLOW, formatInstant(lastLogout)));
+            lines.add(Text.of(Text.NEW_LINE, LanguageHandler.colorGray(), "Last Logout: ", LanguageHandler.colorYellow(), formatInstant(lastLogout)));
         }
 
         Queue<String> names = DataHandler.getResidentNameHistory(id);
         if (names != null && names.size() > 1) {
             String history = names.stream().collect(Collectors.joining(", "));
-            lines.add(Text.of(Text.NEW_LINE, TextColors.GRAY, "Known As: ", TextColors.YELLOW, history));
+            lines.add(Text.of(Text.NEW_LINE, LanguageHandler.colorGray(), "Known As: ", LanguageHandler.colorYellow(), history));
         }
 
         BigDecimal balance = DataHandler.getResidentBalance(id);
         if (balance != null) {
-            lines.add(Text.of(Text.NEW_LINE, TextColors.GRAY, "Account Balance: ", TextColors.YELLOW, balance));
+            lines.add(Text.of(Text.NEW_LINE, LanguageHandler.colorGray(), "Account Balance: ", LanguageHandler.colorYellow(), balance));
         }
 
         long exemptUntil = DataHandler.getResidentTaxExemptUntil(id);
         if (exemptUntil > System.currentTimeMillis()) {
-            lines.add(Text.of(Text.NEW_LINE, TextColors.GRAY, "Tax Exempt Until: ", TextColors.YELLOW, formatInstant(exemptUntil)));
+            lines.add(Text.of(Text.NEW_LINE, LanguageHandler.colorGray(), "Tax Exempt Until: ", LanguageHandler.colorYellow(), formatInstant(exemptUntil)));
         }
 
         if (DataHandler.isResidentBankrupt(id)) {
-            lines.add(Text.of(Text.NEW_LINE, TextColors.RED, "Bankrupt since ", formatInstant(DataHandler.getResidentBankruptcyDeclaredAt(id))));
+            lines.add(Text.of(Text.NEW_LINE, LanguageHandler.colorRed(), "Bankrupt since ", formatInstant(DataHandler.getResidentBankruptcyDeclaredAt(id))));
         }
 
         if (DataHandler.isResidentJailed(id)) {
             long release = DataHandler.getResidentJailRelease(id);
             Text releaseText = (release > 0)
-                    ? Text.of(TextColors.YELLOW, formatInstant(release))
-                    : Text.of(TextColors.YELLOW, "Indefinite");
-            lines.add(Text.of(Text.NEW_LINE, TextColors.RED, "Jailed", TextColors.GRAY, " – Release: ", releaseText));
+                    ? Text.of(LanguageHandler.colorYellow(), formatInstant(release))
+                    : Text.of(LanguageHandler.colorYellow(), "Indefinite");
+            lines.add(Text.of(Text.NEW_LINE, LanguageHandler.colorRed(), "Jailed", LanguageHandler.colorGray(), " – Release: ", releaseText));
         }
 
         List<String> ranks = new java.util.ArrayList<>(DataHandler.getResidentTownRanks(id));
         if (!ranks.isEmpty()) {
-            lines.add(Text.of(Text.NEW_LINE, TextColors.GRAY, "Town Ranks: ", TextColors.YELLOW, String.join(", ", ranks)));
+            lines.add(Text.of(Text.NEW_LINE, LanguageHandler.colorGray(), "Town Ranks: ", LanguageHandler.colorYellow(), String.join(", ", ranks)));
         }
 
         java.util.Set<String> modes = DataHandler.getResidentModes(id);
         if (!modes.isEmpty()) {
-            lines.add(Text.of(Text.NEW_LINE, TextColors.GRAY, "Modes: ", TextColors.YELLOW, String.join(", ", modes)));
+            lines.add(Text.of(Text.NEW_LINE, LanguageHandler.colorGray(), "Modes: ", LanguageHandler.colorYellow(), String.join(", ", modes)));
         }
 
         long cooldown = DataHandler.getResidentSpawnCooldown(id);
         if (cooldown > System.currentTimeMillis()) {
-            lines.add(Text.of(Text.NEW_LINE, TextColors.GRAY, "Spawn Cooldown: ", TextColors.YELLOW, formatDuration(cooldown - System.currentTimeMillis())));
+            lines.add(Text.of(Text.NEW_LINE, LanguageHandler.colorGray(), "Spawn Cooldown: ", LanguageHandler.colorYellow(), formatDuration(cooldown - System.currentTimeMillis())));
         }
 
         if (lines.isEmpty()) {

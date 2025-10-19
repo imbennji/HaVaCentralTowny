@@ -9,7 +9,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
 import com.arckenver.towny.DataHandler;
@@ -40,7 +39,7 @@ public class TownyInfoExecutor implements CommandExecutor
 			towny = DataHandler.getTowny(ctx.<String>getOne("towny").get());
 			if (towny == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADTOWNNNAME));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADTOWNNNAME));
 				return CommandResult.success();
 			}
 			if (src instanceof Player)
@@ -60,7 +59,7 @@ public class TownyInfoExecutor implements CommandExecutor
 				towny = DataHandler.getTownyOfPlayer(player.getUniqueId());
 				if (towny == null)
 				{
-					src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDTOWNNAME));
+					src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDTOWNNAME));
 					return CommandResult.success();
 				}
 				if (towny.isStaff(player.getUniqueId()))
@@ -70,7 +69,7 @@ public class TownyInfoExecutor implements CommandExecutor
 			}
 			else
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 				return CommandResult.success();
 			}
 		}

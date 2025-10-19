@@ -9,7 +9,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -39,14 +38,14 @@ public class TownyadminSetspawnExecutor implements CommandExecutor
 			Player player = (Player) src;
 			if (!ctx.<String>getOne("towny").isPresent() || !ctx.<String>getOne("name").isPresent())
 			{
-				src.sendMessage(Text.of(TextColors.YELLOW, "/ta setspawn <towny> <name>"));
+				src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/ta setspawn <towny> <name>"));
 				return CommandResult.success();
 			}
 			String townyName = ctx.<String>getOne("towny").get();
 			Towny towny = DataHandler.getTowny(townyName);
 			if (towny == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADTOWNNNAME));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADTOWNNNAME));
 				return CommandResult.success();
 			}
 			String spawnName = ctx.<String>getOne("name").get();
@@ -54,29 +53,29 @@ public class TownyadminSetspawnExecutor implements CommandExecutor
 			Location<World> newSpawn = player.getLocation();
 			if (!towny.getRegion().isInside(newSpawn))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADSPAWNLOCATION));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADSPAWNLOCATION));
 				return CommandResult.success();
 			}
 			if (towny.getNumSpawns() + 1 > towny.getMaxSpawns() && !towny.getSpawns().containsKey(spawnName))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_MAXSPAWNREACH
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_MAXSPAWNREACH
 						.replaceAll("\\{MAX\\}", String.valueOf(towny.getMaxSpawns()))));
 				return CommandResult.success();
 			}
 			if (!spawnName.matches("[\\p{Alnum}\\p{IsIdeographic}\\p{IsLetter}]{1,30}"))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ALPHASPAWN
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ALPHASPAWN
 						.replaceAll("\\{MIN\\}", ConfigHandler.getNode("others", "minPlotNameLength").getString())
 						.replaceAll("\\{MAX\\}", ConfigHandler.getNode("others", "maxPlotNameLength").getString())));
 				return CommandResult.success();
 			}
 			towny.addSpawn(spawnName, newSpawn);
 			DataHandler.saveTowny(towny.getUUID());
-			src.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.SUCCESS_CHANGESPAWN));
+			src.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.SUCCESS_CHANGESPAWN));
 		}
 		else
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}

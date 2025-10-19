@@ -8,10 +8,10 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.*;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import com.arckenver.towny.LanguageHandler;
 
 public class ResidentPlotListExecutor implements CommandExecutor {
     public static void create(CommandSpec.Builder root) {
@@ -28,9 +28,9 @@ public class ResidentPlotListExecutor implements CommandExecutor {
     @Override public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
         String who = ctx.<String>getOne("player").orElse(null);
         UUID id;
-        if (who == null) throw new CommandException(Text.of(TextColors.RED, "Usage: /res plotlist <player>"));
+        if (who == null) throw new CommandException(Text.of(LanguageHandler.colorRed(), "Usage: /res plotlist <player>"));
         id = DataHandler.getPlayerUUID(who);
-        if (id == null) throw new CommandException(Text.of(TextColors.RED, "Unknown player."));
+        if (id == null) throw new CommandException(Text.of(LanguageHandler.colorRed(), "Unknown player."));
 
         List<String> lines = new ArrayList<>();
         for (Towny t : DataHandler.getTowny().values()) {
@@ -44,9 +44,9 @@ public class ResidentPlotListExecutor implements CommandExecutor {
             }
         }
         if (lines.isEmpty()) {
-            src.sendMessage(Text.of(TextColors.GRAY, "(no plots)"));
+            src.sendMessage(Text.of(LanguageHandler.colorGray(), "(no plots)"));
         } else {
-            for (String s : lines) src.sendMessage(Text.of(TextColors.WHITE, s.replace('§', '§')));
+            for (String s : lines) src.sendMessage(Text.of(LanguageHandler.colorWhite(), s.replace('§', '§')));
         }
         return CommandResult.success();
     }

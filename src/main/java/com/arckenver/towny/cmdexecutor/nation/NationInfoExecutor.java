@@ -15,7 +15,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 public class NationInfoExecutor implements CommandExecutor {
     public static void create(CommandSpec.Builder cmd) {
@@ -46,23 +45,23 @@ public class NationInfoExecutor implements CommandExecutor {
         if (ctx.<String>getOne("nation").isPresent()) {
             nation = DataHandler.getNation(ctx.<String>getOne("nation").get());
             if (nation == null) {
-                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_NOT_FOUND));
+                src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NATION_NOT_FOUND));
                 return CommandResult.success();
             }
         } else if (src instanceof Player) {
             Player player = (Player) src;
             Towny town = DataHandler.getTownyOfPlayer(player.getUniqueId());
             if (town == null || !town.hasNation()) {
-                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NONATION));
+                src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NONATION));
                 return CommandResult.success();
             }
             nation = DataHandler.getNation(town.getNationUUID());
             if (nation == null) {
-                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_NOT_FOUND));
+                src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NATION_NOT_FOUND));
                 return CommandResult.success();
             }
         } else {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDNATIONNAME));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDNATIONNAME));
             return CommandResult.success();
         }
 

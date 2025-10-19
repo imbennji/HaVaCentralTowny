@@ -13,7 +13,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
@@ -46,12 +45,12 @@ public class PlotCreateExecutor implements CommandExecutor
                         Towny towny = DataHandler.getTowny(player.getLocation());
 			if (towny == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDSTANDTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDSTANDTOWN));
 				return CommandResult.success();
 			}
 			if (!towny.isStaff(player.getUniqueId()))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_TOWNSTAFF));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_TOWNSTAFF));
 				return CommandResult.success();
 			}
 			String plotName = null;
@@ -61,7 +60,7 @@ public class PlotCreateExecutor implements CommandExecutor
 			}
 			if (plotName != null && !plotName.matches("[\\p{Alnum}\\p{IsIdeographic}\\p{IsLetter}\"_\"]*{1,30}"))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ALPHASPAWN
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ALPHASPAWN
 						.replaceAll("\\{MIN\\}", "1")
 						.replaceAll("\\{MAX\\}", "30")));
 				return CommandResult.success();
@@ -72,7 +71,7 @@ public class PlotCreateExecutor implements CommandExecutor
 				owner = DataHandler.getPlayerUUID(ctx.<String>getOne("owner").get());
 				if (owner == null)
 				{
-					src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADPLAYERNAME));
+					src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADPLAYERNAME));
 					return CommandResult.success();
 				}
 			}
@@ -80,25 +79,25 @@ public class PlotCreateExecutor implements CommandExecutor
                         Point b = DataHandler.getSecondPoint(player.getUniqueId());
                         if (a == null || b == null)
                         {
-                                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDCHUNKSELECT));
+                                src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDCHUNKSELECT));
 				return CommandResult.success();
 			}
 			Rect rect = new Rect(a, b);
 			if (!towny.getRegion().isInside(rect))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PLOTNOTINTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PLOTNOTINTOWN));
 				return CommandResult.success();
 			}
 			for (Plot plot : towny.getPlots().values())
 			{
 				if (plotName != null && plot.isNamed() && plot.getName().equalsIgnoreCase(plotName))
 				{
-					src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PLOTNAME));
+					src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PLOTNAME));
 					return CommandResult.success();
 				}
 				if (rect.intersects(plot.getRect()))
 				{
-					src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PLOTINTERSECT));
+					src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PLOTINTERSECT));
 					return CommandResult.success();
 				}
 			}
@@ -109,13 +108,13 @@ public class PlotCreateExecutor implements CommandExecutor
 			}
 			towny.addPlot(plot);
 			DataHandler.saveTowny(towny.getUUID());
-			src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.SUCCESS_PLOTCREATE.replaceAll("\\{PLOT\\}", plot.getName())));
+			src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.SUCCESS_PLOTCREATE.replaceAll("\\{PLOT\\}", plot.getName())));
 			Sponge.getServer().getPlayer(owner).ifPresent(
-					p -> p.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.SUCCESS_SETOWNER.replaceAll("\\{PLOT\\}", plot.getName()))));
+					p -> p.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.SUCCESS_SETOWNER.replaceAll("\\{PLOT\\}", plot.getName()))));
 		}
 		else
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}

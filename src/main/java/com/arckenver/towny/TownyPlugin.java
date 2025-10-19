@@ -32,6 +32,7 @@ import com.arckenver.towny.cmdexecutor.TownyCmds;
 import com.arckenver.towny.service.TownyService;
 import com.arckenver.towny.task.TaxesCollectRunnable;
 import com.google.inject.Inject;
+import com.arckenver.towny.LanguageHandler;
 
 @Plugin(id = "towny-relaunched", name = "Towny/Towns", authors = {"V43"}, version = "1.0", description = "Modernized Towny experience for Sponge")
 public class TownyPlugin {

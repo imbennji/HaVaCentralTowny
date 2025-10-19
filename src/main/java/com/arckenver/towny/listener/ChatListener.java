@@ -10,13 +10,13 @@ import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.event.message.MessageEvent.MessageFormatter;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
 import com.arckenver.towny.ConfigHandler;
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.channel.TownyMessageChannel;
 import com.arckenver.towny.object.Towny;
+import com.arckenver.towny.LanguageHandler;
 
 public class ChatListener
 {
@@ -44,8 +44,8 @@ public class ChatListener
 		}
 		else if (chan instanceof TownyMessageChannel)
 		{
-			e.setMessage(Text.of(TextSerializers.FORMATTING_CODE.deserialize(ConfigHandler.getNode("others", "townyChatFormat").getString().replaceAll("\\{TOWN\\}", towny.getTag()).replaceAll("\\{TITLE\\}", DataHandler.getCitizenTitle(p.getUniqueId()))), formater.getHeader().toText()), Text.of(TextColors.YELLOW, formater.getBody().toText()));
-			DataHandler.getSpyChannel().send(p, Text.of(TextSerializers.FORMATTING_CODE.deserialize(ConfigHandler.getNode("others", "townySpyChatTag").getString()), TextColors.RESET, e.getMessage()));
+			e.setMessage(Text.of(TextSerializers.FORMATTING_CODE.deserialize(ConfigHandler.getNode("others", "townyChatFormat").getString().replaceAll("\\{TOWN\\}", towny.getTag()).replaceAll("\\{TITLE\\}", DataHandler.getCitizenTitle(p.getUniqueId()))), formater.getHeader().toText()), Text.of(LanguageHandler.colorYellow(), formater.getBody().toText()));
+			DataHandler.getSpyChannel().send(p, Text.of(TextSerializers.FORMATTING_CODE.deserialize(ConfigHandler.getNode("others", "townySpyChatTag").getString()), LanguageHandler.colorReset(), e.getMessage()));
 		}
 	}
 }

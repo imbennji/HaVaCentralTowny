@@ -3,6 +3,12 @@ package com.arckenver.towny;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
+import org.spongepowered.api.text.format.TextColor;
+import org.spongepowered.api.text.format.TextColors;
 
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -13,7 +19,18 @@ import com.arckenver.towny.lang.SpigotLanguageImporter;
 public class LanguageHandler
 {
         private static File rootDir;
-	public static String HELP_DESC_CMD_SETSPAWN = "set spawn with the given name";
+        public static String HELP_DESC_CMD_SETSPAWN = "set spawn with the given name";
+        public static String COLOR_AQUA = "AQUA";
+        public static String COLOR_BLUE = "BLUE";
+        public static String COLOR_DARK_AQUA = "DARK_AQUA";
+        public static String COLOR_DARK_GRAY = "DARK_GRAY";
+        public static String COLOR_GOLD = "GOLD";
+        public static String COLOR_GRAY = "GRAY";
+        public static String COLOR_GREEN = "GREEN";
+        public static String COLOR_RED = "RED";
+        public static String COLOR_RESET = "RESET";
+        public static String COLOR_WHITE = "WHITE";
+        public static String COLOR_YELLOW = "YELLOW";
 	public static String HELP_DESC_CMD_DELSPAWN = "delete spawn with the given name";
 	public static String HELP_DESC_CMD_SETNAME = "set town's name";
 	public static String HELP_DESC_CMD_SETTAG = "set town's tag";
@@ -462,6 +479,97 @@ public class LanguageHandler
         public static String INFO_OUTLAW_LIST_EMPTY = "No outlaws are registered.";
         public static String INFO_OUTLAW_RESPAWN = "You cannot respawn inside {TOWN} while outlawed.";
 
+        private static final Map<String, TextColor> COLOR_CACHE = new HashMap<>();
+
+        private static TextColor resolveColor(String value, TextColor fallback, String key)
+        {
+                if (value == null || value.trim().isEmpty())
+                {
+                        return fallback;
+                }
+
+                String normalized = value.trim().toUpperCase(Locale.ENGLISH).replace(' ', '_');
+
+                TextColor cached = COLOR_CACHE.get(normalized);
+                if (cached != null)
+                {
+                        return cached;
+                }
+
+                try
+                {
+                        Field colorField = TextColors.class.getField(normalized);
+                        Object color = colorField.get(null);
+                        if (color instanceof TextColor)
+                        {
+                                COLOR_CACHE.put(normalized, (TextColor) color);
+                                return (TextColor) color;
+                        }
+                }
+                catch (ReflectiveOperationException ignored)
+                {
+                }
+
+                TownyPlugin.getLogger().warn("Unknown text color '" + value + "' for " + key + ", using default '" + fallback + "'.");
+                COLOR_CACHE.put(normalized, fallback);
+                return fallback;
+        }
+
+        public static TextColor colorAqua()
+        {
+                return resolveColor(COLOR_AQUA, TextColors.AQUA, "COLOR_AQUA");
+        }
+
+        public static TextColor colorBlue()
+        {
+                return resolveColor(COLOR_BLUE, TextColors.BLUE, "COLOR_BLUE");
+        }
+
+        public static TextColor colorDarkAqua()
+        {
+                return resolveColor(COLOR_DARK_AQUA, TextColors.DARK_AQUA, "COLOR_DARK_AQUA");
+        }
+
+        public static TextColor colorDarkGray()
+        {
+                return resolveColor(COLOR_DARK_GRAY, TextColors.DARK_GRAY, "COLOR_DARK_GRAY");
+        }
+
+        public static TextColor colorGold()
+        {
+                return resolveColor(COLOR_GOLD, TextColors.GOLD, "COLOR_GOLD");
+        }
+
+        public static TextColor colorGray()
+        {
+                return resolveColor(COLOR_GRAY, TextColors.GRAY, "COLOR_GRAY");
+        }
+
+        public static TextColor colorGreen()
+        {
+                return resolveColor(COLOR_GREEN, TextColors.GREEN, "COLOR_GREEN");
+        }
+
+        public static TextColor colorRed()
+        {
+                return resolveColor(COLOR_RED, TextColors.RED, "COLOR_RED");
+        }
+
+        public static TextColor colorReset()
+        {
+                return resolveColor(COLOR_RESET, TextColors.RESET, "COLOR_RESET");
+        }
+
+        public static TextColor colorWhite()
+        {
+                return resolveColor(COLOR_WHITE, TextColors.WHITE, "COLOR_WHITE");
+        }
+
+        public static TextColor colorYellow()
+        {
+                return resolveColor(COLOR_YELLOW, TextColors.YELLOW, "COLOR_YELLOW");
+        }
+
         private static File languageFile;
         private static ConfigurationLoader<CommentedConfigurationNode> languageManager;
         private static CommentedConfigurationNode language;
@@ -493,6 +601,7 @@ public class LanguageHandler
 
         public static void load()
         {
+                COLOR_CACHE.clear();
                 Field fields[] = LanguageHandler.class.getFields();
                 java.util.Map<String, String> defaults = new java.util.HashMap<>();
                 for (int i = 0; i < fields.length; ++i) {

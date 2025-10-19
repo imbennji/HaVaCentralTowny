@@ -16,7 +16,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.util.UUID;
 
@@ -33,42 +32,42 @@ public class NationInviteExecutor implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
         if (!(src instanceof Player)) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
             return CommandResult.success();
         }
 
         Player player = (Player) src;
         Towny town = DataHandler.getTownyOfPlayer(player.getUniqueId());
         if (town == null || !town.hasNation()) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NONATION));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NONATION));
             return CommandResult.success();
         }
 
         Nation nation = DataHandler.getNation(town.getNationUUID());
         if (nation == null) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_NOT_FOUND));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NATION_NOT_FOUND));
             return CommandResult.success();
         }
 
         if (!nation.isStaff(player.getUniqueId())) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_NATIONSTAFF));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_NATIONSTAFF));
             return CommandResult.success();
         }
 
         String townName = ctx.<String>getOne("town").orElse("");
         Towny targetTown = DataHandler.getTowny(townName);
         if (targetTown == null) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADTOWNNNAME));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADTOWNNNAME));
             return CommandResult.success();
         }
 
         if (targetTown.hasNation()) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_TOWN_HAS_NATION));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_TOWN_HAS_NATION));
             return CommandResult.success();
         }
 
         if (DataHandler.getNationInviteRequest(nation.getUUID(), targetTown.getUUID()) != null) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_ALREADY_INVITED));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NATION_ALREADY_INVITED));
             return CommandResult.success();
         }
 
@@ -78,12 +77,12 @@ public class NationInviteExecutor implements CommandExecutor {
         UUID mayor = targetTown.getPresident();
         if (mayor != null) {
             Sponge.getServer().getPlayer(mayor).ifPresent(p ->
-                    p.sendMessage(Text.of(TextColors.GOLD, LanguageHandler.INFO_NATION_INVITED.replace("{TOWN}", targetTown.getName()),
-                            TextColors.YELLOW, " (/nation join " + nation.getRealName() + ")"))
+                    p.sendMessage(Text.of(LanguageHandler.colorGold(), LanguageHandler.INFO_NATION_INVITED.replace("{TOWN}", targetTown.getName()),
+                            LanguageHandler.colorYellow(), " (/nation join " + nation.getRealName() + ")"))
             );
         }
 
-        src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_NATION_INVITED.replace("{TOWN}", targetTown.getName())));
+        src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.INFO_NATION_INVITED.replace("{TOWN}", targetTown.getName())));
         return CommandResult.success();
     }
 }

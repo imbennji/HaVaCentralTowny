@@ -18,7 +18,6 @@ import org.spongepowered.api.service.economy.account.UniqueAccount;
 import org.spongepowered.api.service.economy.transaction.ResultType;
 import org.spongepowered.api.service.economy.transaction.TransactionResult;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -46,46 +45,46 @@ public class PlotReturnExecutor implements CommandExecutor {
 			Towny towny = DataHandler.getTowny(player.getLocation());
 			if (towny == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDSTANDTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDSTANDTOWN));
 				return CommandResult.success();
 			}
 			Plot plot = towny.getPlot(player.getLocation());
 			if (plot == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDSTANDPLOTSELF));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDSTANDPLOTSELF));
 				return CommandResult.success();
 			}
 			if (!plot.isOwner(player.getUniqueId()) && !towny.isStaff(player.getUniqueId()))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOOWNER));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOOWNER));
 				return CommandResult.success();
 			}
 			if(!plot.isForRent()) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ISBOUGHT));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ISBOUGHT));
 				return CommandResult.success();
 			}
 			//give back money to owner
 			if (TownyPlugin.getEcoService() == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOECO));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOECO));
 				return CommandResult.success();
 			}
                     Optional<Account> optAccount = TownyPlugin.getOrCreateAccount("plot-" + plot.getUUID().toString());
 			if (!optAccount.isPresent())
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOPLOT));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECONOPLOT));
 				return CommandResult.success();
 			}
                     Optional<UniqueAccount> receiver = TownyPlugin.getOrCreateUniqueAccount(player.getUniqueId());
 			if (!receiver.isPresent()) {
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOACCOUNT));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECONOACCOUNT));
 				return CommandResult.success();
 			}
 			BigDecimal balance = optAccount.get().getBalance(TownyPlugin.getEcoService().getDefaultCurrency());
 			TransactionResult result = optAccount.get().transfer(receiver.get(), TownyPlugin.getEcoService().getDefaultCurrency(), balance, TownyPlugin.getCause());
 			if (result.getResult() != ResultType.SUCCESS)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECOTRANSACTION));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECOTRANSACTION));
 				return CommandResult.success();
 			}
 			String oldName = plot.getDisplayName();
@@ -95,12 +94,12 @@ public class PlotReturnExecutor implements CommandExecutor {
 			plot.setDisplayName(null);
 			DataHandler.saveTowny(towny.getUUID());
 			String str = LanguageHandler.INFO_RETURNRENT.replaceAll("\\{PLAYER\\}", player.getName()).replaceAll("\\{PLOT\\}", oldName);
-			towny.getChannel().send(Text.of(TextColors.AQUA, str));
+			towny.getChannel().send(Text.of(LanguageHandler.colorAqua(), str));
 			if(!towny.getCitizens().contains(player.getUniqueId())){
-				player.sendMessage(Text.of(TextColors.AQUA, str));
+				player.sendMessage(Text.of(LanguageHandler.colorAqua(), str));
 			}
 		} else {
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}

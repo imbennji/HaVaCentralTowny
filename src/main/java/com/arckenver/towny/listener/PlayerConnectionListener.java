@@ -11,7 +11,6 @@ import org.spongepowered.api.world.World;
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
 import com.arckenver.towny.object.Towny;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -29,7 +28,7 @@ public class PlayerConnectionListener
                         towny.getMessageChannel().addMember(player);
 
                 if (DataHandler.tryReleaseResidentFromJail(player.getUniqueId())) {
-                        player.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_JAIL_RELEASE));
+                        player.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.INFO_JAIL_RELEASE));
                 }
                 Optional<Location<World>> jailLocation = DataHandler.getResidentJailLocation(player.getUniqueId());
                 if (jailLocation.isPresent()) {
@@ -39,7 +38,7 @@ public class PlayerConnectionListener
                                         .filter(Objects::nonNull)
                                         .map(Towny::getDisplayName)
                                         .orElse(LanguageHandler.FORMAT_UNKNOWN);
-                        player.sendMessage(Text.of(TextColors.RED, LanguageHandler.INFO_JAIL_TELEPORT.replace("{TOWN}", townName)));
+                        player.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.INFO_JAIL_TELEPORT.replace("{TOWN}", townName)));
                 }
 
                 player.setMessageChannel(MessageChannel.TO_ALL);
@@ -47,7 +46,7 @@ public class PlayerConnectionListener
 			DataHandler.getSpyChannel().addMember(player);
 		Towny my = DataHandler.getTownyOfPlayer(player.getUniqueId());
 		if (my != null && !my.getBoard().isEmpty()) {
-			player.sendMessage(Text.of(TextColors.AQUA, "Town Board: ", TextColors.WHITE, my.getBoard()));
+			player.sendMessage(Text.of(LanguageHandler.colorAqua(), "Town Board: ", LanguageHandler.colorWhite(), my.getBoard()));
 		}
 	}
 

@@ -14,7 +14,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 public class NationSetTagExecutor implements CommandExecutor {
     public static void create(CommandSpec.Builder cmd) {
@@ -29,25 +28,25 @@ public class NationSetTagExecutor implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
         if (!(src instanceof Player)) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
             return CommandResult.success();
         }
 
         Player player = (Player) src;
         Towny town = DataHandler.getTownyOfPlayer(player.getUniqueId());
         if (town == null || !town.hasNation()) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NONATION));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NONATION));
             return CommandResult.success();
         }
 
         Nation nation = DataHandler.getNation(town.getNationUUID());
         if (nation == null) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_NOT_FOUND));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NATION_NOT_FOUND));
             return CommandResult.success();
         }
 
         if (!nation.isStaff(player.getUniqueId())) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_NATIONSTAFF));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_NATIONSTAFF));
             return CommandResult.success();
         }
 
@@ -58,21 +57,21 @@ public class NationSetTagExecutor implements CommandExecutor {
             int min = ConfigHandler.getNode("others", "minNationTagLength").getInt(2);
             int max = ConfigHandler.getNode("others", "maxNationTagLength").getInt(6);
             if (tag.length() < min || tag.length() > max) {
-                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_TAG_LENGTH
+                src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NATION_TAG_LENGTH
                         .replace("{MIN}", String.valueOf(min))
                         .replace("{MAX}", String.valueOf(max))));
                 return CommandResult.success();
             }
             Nation existing = DataHandler.getNationByTag(tag);
             if (existing != null && !existing.getUUID().equals(nation.getUUID())) {
-                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_TAG_TAKEN));
+                src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NATION_TAG_TAKEN));
                 return CommandResult.success();
             }
             nation.setTag(tag);
         }
 
         DataHandler.saveNation(nation.getUUID());
-        src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_NATION_TAG));
+        src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.INFO_NATION_TAG));
         return CommandResult.success();
     }
 }

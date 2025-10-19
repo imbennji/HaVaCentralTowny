@@ -9,7 +9,6 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
@@ -36,20 +35,20 @@ public class PlotDeleteExecutor implements CommandExecutor
 			Towny towny = DataHandler.getTowny(player.getLocation());
 			if (towny == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDSTANDTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDSTANDTOWN));
 				return CommandResult.success();
 			}
 			Plot plot = towny.getPlot(player.getLocation());
 			if (plot == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADPLOTNNAME));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADPLOTNNAME));
 				return CommandResult.success();
 			}
 			String plotName = plot.getName();
 			boolean wasJail = plot.getType() == PlotType.JAIL;
 			if (!towny.isStaff(player.getUniqueId()))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_TOWNSTAFF));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_TOWNSTAFF));
 				return CommandResult.success();
 			}
 			towny.removePlot(plot.getUUID());
@@ -57,12 +56,12 @@ public class PlotDeleteExecutor implements CommandExecutor
 			if (wasJail) {
 				DataHandler.releaseResidentsInJailPlot(towny.getUUID(), plot.getUUID());
 			}
-			src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.SUCCESS_DELPLOT.replaceAll("\\{PLOT\\}", plotName)));
+			src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.SUCCESS_DELPLOT.replaceAll("\\{PLOT\\}", plotName)));
 			MessageChannel.TO_CONSOLE.send(Text.of(player.getName(), " > ", towny.getName(), ": ", LanguageHandler.SUCCESS_DELPLOT.replaceAll("\\{PLOT\\}", plotName)));
 		}
 		else
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}

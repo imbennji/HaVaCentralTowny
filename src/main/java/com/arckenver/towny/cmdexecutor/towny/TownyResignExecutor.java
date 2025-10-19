@@ -12,7 +12,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
@@ -39,29 +38,29 @@ public class TownyResignExecutor implements CommandExecutor
 			Towny towny = DataHandler.getTownyOfPlayer(player.getUniqueId());
 			if (towny == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOTOWN));
 				return CommandResult.success();
 			}
 			if (!towny.isPresident(player.getUniqueId()))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_TOWNPRES));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_TOWNPRES));
 				return CommandResult.success();
 			}
 			if (!ctx.<String>getOne("successor").isPresent())
 			{
-				src.sendMessage(Text.of(TextColors.YELLOW, "/t resign <successor>"));
+				src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/t resign <successor>"));
 				return CommandResult.success();
 			}
 			String successorName = ctx.<String>getOne("successor").get();
 			UUID successor = DataHandler.getPlayerUUID(successorName);
 			if (successor == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADPRESNAME));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADPRESNAME));
 				return CommandResult.success();
 			}
 			if (!towny.isCitizen(successor))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOTINTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOTINTOWN));
 				return CommandResult.success();
 			}
 			towny.removeMinister(successor);
@@ -70,12 +69,12 @@ public class TownyResignExecutor implements CommandExecutor
 			for (UUID citizen : towny.getCitizens())
 			{
 				Sponge.getServer().getPlayer(citizen).ifPresent(
-					p -> p.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.INFO_SUCCESSOR.replaceAll("\\{SUCCESSOR\\}", successorName).replaceAll("\\{PLAYER\\}", player.getName()))));
+					p -> p.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_SUCCESSOR.replaceAll("\\{SUCCESSOR\\}", successorName).replaceAll("\\{PLAYER\\}", player.getName()))));
 			}
 		}
 		else
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}

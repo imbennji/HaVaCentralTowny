@@ -10,7 +10,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.ConfigHandler;
 import com.arckenver.towny.LanguageHandler;
@@ -39,7 +38,7 @@ public class TownyworldEnableExecutor implements CommandExecutor
 			worldName = ctx.<String>getOne("world").get();
 			if (!Sponge.getServer().getWorld(worldName).isPresent())
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADWORLDNAME));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADWORLDNAME));
 				return CommandResult.success();
 			}
 		}
@@ -52,14 +51,14 @@ public class TownyworldEnableExecutor implements CommandExecutor
 			}
 			else
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDWORLDNAME));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDWORLDNAME));
 				return CommandResult.success();
 			}
 		}
 		CommentedConfigurationNode node = ConfigHandler.getNode("worlds").getNode(worldName);
 		if (node.getNode("enabled").getBoolean())
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PLUGINALREADYENABLED));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PLUGINALREADYENABLED));
 			return CommandResult.success();
 		}
 		

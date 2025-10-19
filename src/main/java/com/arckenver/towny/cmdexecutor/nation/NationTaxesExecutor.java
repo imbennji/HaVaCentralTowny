@@ -14,7 +14,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 public class NationTaxesExecutor implements CommandExecutor {
     public static void create(CommandSpec.Builder cmd) {
@@ -31,31 +30,31 @@ public class NationTaxesExecutor implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
         if (!(src instanceof Player)) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
             return CommandResult.success();
         }
 
         Player player = (Player) src;
         Towny town = DataHandler.getTownyOfPlayer(player.getUniqueId());
         if (town == null || !town.hasNation()) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NONATION));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NONATION));
             return CommandResult.success();
         }
 
         Nation nation = DataHandler.getNation(town.getNationUUID());
         if (nation == null) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_NOT_FOUND));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NATION_NOT_FOUND));
             return CommandResult.success();
         }
 
         if (!nation.isKing(player.getUniqueId())) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_NATIONLEADER));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_NATIONLEADER));
             return CommandResult.success();
         }
 
         if (!ctx.<String>getOne("mode").isPresent()) {
             String mode = nation.isTaxPercentage() ? "percentage" : "flat";
-            src.sendMessage(Text.of(TextColors.YELLOW,
+            src.sendMessage(Text.of(LanguageHandler.colorYellow(),
                     "Nation taxes: " + nation.getTaxes() + " (" + mode + ")"));
             return CommandResult.success();
         }
@@ -66,41 +65,41 @@ public class NationTaxesExecutor implements CommandExecutor {
         switch (mode.toLowerCase()) {
             case "flat":
                 if (!ctx.<Double>getOne("amount").isPresent()) {
-                    src.sendMessage(Text.of(TextColors.YELLOW, "/nation taxes flat <amount>"));
+                    src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/nation taxes flat <amount>"));
                     return CommandResult.success();
                 }
                 double flat = ctx.<Double>getOne("amount").get();
                 if (flat < 0 || flat > max) {
-                    src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_TAX_RANGE.replace("{MAX}", String.valueOf(max))));
+                    src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NATION_TAX_RANGE.replace("{MAX}", String.valueOf(max))));
                     return CommandResult.success();
                 }
                 nation.setTaxPercentage(false);
                 nation.setTaxes(flat);
                 DataHandler.saveNation(nation.getUUID());
-                src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_NATION_TAXES));
+                src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.INFO_NATION_TAXES));
                 break;
             case "percent":
                 if (!ctx.<Double>getOne("amount").isPresent()) {
-                    src.sendMessage(Text.of(TextColors.YELLOW, "/nation taxes percent <amount>"));
+                    src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/nation taxes percent <amount>"));
                     return CommandResult.success();
                 }
                 double percent = ctx.<Double>getOne("amount").get();
                 if (percent < 0 || percent > max) {
-                    src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_TAX_RANGE.replace("{MAX}", String.valueOf(max))));
+                    src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NATION_TAX_RANGE.replace("{MAX}", String.valueOf(max))));
                     return CommandResult.success();
                 }
                 nation.setTaxPercentage(true);
                 nation.setTaxes(percent);
                 DataHandler.saveNation(nation.getUUID());
-                src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_NATION_TAXES));
+                src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.INFO_NATION_TAXES));
                 break;
             case "toggle":
                 nation.setTaxPercentage(!nation.isTaxPercentage());
                 DataHandler.saveNation(nation.getUUID());
-                src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_NATION_TAXES_PERCENT));
+                src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.INFO_NATION_TAXES_PERCENT));
                 break;
             default:
-                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADARG_AR));
+                src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADARG_AR));
                 break;
         }
 

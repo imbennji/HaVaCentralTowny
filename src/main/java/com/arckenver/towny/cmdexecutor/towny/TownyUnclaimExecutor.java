@@ -15,7 +15,6 @@ import org.spongepowered.api.service.economy.account.Account;
 import org.spongepowered.api.service.economy.transaction.ResultType;
 import org.spongepowered.api.service.economy.transaction.TransactionResult;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -53,37 +52,37 @@ public class TownyUnclaimExecutor implements CommandExecutor
 			Towny towny = DataHandler.getTownyOfPlayer(player.getUniqueId());
 			if (towny == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOTOWN));
 				return CommandResult.success();
 			}
 			if (!towny.isStaff(player.getUniqueId()))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_TOWNSTAFF));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_TOWNSTAFF));
 				return CommandResult.success();
 			}
                         Point a = DataHandler.getFirstPoint(player.getUniqueId());
                         Point b = DataHandler.getSecondPoint(player.getUniqueId());
                         if (a == null || b == null)
                         {
-                                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDCHUNKSELECT));
+                                src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDCHUNKSELECT));
 				return CommandResult.success();
 			}
 			if (!ConfigHandler.getNode("worlds").getNode(a.getWorld().getName()).getNode("enabled").getBoolean())
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PLUGINDISABLEDINWORLD));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PLUGINDISABLEDINWORLD));
 				return CommandResult.success();
 			}
 			Rect rect = new Rect(a, b);
 			if (!towny.getRegion().intersects(rect))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDINTERSECT));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDINTERSECT));
 				return CommandResult.success();
 			}
 			for (Location<World> spawn : towny.getSpawns().values())
 			{
 				if (rect.isInside(new Vector2i(spawn.getBlockX(), spawn.getBlockZ())))
 				{
-					src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_AREACONTAINSPAWN));
+					src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_AREACONTAINSPAWN));
 					return CommandResult.success();
 				}
 			}
@@ -91,7 +90,7 @@ public class TownyUnclaimExecutor implements CommandExecutor
 			{
 				if (plot.getRect().intersects(rect))
 				{
-					src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_SELECTIONCONTAINPLOT));
+					src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_SELECTIONCONTAINPLOT));
 					return CommandResult.success();
 				}
 			}
@@ -107,13 +106,13 @@ public class TownyUnclaimExecutor implements CommandExecutor
                         {
                                 if (TownyPlugin.getEcoService() == null)
 				{
-					src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOECO));
+					src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOECO));
 					return CommandResult.success();
 				}
                             Optional<Account> optAccount = TownyPlugin.getOrCreateAccount("towny-" + towny.getUUID().toString());
 				if (!optAccount.isPresent())
 				{
-					src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECONOTOWN));
+					src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECONOTOWN));
 					return CommandResult.success();
 				}
                                 double pricePerChunk = ConfigHandler.getNode("prices", "chunkClaimPrice").getDouble();
@@ -122,7 +121,7 @@ public class TownyUnclaimExecutor implements CommandExecutor
 				TransactionResult result = optAccount.get().deposit(TownyPlugin.getEcoService().getDefaultCurrency(), refund, TownyPlugin.getCause());
 				if (result.getResult() != ResultType.SUCCESS)
 				{
-					src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ECOTRANSACTION));
+					src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ECOTRANSACTION));
 					return CommandResult.success();
 				}
 			}
@@ -137,18 +136,18 @@ public class TownyUnclaimExecutor implements CommandExecutor
                                                 .replaceAll("\\{NUM\\}", Integer.toString(chunksToUnclaim))
                                                 .replaceAll("\\{PERCENT\\}", ConfigHandler.getNode("prices", "unclaimRefundPercentage").getString());
 				src.sendMessage(Text.builder()
-						.append(Text.of(TextColors.AQUA, str.split("\\{AMOUNT\\}")[0]))
-						.append(Utils.formatPrice(TextColors.AQUA, refund))
-						.append(Text.of(TextColors.AQUA, str.split("\\{AMOUNT\\}")[1])).build());
+						.append(Text.of(LanguageHandler.colorAqua(), str.split("\\{AMOUNT\\}")[0]))
+						.append(Utils.formatPrice(LanguageHandler.colorAqua(), refund))
+						.append(Text.of(LanguageHandler.colorAqua(), str.split("\\{AMOUNT\\}")[1])).build());
 			}
 			else
 			{
-				src.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.SUCCESS_UNCLAIM));
+				src.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.SUCCESS_UNCLAIM));
 			}
 		}
 		else
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}

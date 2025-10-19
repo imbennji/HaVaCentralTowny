@@ -15,7 +15,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -45,16 +44,16 @@ public class TownySpawnExecutor implements CommandExecutor
 			Towny towny = DataHandler.getTownyOfPlayer(player.getUniqueId());
 			if (towny == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOTOWN));
 				return CommandResult.success();
 			}
 			if (!ctx.<String>getOne("name").isPresent())
 			{
 				src.sendMessage(Text.builder()
-						.append(Text.of(TextColors.AQUA, LanguageHandler.INFO_TELEPORTLIST.split("\\{SPAWNLIST\\}")[0]))
-						.append(Utils.formatTownySpawns(towny, TextColors.YELLOW))
-						.append(Text.of(TextColors.AQUA, LanguageHandler.INFO_TELEPORTLIST.split("\\{SPAWNLIST\\}")[1]))
-						.append(Text.of(TextColors.DARK_GRAY, " <- " + LanguageHandler.CLICK)).build());
+						.append(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_TELEPORTLIST.split("\\{SPAWNLIST\\}")[0]))
+						.append(Utils.formatTownySpawns(towny, LanguageHandler.colorYellow()))
+						.append(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_TELEPORTLIST.split("\\{SPAWNLIST\\}")[1]))
+						.append(Text.of(LanguageHandler.colorDarkGray(), " <- " + LanguageHandler.CLICK)).build());
 				return CommandResult.success();
 			}
 			String spawnName = ctx.<String>getOne("name").get();
@@ -62,10 +61,10 @@ public class TownySpawnExecutor implements CommandExecutor
 			if (spawn == null)
 			{
 				src.sendMessage(Text.builder()
-						.append(Text.of(TextColors.RED, LanguageHandler.ERROR_SPAWNNAME.split("\\{SPAWNLIST\\}")[0]))
-						.append(Utils.formatTownySpawns(towny, TextColors.YELLOW))
-						.append(Text.of(TextColors.RED, LanguageHandler.ERROR_SPAWNNAME.split("\\{SPAWNLIST\\}")[1]))
-						.append(Text.of(TextColors.DARK_GRAY, " <- " + LanguageHandler.CLICK)).build());
+						.append(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_SPAWNNAME.split("\\{SPAWNLIST\\}")[0]))
+						.append(Utils.formatTownySpawns(towny, LanguageHandler.colorYellow()))
+						.append(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_SPAWNNAME.split("\\{SPAWNLIST\\}")[1]))
+						.append(Text.of(LanguageHandler.colorDarkGray(), " <- " + LanguageHandler.CLICK)).build());
 				return CommandResult.success();
 			}
 			if (player.hasPermission("towny.bypass.teleport.warmup")) {
@@ -74,12 +73,12 @@ public class TownySpawnExecutor implements CommandExecutor
 				if (!event.isCancelled())
 				{
 					player.setLocation(spawn);
-					src.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.INFO_TELEPORTED));
+					src.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_TELEPORTED));
 				}
 				return CommandResult.success();
 			}
 			
-			src.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.INFO_TELEPORTCOOLDOWN));
+			src.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_TELEPORTCOOLDOWN));
 			
 			Scheduler scheduler = Sponge.getScheduler();
 			Task.Builder taskBuilder = scheduler.createTaskBuilder();
@@ -93,14 +92,14 @@ public class TownySpawnExecutor implements CommandExecutor
 					if (!event.isCancelled())
 					{
 						player.setLocation(spawn);
-						src.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.INFO_TELEPORTED));
+						src.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_TELEPORTED));
 					}
 				}
 			}).delay(10, TimeUnit.SECONDS).submit(TownyPlugin.getInstance());
 		}
 		else
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}

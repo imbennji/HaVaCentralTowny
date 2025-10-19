@@ -14,7 +14,6 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
@@ -39,32 +38,32 @@ public class TownyInviteExecutor implements CommandExecutor
 			Player hostPlayer = (Player) src;
 			if (!ctx.<Player>getOne("player").isPresent())
 			{
-				src.sendMessage(Text.of(TextColors.YELLOW, "/t invite <player>"));
+				src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/t invite <player>"));
 				return CommandResult.success();
 			}
 			Towny towny = DataHandler.getTownyOfPlayer(hostPlayer.getUniqueId());
 			if (towny == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOTOWN));
 				return CommandResult.success();
 			}
 			if (!towny.isStaff(hostPlayer.getUniqueId()))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_TOWNSTAFF));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_TOWNSTAFF));
 				return CommandResult.success();
 			}
 			Player guestPlayer = ctx.<Player>getOne("player").get();
 			
 			if (towny.isCitizen(guestPlayer.getUniqueId()))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ALREADYINTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ALREADYINTOWN));
 				return CommandResult.success();
 			}
 			
 			Request req = DataHandler.getInviteRequest(towny.getUUID(), guestPlayer.getUniqueId());
 			if (req != null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ALREADYINVITED));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ALREADYINVITED));
 				return CommandResult.success();
 			}
 			req = DataHandler.getJoinRequest(towny.getUUID(), guestPlayer.getUniqueId());
@@ -75,10 +74,10 @@ public class TownyInviteExecutor implements CommandExecutor
 				{
 					Optional<Player> optPlayer = Sponge.getServer().getPlayer(uuid);
 					if (optPlayer.isPresent())
-						optPlayer.get().sendMessage(Text.of(TextColors.AQUA, LanguageHandler.INFO_JOINTOWNANNOUNCE.replaceAll("\\{PLAYER\\}", guestPlayer.getName())));
+						optPlayer.get().sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_JOINTOWNANNOUNCE.replaceAll("\\{PLAYER\\}", guestPlayer.getName())));
 				}
 				towny.addCitizen(guestPlayer.getUniqueId());
-				guestPlayer.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_JOINTOWN.replaceAll("\\{TOWN\\}", towny.getName())));
+				guestPlayer.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.INFO_JOINTOWN.replaceAll("\\{TOWN\\}", towny.getName())));
 				DataHandler.saveTowny(towny.getUUID());;
 				return CommandResult.success();
 			}
@@ -86,18 +85,18 @@ public class TownyInviteExecutor implements CommandExecutor
 
 			String str = LanguageHandler.INFO_CLICK_TOWNINVITE.replaceAll("\\{TOWN\\}", towny.getName());
 			guestPlayer.sendMessage(Text.builder()
-					.append(Text.of(TextColors.AQUA, str.split("\\{CLICKHERE\\}")[0]))
+					.append(Text.of(LanguageHandler.colorAqua(), str.split("\\{CLICKHERE\\}")[0]))
 					.append(Text.builder(LanguageHandler.CLICKME)
 							.onClick(TextActions.runCommand("/towny join " + towny.getRealName()))
-							.color(TextColors.DARK_AQUA)
+							.color(LanguageHandler.colorDarkAqua())
 							.build())
-					.append(Text.of(TextColors.AQUA, str.split("\\{CLICKHERE\\}")[1])).build());
+					.append(Text.of(LanguageHandler.colorAqua(), str.split("\\{CLICKHERE\\}")[1])).build());
 
-			src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_INVITSEND.replaceAll("\\{RECEIVER\\}", guestPlayer.getName())));
+			src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.INFO_INVITSEND.replaceAll("\\{RECEIVER\\}", guestPlayer.getName())));
 		}
 		else
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}

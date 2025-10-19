@@ -12,7 +12,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
@@ -36,32 +35,32 @@ public class PlotSetTypeExecutor implements CommandExecutor {
         @Override
         public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
                 if (!(src instanceof Player)) {
-                        src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+                        src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
                         return CommandResult.success();
                 }
                 Player player = (Player) src;
                 Towny towny = DataHandler.getTowny(player.getLocation());
                 if (towny == null) {
-                        src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDSTANDTOWN));
+                        src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDSTANDTOWN));
                         return CommandResult.success();
                 }
                 Plot plot = towny.getPlot(player.getLocation());
                 if (plot == null) {
-                        src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDSTANDPLOTSELF));
+                        src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDSTANDPLOTSELF));
                         return CommandResult.success();
                 }
                 if (!plot.isOwner(player.getUniqueId()) && !towny.isStaff(player.getUniqueId())) {
-                        src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOOWNER));
+                        src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOOWNER));
                         return CommandResult.success();
                 }
                 String rawType = ctx.<String>getOne("type").orElse(null);
                 PlotType newType = PlotType.fromString(rawType);
                 if (newType == null) {
-                        src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PLOT_TYPE_INVALID.replace("{TYPE}", rawType)));
+                        src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PLOT_TYPE_INVALID.replace("{TYPE}", rawType)));
                         return CommandResult.success();
                 }
                 if (newType == plot.getType()) {
-                        src.sendMessage(Text.of(TextColors.YELLOW, LanguageHandler.INFO_PLOT_TYPE_UNCHANGED
+                        src.sendMessage(Text.of(LanguageHandler.colorYellow(), LanguageHandler.INFO_PLOT_TYPE_UNCHANGED
                                         .replace("{TYPE}", plot.getType().getDisplayName())));
                         return CommandResult.success();
                 }
@@ -73,7 +72,7 @@ public class PlotSetTypeExecutor implements CommandExecutor {
                 if (oldType == PlotType.JAIL && newType != PlotType.JAIL) {
                         DataHandler.releaseResidentsInJailPlot(towny.getUUID(), plot.getUUID());
                 }
-                src.sendMessage(Text.of(TextColors.GREEN,
+                src.sendMessage(Text.of(LanguageHandler.colorGreen(),
                                 LanguageHandler.SUCCESS_PLOT_TYPE_SET.replace("{TYPE}", newType.getDisplayName())));
                 src.sendMessage(Utils.formatPlotDescription(plot, towny, Utils.CLICKER_DEFAULT));
                 return CommandResult.success();

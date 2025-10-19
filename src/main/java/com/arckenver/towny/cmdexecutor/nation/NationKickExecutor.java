@@ -14,7 +14,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 public class NationKickExecutor implements CommandExecutor {
     public static void create(CommandSpec.Builder cmd) {
@@ -29,37 +28,37 @@ public class NationKickExecutor implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
         if (!(src instanceof Player)) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
             return CommandResult.success();
         }
 
         Player player = (Player) src;
         Towny playerTown = DataHandler.getTownyOfPlayer(player.getUniqueId());
         if (playerTown == null || !playerTown.hasNation()) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NONATION));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NONATION));
             return CommandResult.success();
         }
 
         Nation nation = DataHandler.getNation(playerTown.getNationUUID());
         if (nation == null) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_NOT_FOUND));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NATION_NOT_FOUND));
             return CommandResult.success();
         }
 
         if (!nation.isStaff(player.getUniqueId())) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_NATIONSTAFF));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_NATIONSTAFF));
             return CommandResult.success();
         }
 
         String townName = ctx.<String>getOne("town").orElse("");
         Towny targetTown = DataHandler.getTowny(townName);
         if (targetTown == null || !targetTown.hasNation() || !nation.getUUID().equals(targetTown.getNationUUID())) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_TOWN_NO_NATION));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_TOWN_NO_NATION));
             return CommandResult.success();
         }
 
         if (nation.isCapital(targetTown.getUUID())) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_CAPITAL_REQUIRED));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NATION_CAPITAL_REQUIRED));
             return CommandResult.success();
         }
 
@@ -68,7 +67,7 @@ public class NationKickExecutor implements CommandExecutor {
         targetTown.clearNation();
         DataHandler.saveTowny(targetTown.getUUID());
 
-        src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.INFO_NATION_LEFT.replace("{TOWN}", targetTown.getName())));
+        src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.INFO_NATION_LEFT.replace("{TOWN}", targetTown.getName())));
         return CommandResult.success();
     }
 }

@@ -12,7 +12,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
@@ -37,7 +36,7 @@ public class PlotSetownerExecutor implements CommandExecutor
 		{
 			if (!ctx.<String>getOne("owner").isPresent())
 			{
-				src.sendMessage(Text.of(TextColors.RED, "/z setowner <owner>"));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), "/z setowner <owner>"));
 				return CommandResult.success();
 			}
 			String newOwnerName = ctx.<String>getOne("owner").get();
@@ -45,34 +44,34 @@ public class PlotSetownerExecutor implements CommandExecutor
 			Towny towny = DataHandler.getTowny(player.getLocation());
 			if (towny == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDSTANDTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDSTANDTOWN));
 				return CommandResult.success();
 			}
 			Plot plot = towny.getPlot(player.getLocation());
 			if (plot == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDSTANDPLOTSELF));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDSTANDPLOTSELF));
 				return CommandResult.success();
 			}
 			if (!plot.isOwner(player.getUniqueId()) && !towny.isStaff(player.getUniqueId()))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOOWNER));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOOWNER));
 				return CommandResult.success();
 			}
 			UUID newOwner = DataHandler.getPlayerUUID(newOwnerName);
 			if (newOwner == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADPLAYERNAME));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADPLAYERNAME));
 				return CommandResult.success();
 			}
 			if (newOwner.equals(plot.getOwner()))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ALREADYOWNER));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ALREADYOWNER));
 				return CommandResult.success();
 			}
                         if (!towny.isCitizen(newOwner) && !plot.getType().allowsForeignOwnership())
                         {
-                                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PLOT_FOREIGN_OWNERSHIP));
+                                src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PLOT_FOREIGN_OWNERSHIP));
                                 return CommandResult.success();
                         }
 			plot.setOwner(newOwner);
@@ -80,18 +79,18 @@ public class PlotSetownerExecutor implements CommandExecutor
 			final String plotName = plot.getName();
 			if (newOwner.equals(player.getUniqueId()))
 			{
-				src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.SUCCESS_SETOWNER.replaceAll("\\{PLOT\\}", plotName)));
+				src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.SUCCESS_SETOWNER.replaceAll("\\{PLOT\\}", plotName)));
 			}
 			else
 			{
-				src.sendMessage(Text.of(TextColors.GREEN, LanguageHandler.SUCCESS_CHANGEOWNER.replaceAll("\\{PLAYER\\}", newOwnerName).replaceAll("\\{PLOT\\}", plotName)));
+				src.sendMessage(Text.of(LanguageHandler.colorGreen(), LanguageHandler.SUCCESS_CHANGEOWNER.replaceAll("\\{PLAYER\\}", newOwnerName).replaceAll("\\{PLOT\\}", plotName)));
 				Sponge.getServer().getPlayer(newOwner).ifPresent(
-						p -> p.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.INFO_CHANGEOWNER.replaceAll("\\{PLAYER\\}", player.getName()).replaceAll("\\{PLOT\\}", plotName))));
+						p -> p.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_CHANGEOWNER.replaceAll("\\{PLAYER\\}", player.getName()).replaceAll("\\{PLOT\\}", plotName))));
 			}
 		}
 		else
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}

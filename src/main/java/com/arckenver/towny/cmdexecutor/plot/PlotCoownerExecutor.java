@@ -12,7 +12,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import com.arckenver.towny.DataHandler;
 import com.arckenver.towny.LanguageHandler;
@@ -46,24 +45,24 @@ public class PlotCoownerExecutor implements CommandExecutor
 			Towny towny = DataHandler.getTowny(player.getLocation());
 			if (towny == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NEEDSTANDTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NEEDSTANDTOWN));
 				return CommandResult.success();
 			}
 			Plot plot = towny.getPlot(player.getLocation());
 			if (plot == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOSTANDPLOTTOWN));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOSTANDPLOTTOWN));
 				return CommandResult.success();
 			}
 			final String plotName = plot.getName();
 			if (!plot.isOwner(player.getUniqueId()))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_NOTOWNER));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_NOTOWNER));
 				return CommandResult.success();
 			}
 			if (!ctx.<String>getOne("add|remove").isPresent() || !ctx.<String>getOne("citizen").isPresent())
 			{
-				src.sendMessage(Text.of(TextColors.YELLOW, "/z coowner add <citizen>\n/z coowner remove <citizen>"));
+				src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/z coowner add <citizen>\n/z coowner remove <citizen>"));
 				return CommandResult.success();
 			}
 			String addOrRemove = ctx.<String>getOne("add|remove").get();
@@ -71,48 +70,48 @@ public class PlotCoownerExecutor implements CommandExecutor
 			UUID uuid = DataHandler.getPlayerUUID(playerName);
 			if (uuid == null)
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADPLAYERNAME));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADPLAYERNAME));
 				return CommandResult.success();
 			}
 			if (player.getUniqueId().equals(uuid))
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_MANAGECOOWNER));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_MANAGECOOWNER));
 				return CommandResult.success();
 			}
 			if (addOrRemove.equalsIgnoreCase("add"))
 			{
 				if (plot.isCoowner(uuid))
 				{
-					src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ALREADYCOOWNER.replaceAll("\\{PLAYER\\}", playerName)));
+					src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_ALREADYCOOWNER.replaceAll("\\{PLAYER\\}", playerName)));
 					return CommandResult.success();
 				}
 				plot.addCoowner(uuid);
 				DataHandler.saveTowny(towny.getUUID());
-				src.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.SUCCESS_ADDCOOWNER.replaceAll("\\{PLAYER\\}", playerName)));
+				src.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.SUCCESS_ADDCOOWNER.replaceAll("\\{PLAYER\\}", playerName)));
 				Sponge.getServer().getPlayer(uuid).ifPresent(
-						p -> p.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.INFO_ADDCOOWNER.replaceAll("\\{PLAYER\\}", player.getName()).replaceAll("\\{PLOT\\}", plotName))));
+						p -> p.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_ADDCOOWNER.replaceAll("\\{PLAYER\\}", player.getName()).replaceAll("\\{PLOT\\}", plotName))));
 			}
 			else if (addOrRemove.equalsIgnoreCase("remove"))
 			{
 				if (!towny.isMinister(uuid))
 				{
-					src.sendMessage(Text.of(TextColors.RED, LanguageHandler.INFO_ALREADYNOCOOWNER.replaceAll("\\{PLAYER\\}", playerName)));
+					src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.INFO_ALREADYNOCOOWNER.replaceAll("\\{PLAYER\\}", playerName)));
 					return CommandResult.success();
 				}
 				plot.removeCoowner(uuid);
 				DataHandler.saveTowny(towny.getUUID());
-				src.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.SUCCESS_DELCOOWNER.replaceAll("\\{PLAYER\\}", playerName)));
+				src.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.SUCCESS_DELCOOWNER.replaceAll("\\{PLAYER\\}", playerName)));
 				Sponge.getServer().getPlayer(uuid).ifPresent(
-						p -> p.sendMessage(Text.of(TextColors.AQUA, LanguageHandler.INFO_DELCOOWNER.replaceAll("\\{PLAYER\\}", player.getName()).replaceAll("\\{PLOT\\}", plotName))));
+						p -> p.sendMessage(Text.of(LanguageHandler.colorAqua(), LanguageHandler.INFO_DELCOOWNER.replaceAll("\\{PLAYER\\}", player.getName()).replaceAll("\\{PLOT\\}", plotName))));
 			}
 			else
 			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_BADARG_AR));
+				src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_BADARG_AR));
 			}
 		}
 		else
 		{
-			src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+			src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
 		}
 		return CommandResult.success();
 	}

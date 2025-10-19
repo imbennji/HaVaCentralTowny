@@ -15,7 +15,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Locale;
 import java.util.Map;
@@ -39,37 +38,37 @@ public class NationSetGovernmentExecutor implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
         if (!(src instanceof Player)) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOPLAYER));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NOPLAYER));
             return CommandResult.success();
         }
 
         if (!ctx.<GovernmentType>getOne("government").isPresent()) {
-            src.sendMessage(Text.of(TextColors.YELLOW, "/nation government <type>"));
+            src.sendMessage(Text.of(LanguageHandler.colorYellow(), "/nation government <type>"));
             return CommandResult.success();
         }
 
         Player player = (Player) src;
         Towny town = DataHandler.getTownyOfPlayer(player.getUniqueId());
         if (town == null || !town.hasNation()) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NONATION));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NONATION));
             return CommandResult.success();
         }
 
         Nation nation = DataHandler.getNation(town.getNationUUID());
         if (nation == null) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NATION_NOT_FOUND));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_NATION_NOT_FOUND));
             return CommandResult.success();
         }
 
         if (!nation.isKing(player.getUniqueId())) {
-            src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_NATIONLEADER));
+            src.sendMessage(Text.of(LanguageHandler.colorRed(), LanguageHandler.ERROR_PERM_NATIONLEADER));
             return CommandResult.success();
         }
 
         GovernmentType newGovernment = ctx.<GovernmentType>getOne("government").get();
         nation.setGovernment(newGovernment);
         DataHandler.saveNation(nation.getUUID());
-        src.sendMessage(Text.of(TextColors.GREEN,
+        src.sendMessage(Text.of(LanguageHandler.colorGreen(),
                 LanguageHandler.INFO_NATION_GOVERNMENT.replace("{GOVERNMENT}", newGovernment.getDisplayName())));
         return CommandResult.success();
     }
