@@ -70,11 +70,11 @@ public class PlotSetownerExecutor implements CommandExecutor
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_ALREADYOWNER));
 				return CommandResult.success();
 			}
-			if (!towny.isCitizen(newOwner))
-			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_OWNERNEEDTOWN));
-				return CommandResult.success();
-			}
+                        if (!towny.isCitizen(newOwner) && !plot.getType().allowsForeignOwnership())
+                        {
+                                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PLOT_FOREIGN_OWNERSHIP));
+                                return CommandResult.success();
+                        }
 			plot.setOwner(newOwner);
 			DataHandler.saveTowny(towny.getUUID());
 			final String plotName = plot.getName();

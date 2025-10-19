@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.UUID;
 
@@ -25,6 +26,7 @@ public class Plot
         private Rect rect;
         private Hashtable<String, Hashtable<String, Boolean>> perms;
         private Hashtable<String, Boolean> flags;
+        private PlotType type;
         private BigDecimal price;
         private BigDecimal rentalPrice;
 
@@ -46,16 +48,10 @@ public class Plot
 		this.rect = rect;
 		
 
-                this.flags = new Hashtable<String, Boolean>();
-                for (Entry<Object, ? extends CommentedConfigurationNode> e : ConfigHandler.getNode("flags", "plots").getChildrenMap().entrySet())
-                {
-                        flags.put(e.getKey().toString(), e.getValue().getBoolean());
-                }
-                this.perms = new Hashtable<>();
-                ensurePlotPermContainer(Towny.TYPE_FRIEND);
-                ensurePlotPermContainer(Towny.TYPE_RESIDENT);
-                ensurePlotPermContainer(Towny.TYPE_ALLY);
-                ensurePlotPermContainer(Towny.TYPE_OUTSIDER);
+                loadFlagDefaults();
+                loadPermDefaults();
+                this.type = PlotType.RESIDENTIAL;
+                this.type.applyForced(this);
         }
 
         private Hashtable<String, Boolean> ensurePlotPermContainer(String type) {
@@ -136,9 +132,41 @@ public class Plot
                 return map.get(permKey);
         }
 
-        private void setPlotPermInternal(String type, String permKey, boolean value) {
+        void setPlotPermInternal(String type, String permKey, boolean value) {
                 Hashtable<String, Boolean> map = ensurePlotPermContainer(type);
                 map.put(permKey, value);
+        }
+
+        void setFlagInternal(String flag, boolean value) {
+                String key = canonicalizeFlag(flag);
+                flags.put(key, value);
+        }
+
+        private void loadFlagDefaults() {
+                this.flags = new Hashtable<>();
+                for (Entry<Object, ? extends CommentedConfigurationNode> e : ConfigHandler.getNode("flags", "plots").getChildrenMap().entrySet()) {
+                        flags.put(canonicalizeFlag(e.getKey().toString()), e.getValue().getBoolean());
+                }
+        }
+
+        private void loadPermDefaults() {
+                this.perms = new Hashtable<>();
+                ensurePlotPermContainer(Towny.TYPE_FRIEND);
+                ensurePlotPermContainer(Towny.TYPE_RESIDENT);
+                ensurePlotPermContainer(Towny.TYPE_ALLY);
+                ensurePlotPermContainer(Towny.TYPE_OUTSIDER);
+        }
+
+        private String canonicalizeFlag(String flag) {
+                if (flag == null) {
+                        return "";
+                }
+                return flag.toLowerCase(Locale.ENGLISH);
+        }
+
+        private void resetToConfigDefaults() {
+                loadFlagDefaults();
+                loadPermDefaults();
         }
 	
 	public UUID getUUID()
@@ -237,26 +265,35 @@ public class Plot
 		this.rect = rect;
 	}
 
-	public boolean getFlag(String flag)
-	{
-		return flags.get(flag);
-	}
+        public boolean getFlag(String flag)
+        {
+                String key = canonicalizeFlag(flag);
+                Boolean forced = type.getForcedFlag(key);
+                if (forced != null) {
+                        return forced;
+                }
+                Boolean value = flags.get(key);
+                return value != null ? value : false;
+        }
 
-	public Hashtable<String, Boolean> getFlags()
-	{
-		return flags;
-	}
+        public Hashtable<String, Boolean> getFlags()
+        {
+                return flags;
+        }
 
-	public void setFlag(String flag, boolean b)
-	{
-		flags.put(flag, b);
-	}
+        public void setFlag(String flag, boolean b)
+        {
+                if (!canSetFlag(flag)) {
+                        return;
+                }
+                flags.put(canonicalizeFlag(flag), b);
+        }
 
-	public boolean hasFlag(String flag)
-	{
-		return flags.containsKey(flag);
-	}
-	
+        public boolean hasFlag(String flag)
+        {
+                return flags.containsKey(canonicalizeFlag(flag)) || type.getForcedFlag(canonicalizeFlag(flag)) != null;
+        }
+
         public boolean getPerm(String type, String perm)
         {
                 Collection<String> keys = Towny.expandPermKeys(perm);
@@ -266,7 +303,12 @@ public class Plot
                 String canonicalType = Towny.canonicalizePlotType(type);
                 boolean allowed = true;
                 for (String key : keys) {
-                        allowed = allowed && getPlotPermInternal(canonicalType, key);
+                        Boolean forced = this.type.getForcedPerm(canonicalType, key);
+                        if (forced != null) {
+                                allowed = allowed && forced;
+                        } else {
+                                allowed = allowed && getPlotPermInternal(canonicalType, key);
+                        }
                 }
                 return allowed;
         }
@@ -287,9 +329,63 @@ public class Plot
                 if (keys.isEmpty()) {
                         return;
                 }
+                if (!canSetPerm(canonicalType, keys)) {
+                        return;
+                }
                 for (String key : keys) {
+                        if (this.type.getForcedPerm(canonicalType, key) != null) {
+                                continue;
+                        }
                         setPlotPermInternal(canonicalType, key, bool);
                 }
+        }
+
+        private boolean canSetPerm(String canonicalType, Collection<String> keys) {
+                for (String key : keys) {
+                        if (!this.type.canChangePerm(canonicalType, key)) {
+                                return false;
+                        }
+                }
+                return true;
+        }
+
+        public boolean canSetPerm(String type, String perm) {
+                Collection<String> keys = Towny.expandPermKeys(perm);
+                if (keys.isEmpty()) {
+                        return false;
+                }
+                String canonicalType = Towny.canonicalizePlotType(type);
+                return canSetPerm(canonicalType, keys);
+        }
+
+        public boolean canSetFlag(String flag) {
+                return type.canChangeFlag(canonicalizeFlag(flag));
+        }
+
+        public PlotType getType() {
+                return type;
+        }
+
+        public String getTypeId() {
+                return type.getId();
+        }
+
+        public void setType(PlotType type) {
+                setType(type, true);
+        }
+
+        public void setType(PlotType type, boolean applyDefaults) {
+                this.type = type == null ? PlotType.RESIDENTIAL : type;
+                if (applyDefaults) {
+                        resetToConfigDefaults();
+                        this.type.applyDefaults(this);
+                } else {
+                        this.type.applyForced(this);
+                }
+        }
+
+        public void enforceTypeRules() {
+                this.type.applyForced(this);
         }
 	
 	public BigDecimal getPrice()

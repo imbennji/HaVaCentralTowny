@@ -55,11 +55,18 @@ public class PlotBuyExecutor implements CommandExecutor
 				return CommandResult.success();
 			}
 			Towny playerTowny = DataHandler.getTownyOfPlayer(player.getUniqueId());
-			if (!towny.isAdmin() && !plot.getFlag("public") && (playerTowny == null || !towny.getUUID().equals(playerTowny.getUUID())))
-			{
-				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_PLOTBUY));
-				return CommandResult.success();
-			}
+                        boolean sameTown = playerTowny != null && towny.getUUID().equals(playerTowny.getUUID());
+                        boolean foreignAllowed = plot.getType().allowsForeignOwnership();
+                        if (!towny.isAdmin() && !plot.getFlag("public") && !sameTown && !foreignAllowed)
+                        {
+                                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PERM_PLOTBUY));
+                                return CommandResult.success();
+                        }
+                        if (!towny.isAdmin() && !sameTown && !foreignAllowed)
+                        {
+                                src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PLOT_FOREIGN_OWNERSHIP));
+                                return CommandResult.success();
+                        }
 			if (!plot.isForSale())
 			{
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_PLOTNFS));

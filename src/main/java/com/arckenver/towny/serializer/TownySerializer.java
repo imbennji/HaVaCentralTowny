@@ -83,11 +83,13 @@ public class TownySerializer implements JsonSerializer<Towny> {
 			plotObj.add("uuid", new JsonPrimitive(plot.getUUID().toString()));
 			if (plot.isNamed())
 				plotObj.add("name", new JsonPrimitive(plot.getRealName()));
-			if (plot.hasDisplayName())
-				plotObj.add("displayname", new JsonPrimitive(plot.getDisplayName()));
+                        if (plot.hasDisplayName())
+                                plotObj.add("displayname", new JsonPrimitive(plot.getDisplayName()));
 
-			JsonObject rectJson = new JsonObject();
-			rectJson.add("world", new JsonPrimitive(plot.getRect().getWorld().toString()));
+                        plotObj.add("type", new JsonPrimitive(plot.getTypeId()));
+
+                        JsonObject rectJson = new JsonObject();
+                        rectJson.add("world", new JsonPrimitive(plot.getRect().getWorld().toString()));
 			rectJson.add("minX", new JsonPrimitive(plot.getRect().getMinX()));
 			rectJson.add("maxX", new JsonPrimitive(plot.getRect().getMaxX()));
 			rectJson.add("minY", new JsonPrimitive(plot.getRect().getMinY()));

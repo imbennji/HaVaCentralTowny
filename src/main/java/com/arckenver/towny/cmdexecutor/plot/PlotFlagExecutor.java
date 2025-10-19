@@ -60,9 +60,16 @@ public class PlotFlagExecutor implements CommandExecutor
 				src.sendMessage(Text.of(TextColors.RED, LanguageHandler.ERROR_NOOWNER));
 				return CommandResult.success();
 			}
-			String flag = ctx.<String>getOne("flag").get();
-			boolean bool = (ctx.<Boolean>getOne("bool").isPresent()) ? ctx.<Boolean>getOne("bool").get() : !plot.getFlag(flag);
-			plot.setFlag(flag, bool);
+                        String flag = ctx.<String>getOne("flag").get();
+                        if (!plot.canSetFlag(flag)) {
+                                src.sendMessage(Text.of(TextColors.RED,
+                                                LanguageHandler.ERROR_PLOT_TYPE_FLAG_LOCKED
+                                                                .replace("{FLAG}", flag)
+                                                                .replace("{TYPE}", plot.getType().getDisplayName())));
+                                return CommandResult.success();
+                        }
+                        boolean bool = (ctx.<Boolean>getOne("bool").isPresent()) ? ctx.<Boolean>getOne("bool").get() : !plot.getFlag(flag);
+                        plot.setFlag(flag, bool);
 			DataHandler.saveTowny(towny.getUUID());
 			src.sendMessage(Utils.formatPlotDescription(plot, towny, Utils.CLICKER_DEFAULT));
 		}
