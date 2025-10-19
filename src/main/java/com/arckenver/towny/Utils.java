@@ -663,10 +663,10 @@ public class Utils
 		return formatTownySpawns(towny, color, cmd, CLICKER_DEFAULT);
 	}
 
-	public static Text formatTownySpawns(Towny towny, TextColor color, String cmd, int clicker)
-	{
-		if (clicker == CLICKER_DEFAULT)
-		{
+        public static Text formatTownySpawns(Towny towny, TextColor color, String cmd, int clicker)
+        {
+                if (clicker == CLICKER_DEFAULT)
+                {
 			return structureX(
 					towny.getSpawns().keySet().iterator(),
 					Text.builder(),
@@ -688,9 +688,22 @@ public class Utils
 				Text.builder(),
 				(b) -> b.append(Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE)),
 				(b, spawnName) -> b.append(Text.builder(spawnName).color(color).build()),
-				(b) -> b.append(Text.of(color, ", "))).build();
+                                (b) -> b.append(Text.of(color, ", "))).build();
 
-	}
+        }
+
+        public static Text formatTownyOutpostSpawns(Towny towny, TextColor color) {
+                List<Integer> indices = towny.getOutpostIndices();
+                return structureX(
+                                indices.iterator(),
+                                Text.builder(),
+                                (builder) -> builder.append(Text.of(TextColors.GRAY, LanguageHandler.FORMAT_NONE)),
+                                (builder, index) -> builder.append(Text.builder(String.valueOf(index))
+                                                .color(color)
+                                                .onClick(TextActions.runCommand("/t outpost " + index))
+                                                .build()),
+                                (builder) -> builder.append(Text.of(color, ", "))).build();
+        }
 
 	// clickable
 

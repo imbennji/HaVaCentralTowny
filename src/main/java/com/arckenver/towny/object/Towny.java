@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.spongepowered.api.Sponge;
@@ -181,7 +183,9 @@ public class Towny {
 	private String tag;
 	private String displayName;
 	private boolean isAdmin;
-	private Hashtable<String, Location<World>> spawns;
+        private static final Pattern OUTPOST_SPAWN_PATTERN = Pattern.compile("^outpost(\\d+)$", Pattern.CASE_INSENSITIVE);
+
+        private Hashtable<String, Location<World>> spawns;
 	private Region region;
 	private UUID mayor;
 	private ArrayList<UUID> comayor;
@@ -300,29 +304,76 @@ public class Towny {
 		return ConfigHandler.getNode("prices", "upkeepPerCitizen").getDouble() * citizens.size();
 	}
 
-	public Location<World> getSpawn(String name) {
-		return spawns.get(name);
-	}
+        public Location<World> getSpawn(String name) {
+                return spawns.get(name);
+        }
 
-	public void addSpawn(String name, Location<World> spawn) {
-		this.spawns.put(name, spawn);
-	}
+        public void addSpawn(String name, Location<World> spawn) {
+                this.spawns.put(name, spawn);
+        }
 
-	public void removeSpawn(String name) {
-		this.spawns.remove(name);
-	}
+        public void removeSpawn(String name) {
+                this.spawns.remove(name);
+        }
 
-	public Hashtable<String, Location<World>> getSpawns() {
-		return spawns;
-	}
+        public Hashtable<String, Location<World>> getSpawns() {
+                return spawns;
+        }
 
-	public int getNumSpawns() {
-		return spawns.size();
-	}
+        public int getNumSpawns() {
+                return spawns.size();
+        }
 
-	public int getMaxSpawns() {
-		return ConfigHandler.getNode("others", "maxTownySpawns").getInt() + extraspawns;
-	}
+        public int getMaxSpawns() {
+                return ConfigHandler.getNode("others", "maxTownySpawns").getInt() + extraspawns;
+        }
+
+        public boolean hasOutpostSpawns() {
+                return !getOutpostIndices().isEmpty();
+        }
+
+        public List<Integer> getOutpostIndices() {
+                return spawns.keySet().stream()
+                                .map(Towny::parseOutpostIndex)
+                                .filter(i -> i > 0)
+                                .sorted()
+                                .collect(Collectors.toList());
+        }
+
+        public int getNextOutpostIndex() {
+                int candidate = 1;
+                while (spawns.containsKey(outpostSpawnKey(candidate))) {
+                        candidate++;
+                }
+                return candidate;
+        }
+
+        public Location<World> getOutpostSpawn(int index) {
+                return getSpawn(outpostSpawnKey(index));
+        }
+
+        public void setOutpostSpawn(int index, Location<World> spawn) {
+                addSpawn(outpostSpawnKey(index), spawn);
+        }
+
+        private static String outpostSpawnKey(int index) {
+                return "outpost" + index;
+        }
+
+        private static int parseOutpostIndex(String name) {
+                if (name == null) {
+                        return -1;
+                }
+                Matcher matcher = OUTPOST_SPAWN_PATTERN.matcher(name);
+                if (!matcher.matches()) {
+                        return -1;
+                }
+                try {
+                        return Integer.parseInt(matcher.group(1));
+                } catch (NumberFormatException ignored) {
+                        return -1;
+                }
+        }
 
 	public int getExtraSpawns() {
 		return extraspawns;
