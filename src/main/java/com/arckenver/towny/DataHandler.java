@@ -499,7 +499,11 @@ public class DataHandler
                         return plot.getPerm(Towny.TYPE_RESIDENT, canonicalPerm);
                 if (playerTown != null)
                 {
-                        if (shareNation(town, playerTown) || areNationsAllied(town, playerTown))
+                        if (shareNation(town, playerTown))
+                        {
+                                return plot.getPerm(Towny.TYPE_NATION, canonicalPerm);
+                        }
+                        if (areNationsAllied(town, playerTown))
                         {
                                 return plot.getPerm(Towny.TYPE_ALLY, canonicalPerm);
                         }

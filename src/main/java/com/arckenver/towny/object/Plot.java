@@ -153,6 +153,7 @@ public class Plot
                 this.perms = new Hashtable<>();
                 ensurePlotPermContainer(Towny.TYPE_FRIEND);
                 ensurePlotPermContainer(Towny.TYPE_RESIDENT);
+                ensurePlotPermContainer(Towny.TYPE_NATION);
                 ensurePlotPermContainer(Towny.TYPE_ALLY);
                 ensurePlotPermContainer(Towny.TYPE_OUTSIDER);
         }
@@ -317,6 +318,7 @@ public class Plot
         {
                 ensurePlotPermContainer(Towny.TYPE_FRIEND);
                 ensurePlotPermContainer(Towny.TYPE_RESIDENT);
+                ensurePlotPermContainer(Towny.TYPE_NATION);
                 ensurePlotPermContainer(Towny.TYPE_ALLY);
                 ensurePlotPermContainer(Towny.TYPE_OUTSIDER);
                 return perms;

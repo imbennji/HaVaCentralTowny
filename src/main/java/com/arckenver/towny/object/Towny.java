@@ -65,6 +65,8 @@ public class Towny {
                 PLOT_TYPE_ALIASES.put(TYPE_RESIDENT, TYPE_RESIDENT);
                 PLOT_TYPE_ALIASES.put("citizen", TYPE_RESIDENT);
                 PLOT_TYPE_ALIASES.put("citizens", TYPE_RESIDENT);
+                PLOT_TYPE_ALIASES.put(TYPE_NATION, TYPE_NATION);
+                PLOT_TYPE_ALIASES.put("nationals", TYPE_NATION);
                 PLOT_TYPE_ALIASES.put(TYPE_ALLY, TYPE_ALLY);
                 PLOT_TYPE_ALIASES.put("allies", TYPE_ALLY);
                 PLOT_TYPE_ALIASES.put(TYPE_OUTSIDER, TYPE_OUTSIDER);

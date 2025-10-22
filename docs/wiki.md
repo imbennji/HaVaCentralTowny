@@ -164,7 +164,7 @@ Towny Sponge Remake mirrors the classic Towny command layout. Below is a high-le
 | --- | --- |
 | `/plot claim` / `/plot unclaim` | Purchase or release the plot you stand in, respecting town policies. |
 | `/plot set <type>` | Define plot category (e.g., shop, embassy) for organisational purposes. |
-| `/plot perm <group> <toggle>` | Adjust build, destroy, switch, or item-use permissions for friends, allies, residents, or outsiders. |
+| `/plot perm <group> <toggle>` | Adjust build, destroy, switch, or item-use permissions for friends, residents, nation members, allies, or outsiders. |
 | `/plot flag <flag> <on/off>` | Override town-wide flags (PvP, mobs, explosions) on a per-plot basis. |
 | `/plot rent <price> <interval>` | List or cancel rental offerings. |
 
