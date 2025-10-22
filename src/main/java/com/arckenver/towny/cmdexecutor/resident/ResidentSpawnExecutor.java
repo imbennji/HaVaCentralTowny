@@ -13,6 +13,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
@@ -115,5 +116,26 @@ public class ResidentSpawnExecutor implements CommandExecutor {
 
     private static Optional<Location<World>> findBedSpawn(Player player) {
         return player.getBedLocation();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Optional<Location<World>> extractRespawnLocation(Object respawnLocation) {
+        if (respawnLocation == null) {
+            return Optional.empty();
+        }
+
+        try {
+            Method asLocation = respawnLocation.getClass().getMethod("asLocation");
+            Object raw = asLocation.invoke(respawnLocation);
+            if (raw instanceof Optional) {
+                Optional<?> opt = (Optional<?>) raw;
+                if (opt.isPresent() && opt.get() instanceof Location) {
+                    return Optional.of((Location<World>) opt.get());
+                }
+            }
+        } catch (ReflectiveOperationException ignored) {
+        }
+
+        return Optional.empty();
     }
 }
