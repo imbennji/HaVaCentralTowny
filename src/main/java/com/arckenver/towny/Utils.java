@@ -47,6 +47,13 @@ public class Utils
         public static final int CLICKER_DEFAULT = 1;
         public static final int CLICKER_ADMIN = 2;
 
+        private static String quoteIfNeeded(String input) {
+                if (input == null) {
+                        return "";
+                }
+                return input.indexOf(' ') >= 0 ? '"' + input + '"' : input;
+        }
+
         private static final DateTimeFormatter RESIDENT_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
                         .withZone(ZoneId.systemDefault());
 
