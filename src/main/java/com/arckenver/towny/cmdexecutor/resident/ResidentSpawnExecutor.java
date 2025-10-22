@@ -8,7 +8,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.*;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.*;
-import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
@@ -116,20 +115,7 @@ public class ResidentSpawnExecutor implements CommandExecutor {
     }
 
     private static Optional<Location<World>> findBedSpawn(Player player) {
-        Optional<Map<?, ?>> respawnLocations = player.get(Keys.RESPAWN_LOCATIONS)
-                .map(raw -> (Map<?, ?>) raw);
-        if (!respawnLocations.isPresent()) {
-            return Optional.empty();
-        }
-
-        for (Object candidate : respawnLocations.get().values()) {
-            Optional<Location<World>> location = extractRespawnLocation(candidate);
-            if (location.isPresent()) {
-                return location;
-            }
-        }
-
-        return Optional.empty();
+        return player.getBedLocation();
     }
 
     @SuppressWarnings("unchecked")
